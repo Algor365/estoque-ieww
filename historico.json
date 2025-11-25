@@ -1,0 +1,51 @@
+[
+  {
+    "turma": "Turma 1",
+    "alunos": 100,
+    "enviados": 100,
+    "usados": 50,
+    "faltou": 0
+  },
+  {
+    "turma": "Turma 2",
+    "alunos": 100,
+    "enviados": 50,
+    "usados": 100,
+    "faltou": 50
+  },
+  {
+    "turma": "Turma 3",
+    "alunos": 30,
+    "enviados": 30,
+    "usados": 30,
+    "faltou": 0
+  },
+  {
+    "turma": "Turma 4",
+    "alunos": 30,
+    "enviados": 60,
+    "usados": 10,
+    "faltou": 50
+  },
+  {
+    "turma": "Nova Turma",
+    "alunos": 60,
+    "enviados": 92,
+    "usados": 40,
+    "faltou": 0
+  },
+  {
+    "turma": "Nova Turma",
+    "alunos": 60,
+    "enviados": 82,
+    "usados": 82,
+    "faltou": 0
+  },
+  {
+    "turma": "Nova Turma",
+    "alunos": 30,
+    "enviados": 41,
+    "usados": 20,
+    "faltou": 0
+  }
+]
