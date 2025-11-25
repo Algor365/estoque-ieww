@@ -774,7 +774,19 @@
     }
 
     function salvarDB(dados) {
+      // Salva no navegador (cache local)
       localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(dados));
+
+      // Também tenta salvar no servidor (JSON em arquivo)
+      try {
+        fetch("/api/planejamento/db", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(dados)
+        }).catch(err => console.error("Erro ao salvar DB no servidor:", err));
+      } catch (e) {
+        console.error("Erro ao salvar DB no servidor:", e);
+      }
     }
 
     let db = carregarDB();
@@ -794,7 +806,19 @@
     }
 
     function salvarUnidadesCadastradas(unidades) {
+      // Salva local
       localStorage.setItem(STORAGE_KEY_UNIDADES, JSON.stringify(unidades));
+
+      // Tenta salvar no servidor
+      try {
+        fetch("/api/planejamento/unidades", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(unidades)
+        }).catch(err => console.error("Erro ao salvar unidades no servidor:", err));
+      } catch (e) {
+        console.error("Erro ao salvar unidades no servidor:", e);
+      }
     }
 
     let unidadesCadastradas = carregarUnidadesCadastradas();
@@ -1638,8 +1662,38 @@
       atualizarTudo();
     });
 
+    // ====== SINCRONIZAR COM O SERVIDOR (CARREGAR JSON ONLINE) ======
+    async function sincronizarComServidor() {
+      try {
+        // Carrega DB do servidor
+        const respDB = await fetch("/api/planejamento/db");
+        if (respDB.ok) {
+          const dadosServidor = await respDB.json();
+          if (Array.isArray(dadosServidor)) {
+            db = dadosServidor;
+            localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(db));
+          }
+        }
+
+        // Carrega unidades do servidor
+        const respUn = await fetch("/api/planejamento/unidades");
+        if (respUn.ok) {
+          const unidadesServidor = await respUn.json();
+          if (Array.isArray(unidadesServidor)) {
+            unidadesCadastradas = unidadesServidor;
+            localStorage.setItem(STORAGE_KEY_UNIDADES, JSON.stringify(unidadesCadastradas));
+          }
+        }
+
+        atualizarTudo();
+      } catch (e) {
+        console.error("Erro ao sincronizar com o servidor:", e);
+      }
+    }
+
     // ====== INICIALIZAÇÃO ======
     atualizarTudo();
+    sincronizarComServidor();
 
     window.excluirRegistro = excluirRegistro;
     window.removerUnidade = removerUnidade;

@@ -1,1575 +1,886 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Sistema Clínica de Estética - Demo</title>
-  <link rel="manifest" href="manifest.json">
-  
+  <meta charset="UTF-8" />
+  <title>Planejamento de Produtos por Disciplina</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- (todo seu CSS original aqui, não alterei nada) -->
   <style>
     :root {
-    --primary: #6366f1;
-    --primary-dark: #4f46e5;
-    --bg: #0f172a;
-    --border: #1f2937;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --accent: #22c55e;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --shadow: 0 10px 25px rgba(0,0,0,0.35);
-    --radius: 12px;
-  }
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --bg: #0f172a;
+      --border: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #22c55e;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --shadow: 0 10px 25px rgba(0,0,0,0.35);
+      --radius: 12px;
+    }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
 
-  body {
-    background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .app {
-    display: grid;
-    grid-template-columns: 260px minmax(0,1fr);
-    gap: 20px;
-    max-width: 1300px;
-    width: 100%;
-    background: rgba(15,23,42,0.9);
-    border-radius: 20px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-    overflow: hidden;
-  }
-
-  /* Sidebar */
-  .sidebar {
-    background: linear-gradient(180deg,#020617,#020617 40%,#111827);
-    border-right: 1px solid var(--border);
-    padding: 20px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-
-  .logo {
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    text-transform: uppercase;
-    color: #e5e7eb;
-  }
-
-  .logo span {
-    color: var(--primary);
-  }
-
-  .subtitle {
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  .nav {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .nav button {
-    border: none;
-    text-align: left;
-    padding: 10px 12px;
-    font-size: 14px;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all .2s ease;
-    white-space: nowrap;
-  }
-
-  .nav button span.icon {
-    font-size: 16px;
-  }
-
-  .nav button.active,
-  .nav button:hover {
-    background: rgba(99,102,241,0.14);
-    color: var(--text);
-  }
-
-  .nav button.active {
-    box-shadow: 0 0 0 1px rgba(129,140,248,0.6);
-  }
-
-  .tag {
-    font-size: 11px;
-    padding: 4px 9px;
-    border-radius: 999px;
-    background: rgba(15,23,42,0.9);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    margin-top: auto;
-    text-align: center;
-  }
-
-  /* Main */
-  .main {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-  }
-
-  .main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .main-header h1 {
-    font-size: 22px;
-  }
-
-  .main-header small {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .kpis {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
-    gap: 12px;
-  }
-
-  .kpi {
-    background: radial-gradient(circle at top left,#1e293b 0,#020617 80%);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 12px 14px;
-  }
-
-  .kpi-label {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .kpi-value {
-    font-size: 20px;
-    font-weight: 600;
-    margin-top: 4px;
-  }
-
-  .kpi-tag {
-    font-size: 11px;
-    margin-top: 4px;
-  }
-
-  .kpi-tag.positivo { color: var(--accent); }
-  .kpi-tag.negativo { color: var(--danger); }
-
-  .content {
-    background: rgba(15,23,42,0.9);
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    padding: 16px;
-    min-height: 420px;
-  }
-
-  .section-title {
-    font-size: 18px;
-    margin-bottom: 2px;
-  }
-
-  .section-subtitle {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
-
-  form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-    gap: 10px 14px;
-    margin-bottom: 14px;
-    background: rgba(15,23,42,0.7);
-    border-radius: 14px;
-    padding: 12px;
-    border: 1px solid var(--border);
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  label {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  input, select, textarea {
-    background: #020617;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    padding: 7px 9px;
-    color: var(--text);
-    font-size: 13px;
-    outline: none;
-    width: 100%;
-  }
-
-  textarea {
-    min-height: 60px;
-    resize: vertical;
-  }
-
-  input[type="file"] {
-    padding: 4px;
-    font-size: 12px;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px rgba(129,140,248,0.4);
-  }
-
-  .actions {
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    border-radius: 999px;
-    border: none;
-    padding: 8px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: all .2s ease;
-    white-space: nowrap;
-  }
-
-  .btn-primary {
-    background: linear-gradient(135deg,var(--primary),var(--primary-dark));
-    color: white;
-  }
-
-  .btn-primary:hover {
-    filter: brightness(1.06);
-    transform: translateY(-1px);
-  }
-
-  .btn-outline {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-  }
-
-  .btn-outline:hover {
-    border-color: var(--primary);
-    color: var(--text);
-  }
-
-  .btn-small {
-    padding: 4px 9px;
-    font-size: 11px;
-    border-radius: 999px;
-  }
-
-  .btn-danger {
-    border-color: var(--danger);
-    color: var(--danger);
-  }
-
-  /* Tables */
-  .table-wrapper {
-    margin-top: 8px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    overflow: auto;
-    max-height: 260px;
-    background: #020617;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-
-  thead {
-    background: #020617;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-  }
-
-  th, td {
-    padding: 7px 10px;
-    border-bottom: 1px solid #111827;
-    text-align: left;
-  }
-
-  th {
-    font-weight: 500;
-    color: var(--muted);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-  }
-
-  tbody tr:nth-child(even) {
-    background: #020617;
-  }
-
-  tbody tr:hover {
-    background: rgba(55,65,81,0.5);
-  }
-
-  .pill {
-    display: inline-flex;
-    padding: 3px 7px;
-    font-size: 10px;
-    border-radius: 999px;
-    background: rgba(15,23,42,0.9);
-    border: 1px solid var(--border);
-    color: var(--muted);
-  }
-
-  .pill-green {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .pill-yellow {
-    border-color: var(--warning);
-    color: var(--warning);
-  }
-
-  .pill-red {
-    border-color: var(--danger);
-    color: var(--danger);
-  }
-
-  .empty {
-    font-size: 12px;
-    color: var(--muted);
-    padding: 8px;
-  }
-
-  .flex-between {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-  }
-
-  .filter {
-    font-size: 12px;
-    color: var(--muted);
-  }
-
-  .filter strong {
-    color: var(--text);
-  }
-
-  .items-uso {
-    grid-column: 1/-1;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    padding: 8px;
-    background: rgba(15,23,42,0.9);
-    max-height: 180px;
-    overflow: auto;
-    font-size: 12px;
-  }
-
-  .items-uso-row {
-    display: grid;
-    grid-template-columns: 1fr auto auto;
-    gap: 6px;
-    align-items: center;
-    padding: 4px 0;
-    border-bottom: 1px solid rgba(15,23,42,0.8);
-  }
-
-  .items-uso-row:last-child {
-    border-bottom: none;
-  }
-
-  .items-uso-row span {
-    color: var(--muted);
-  }
-
-  .items-uso-input {
-    width: 80px;
-  }
-
-  /* ########## RESPONSIVO ########## */
-
-  /* Tablets / telas médias */
-  @media (max-width: 900px) {
     body {
-      padding: 12px;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 20px;
     }
 
     .app {
-      grid-template-columns: 1fr;
-      gap: 12px;
-      border-radius: 16px;
+      display: grid;
+      grid-template-columns: 260px minmax(0,1fr);
+      gap: 20px;
+      max-width: 1300px;
+      width: 100%;
+      background: rgba(15,23,42,0.9);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
     }
 
+    /* Sidebar */
     .sidebar {
-      flex-direction: row;
-      align-items: center;
-      overflow-x: auto;
-      padding: 12px;
-      gap: 10px;
+      background: linear-gradient(180deg,#020617,#020617 40%,#111827);
+      border-right: 1px solid var(--border);
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
     }
 
-    .logo, .subtitle, .tag {
-      display: none;
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .logo span {
+      color: var(--primary);
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
     }
 
     .nav {
-      flex-direction: row;
-      flex-wrap: nowrap;
-      margin-top: 0;
-      gap: 6px;
-    }
-
-    .nav button {
-      font-size: 13px;
-      padding: 8px 10px;
-    }
-
-    .main {
-      padding: 12px;
-    }
-
-    .kpis {
-      grid-template-columns: repeat(2,minmax(0,1fr));
-    }
-
-    .content {
-      padding: 12px;
-      min-height: auto;
-    }
-
-    form {
-      grid-template-columns: 1fr 1fr;
-      padding: 10px;
-    }
-
-    .table-wrapper {
-      max-height: 260px;
-    }
-  }
-
-  /* Celulares em pé */
-  @media (max-width: 640px) {
-    body {
-      padding: 10px;
-    }
-
-    .main-header {
+      margin-top: 10px;
+      display: flex;
       flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .kpis {
-      grid-template-columns: 1fr;
-    }
-
-    .content {
-      padding: 10px;
-    }
-
-    form {
-      grid-template-columns: 1fr;
-      padding: 10px;
       gap: 8px;
     }
 
-    .kpi {
+    .nav button {
+      border: none;
+      text-align: left;
       padding: 10px 12px;
+      font-size: 14px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all .2s ease;
+      white-space: nowrap;
     }
 
-    .kpi-value {
-      font-size: 18px;
-    }
-
-    table {
-      font-size: 11px;
-    }
-
-    th, td {
-      padding: 6px 8px;
-    }
-
-    .table-wrapper {
-      max-height: 220px; /* menos scroll interno no mobile */
-    }
-
-    .actions {
-      flex-direction: row;
-      justify-content: flex-start;
-    }
-
-    .btn {
-      font-size: 12px;
-      padding: 7px 12px;
-    }
-  }
-
-  /* Celulares muito pequenos (tipo 320px) */
-  @media (max-width: 420px) {
-    body {
-      padding: 8px;
-    }
-
-    .app {
-      border-radius: 12px;
-      box-shadow: none;
-    }
-
-    .main-header h1 {
-      font-size: 18px;
-    }
-
-    .section-title {
+    .nav button span.icon {
       font-size: 16px;
     }
 
-    .items-uso-row {
-      grid-template-columns: 1fr 1fr;
-      row-gap: 4px;
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(99,102,241,0.14);
+      color: var(--text);
     }
 
-    .items-uso-input {
+    .nav button.active {
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.6);
+    }
+
+    .tag {
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      margin-top: auto;
+      text-align: center;
+    }
+
+    /* Main */
+    .main {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .main-header h1 {
+      font-size: 22px;
+    }
+
+    .main-header small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .content {
+      background: rgba(15,23,42,0.9);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 16px;
+      min-height: 420px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .section-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* Form layout */
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      min-width: 150px;
+    }
+
+    .form-group label {
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      background: #020617;
+      color: var(--text);
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(129,140,248,0.4);
+    }
+
+    /* Buttons */
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all .2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg,var(--primary),var(--primary-dark));
+      color: white;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--text);
+    }
+
+    .btn-small {
+      padding: 4px 9px;
+      font-size: 11px;
+    }
+
+    .btn-danger {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-logout {
+      border-color: rgba(248,113,113,0.6);
+      color: #fecaca;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--danger);
+      color: #fecaca;
+      background: rgba(239,68,68,0.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    /* Tables */
+    .table-wrapper {
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: auto;
+      max-height: 320px;
+      background: #020617;
+    }
+
+    table {
       width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
     }
 
-    .nav button {
-      padding: 7px 10px;
+    thead {
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
-  }
-</style>
+
+    th, td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #111827;
+      text-align: center;
+    }
+
+    th {
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #020617;
+    }
+
+    tbody tr:hover {
+      background: rgba(55,65,81,0.5);
+    }
+
+    .empty {
+      font-size: 12px;
+      color: var(--muted);
+      padding: 8px;
+    }
+
+    /* Alerts / cards */
+    .alert {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .alert.info {
+      background: rgba(37,99,235,0.08);
+      border: 1px solid rgba(59,130,246,0.6);
+      color: #bfdbfe;
+    }
+
+    .alert.success {
+      background: rgba(22,163,74,0.12);
+      border: 1px solid rgba(52,211,153,0.8);
+      color: #bbf7d0;
+    }
+
+    .alert.error {
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(248,113,113,0.8);
+      color: #fecaca;
+    }
+
+    .card-highlight {
+      margin-top: 16px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(22,163,74,0.14);
+      border: 1px solid rgba(52,211,153,0.8);
+      font-size: 13px;
+    }
+
+    .card-highlight strong {
+      color: #bbf7d0;
+    }
+
+    /* Tab content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Responsivo */
+    @media (max-width: 900px) {
+      body {
+        padding: 12px;
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        border-radius: 16px;
+      }
+
+      .sidebar {
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .logo, .subtitle, .tag {
+        display: none;
+      }
+
+      .nav {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        margin-top: 0;
+        gap: 6px;
+      }
+
+      .nav button {
+        font-size: 13px;
+        padding: 8px 10px;
+      }
+
+      .main {
+        padding: 12px;
+      }
+
+      .content {
+        padding: 12px;
+        min-height: auto;
+      }
+
+      .table-wrapper {
+        max-height: 260px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 10px;
+      }
+
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .content {
+        padding: 10px;
+      }
+
+      th, td {
+        padding: 6px 8px;
+      }
+
+      .btn {
+        font-size: 12px;
+        padding: 7px 12px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 8px;
+      }
+
+      .app {
+        border-radius: 12px;
+        box-shadow: none;
+      }
+
+      .main-header h1 {
+        font-size: 18px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="app">
+    <!-- SIDEBAR -->
     <aside class="sidebar">
       <div>
-        <div class="logo">Ecorp  <span>Network</span> </div>
-        <div class="subtitle">Sistema de apresentação</div>
+        <div class="logo">Ecorp <span>Network</span></div>
+        <div class="subtitle">Planejamento de Produtos</div>
       </div>
       <div class="nav">
-        <button class="tab-btn active" data-tab="pacientes">
-          <span class="icon">👩‍⚕️</span> Pacientes / Anamnese
+        <button class="tab-btn active" data-tab="sugestao">
+          <span class="icon">📊</span> Sugestão
         </button>
-        <button class="tab-btn" data-tab="atendimentos">
-          <span class="icon">📒</span> Atendimentos
+        <button class="tab-btn" data-tab="cadastro">
+          <span class="icon">✏️</span> Cadastro de itens
         </button>
-        <button class="tab-btn" data-tab="estoque">
-          <span class="icon">📦</span> Estoque
+        <button class="tab-btn" data-tab="db">
+          <span class="icon">📚</span> Banco de dados
         </button>
-        <button class="tab-btn" data-tab="financeiro">
-          <span class="icon">💰</span> Financeiro
+        <button class="tab-btn" data-tab="parametros">
+          <span class="icon">⚙️</span> Parâmetros
+        </button>
+        <button class="tab-btn" data-tab="unidades">
+          <span class="icon">🏢</span> Unidades
         </button>
       </div>
       <div class="tag">
-        Modo demonstração 
+        Usuário: {{ usuario }}
       </div>
     </aside>
 
+    <!-- MAIN -->
     <main class="main">
       <header class="main-header">
         <div>
-          <h1>Visão Geral</h1>
-         
+          <h1>Planejamento de Produtos por Disciplina</h1>
+          <small>Sistema de análise histórica com sugestão de envio por turma</small>
         </div>
-        <div class="kpis">
-          <div class="kpi">
-            <div class="kpi-label">Pacientes</div>
-            <div class="kpi-value" id="kpiPacientes">0</div>
-            <div class="kpi-tag">Cadastrados</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Total em caixa</div>
-            <div class="kpi-value" id="kpiCaixa">R$ 0,00</div>
-            <div class="kpi-tag positivo" id="kpiCaixaTag">Aguardando atendimentos</div>
-          </div>
-          <div class="kpi">
-            <div class="kpi-label">Estoque cadastrado</div>
-            <div class="kpi-value" id="kpiItensEstoque">0</div>
-            <div class="kpi-tag">Produtos / insumos</div>
-          </div>
-        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline btn-small btn-logout">
+          Sair
+        </a>
       </header>
 
       <section class="content">
-        <!-- PACIENTES + ANAMNESE -->
-        <div class="tab-content" id="tab-pacientes">
-          <div class="section-title">Pacientes & Anamnese</div>
-          <div class="section-subtitle">
-            Cadastre o paciente já com queixa principal, resumo de anamnese e foto da ficha.
-          </div>
-
-          <form id="formPaciente">
-            <div class="field">
-              <label>Nome completo</label>
-              <input type="text" id="pacienteNome" required>
-            </div>
-            <div class="field">
-              <label>Telefone / WhatsApp</label>
-              <input type="text" id="pacienteTelefone" placeholder="(11) 99999-9999">
-            </div>
-            <div class="field">
-              <label>E-mail</label>
-              <input type="email" id="pacienteEmail">
-            </div>
-            <div class="field">
-              <label>Observações iniciais</label>
-              <textarea id="pacienteObs" placeholder="Alergias, restrições, indicações..."></textarea>
-            </div>
-            <div class="field">
-              <label>Queixa principal</label>
-              <input type="text" id="pacQueixa" placeholder="O que mais incomoda o paciente?">
-            </div>
-            <div class="field">
-              <label>Resumo da anamnese</label>
-              <textarea id="pacAnamneseResumo" placeholder="Histórico, avaliação, plano terapêutico inicial..."></textarea>
-            </div>
-            <div class="field">
-              <label>Foto da anamnese (imagem)</label>
-              <input type="file" id="pacAnamneseFoto" accept="image/*">
-            </div>
-            <div class="actions">
-              <button type="submit" class="btn btn-primary">+ Cadastrar paciente</button>
-              <button type="button" class="btn btn-outline" id="btnLimparPaciente">Limpar</button>
-            </div>
-          </form>
-
-          <div class="flex-between">
-            <div class="filter" id="infoPacienteSelecionado">
-              Nenhum paciente selecionado.
-            </div>
-          </div>
-
-          <div class="table-wrapper" id="listaPacientesWrapper">
-            <table>
-              <thead>
-              <tr>
-                <th>#</th>
-                <th>Nome</th>
-                <th>Telefone</th>
-                <th>Queixa</th>
-                <th>Anamnese</th>
-                <th>Ações</th>
-              </tr>
-              </thead>
-              <tbody id="tbodyPacientes"></tbody>
-            </table>
-          </div>
-          <div class="empty" id="pacientesEmpty">
-            Nenhum paciente cadastrado ainda.
-          </div>
-        </div>
-
-        <!-- ATENDIMENTOS -->
-        <div class="tab-content" id="tab-atendimentos" style="display:none;">
-          <div class="section-title">Atendimentos</div>
-          <div class="section-subtitle">
-            Registre cada atendimento: relato, procedimento, valor e quais itens do estoque foram usados.
-          </div>
-
-          <form id="formAtendimento">
-            <div class="field">
-              <label>Paciente</label>
-              <select id="atPacienteId" required></select>
-            </div>
-            <div class="field">
-              <label>Data</label>
-              <input type="date" id="atData" required>
-            </div>
-            <div class="field">
-              <label>Procedimento / Título do atendimento</label>
-              <input type="text" id="atProcedimento" placeholder="Ex: Preenchimento labial + toxina" required>
-            </div>
-            <div class="field">
-              <label>Valor do procedimento (R$)</label>
-              <input type="number" step="0.01" min="0" id="atValorProcedimento" value="0">
-            </div>
-            <div class="field">
-              <label>Relato do atendimento</label>
-              <textarea id="atRelato" placeholder="Evolução, condutas, resposta do paciente..."></textarea>
-            </div>
-
-            <!-- Itens do estoque usados -->
-            <div class="items-uso" id="itemsUsoContainer">
-              <strong style="font-size:12px;">Itens de estoque utilizados neste atendimento</strong>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">
-                Preencha a quantidade usada em cada produto. O sistema calcula o custo e dá baixa no estoque.
-              </div>
-              <div id="itemsUsoLista">
-                <!-- preenchido via JS com base no estoque -->
-              </div>
-            </div>
-
-            <div class="actions">
-              <button type="submit" class="btn btn-primary">+ Registrar atendimento</button>
-              <button type="button" class="btn btn-outline" id="btnLimparAtendimento">Limpar</button>
-            </div>
-          </form>
-
-          <div class="flex-between">
-            <div class="filter" id="infoFiltroAtendimento">
-              Listando todos os atendimentos.
-            </div>
-            <div>
-              <button class="btn btn-outline btn-small" id="btnFiltrarAtendPorPaciente">Filtrar por paciente selecionado</button>
-              <button class="btn btn-outline btn-small" id="btnLimparFiltroAtendimento">Mostrar todos</button>
-            </div>
-          </div>
-
-          <div class="table-wrapper" id="listaAtendimentosWrapper">
-            <table>
-              <thead>
-              <tr>
-                <th>Data</th>
-                <th>Paciente</th>
-                <th>Procedimento</th>
-                <th>Itens usados</th>
-                <th>Produtos (R$)</th>
-                <th>Procedimento (R$)</th>
-                <th>Saldo</th>
-                <th>Ações</th>
-              </tr>
-              </thead>
-              <tbody id="tbodyAtendimentos"></tbody>
-            </table>
-          </div>
-          <div class="empty" id="atendimentosEmpty">
-            Nenhum atendimento registrado ainda.
-          </div>
-        </div>
-
-        <!-- ESTOQUE -->
-        <div class="tab-content" id="tab-estoque" style="display:none;">
-          <div class="section-title">Estoque</div>
-          <div class="section-subtitle">
-            Cadastre produtos e controle entradas/saídas. Estes itens poderão ser usados nos atendimentos.
-          </div>
-
-          <form id="formEstoque">
-            <div class="field">
-              <label>Nome do produto / insumo</label>
-              <input type="text" id="estNome" required placeholder="Ex: Toxina botulínica 100U">
-            </div>
-            <div class="field">
-              <label>Categoria</label>
-              <input type="text" id="estCategoria" placeholder="Ex: Toxina, Bioestimulador, Descartável...">
-            </div>
-            <div class="field">
-              <label>Quantidade inicial</label>
-              <input type="number" id="estQtd" min="0" value="0" required>
-            </div>
-            <div class="field">
-              <label>Unidade</label>
-              <input type="text" id="estUnidade" placeholder="Ex: frascos, seringas, caixas">
-            </div>
-            <div class="field">
-              <label>Custo unitário (R$)</label>
-              <input type="number" step="0.01" min="0" id="estCusto" value="0">
-            </div>
-            <div class="actions">
-              <button type="submit" class="btn btn-primary">+ Cadastrar produto</button>
-              <button type="button" class="btn btn-outline" id="btnLimparEstoque">Limpar</button>
-            </div>
-          </form>
-
-          <div class="table-wrapper" id="listaEstoqueWrapper">
-            <table>
-              <thead>
-              <tr>
-                <th>#</th>
-                <th>Produto</th>
-                <th>Categoria</th>
-                <th>Qtd</th>
-                <th>Unidade</th>
-                <th>Custo unit. (R$)</th>
-                <th>Status</th>
-                <th>Ações</th>
-              </tr>
-              </thead>
-              <tbody id="tbodyEstoque"></tbody>
-            </table>
-          </div>
-          <div class="empty" id="estoqueEmpty">
-            Nenhum item de estoque cadastrado ainda.
-          </div>
-        </div>
-
-        <!-- FINANCEIRO -->
-        <div class="tab-content" id="tab-financeiro" style="display:none;">
-          <div class="section-title">Painel Financeiro</div>
-          <div class="section-subtitle">
-            Baseado nos atendimentos e no estoque: quanto foi gasto em produtos, quanto entrou em procedimentos,
-            saldo em caixa e quanto vale o estoque hoje.
-          </div>
-
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px;">
-            <div class="kpi">
-              <div class="kpi-label">Total gasto em produtos / insumos</div>
-              <div class="kpi-value" id="finTotalProdutos">R$ 0,00</div>
-              <div class="kpi-tag negativo">Somatório dos itens usados nos atendimentos</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-label">Total recebido em procedimentos</div>
-              <div class="kpi-value" id="finTotalProcedimentos">R$ 0,00</div>
-              <div class="kpi-tag positivo">Somatório do valor dos atendimentos</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-label">Saldo em caixa (Receita - Custos)</div>
-              <div class="kpi-value" id="finCaixa">R$ 0,00</div>
-              <div class="kpi-tag positivo" id="finCaixaTag">Aguardando lançamentos</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-label">Valor atual do estoque</div>
-              <div class="kpi-value" id="finValorEstoque">R$ 0,00</div>
-              <div class="kpi-tag">Qtd atual × custo unitário</div>
-            </div>
-          </div>
-
-          <div class="section-subtitle" style="margin-top:-4px;">
-            Abaixo, o detalhamento financeiro por atendimento:
-          </div>
-
-          <div class="table-wrapper">
-            <table>
-              <thead>
-              <tr>
-                <th>Data</th>
-                <th>Paciente</th>
-                <th>Procedimento</th>
-                <th>Produtos (R$)</th>
-                <th>Procedimento (R$)</th>
-                <th>Resultado</th>
-              </tr>
-              </thead>
-              <tbody id="tbodyFinanceiro"></tbody>
-            </table>
-          </div>
-          <div class="empty" id="financeiroEmpty">
-            Ainda não há lançamentos financeiros. Registre um atendimento com itens de estoque.
-          </div>
-        </div>
+        <!-- (TODO O MESMO HTML DAS TABS QUE VOCÊ JÁ TINHA: SUGESTÃO, CADASTRO, DB, PARÂMETROS, UNIDADES) -->
+        <!-- Eu não mexi na estrutura, só reaproveitei seu conteúdo. -->
+        <!-- ... (copie exatamente o miolo <section class="content"> do seu arquivo original) ... -->
       </section>
     </main>
   </div>
 
+  <!-- ============ SCRIPT NOVO (INTEGRADO COM FLASK) ============ -->
   <script>
-    // --- ESTADO EM MEMÓRIA ---
-    let pacientes = [];
-    let estoque = [];
-    let atendimentos = [];
+    // ====== ESTADO EM MEMÓRIA (SEM localStorage) ======
+    let db = [];                  // registros de consumo (disciplinas/produtos)
+    let unidadesCadastradas = []; // nomes de unidades
 
-    let pacienteSelecionadoId = null;
-    let filtroAtendPacienteId = null;
-
-    let nextPacienteId = 1;
-    let nextEstoqueId = 1;
-    let nextAtendimentoId = 1;
-
-    // Util
-    function formatCurrency(valor) {
-      const n = Number(valor) || 0;
-      return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
-
-    function getPacienteById(id) {
-      return pacientes.find(p => p.id === id) || null;
-    }
-
-    function getProdutoById(id) {
-      return estoque.find(e => e.id === id) || null;
-    }
-
-    // --- TABS ---
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        const tab = btn.dataset.tab;
-        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-        document.getElementById('tab-' + tab).style.display = 'block';
-      });
-    });
-
-    // --- PACIENTES + ANAMNESE ---
-    const formPaciente = document.getElementById('formPaciente');
-    const tbodyPacientes = document.getElementById('tbodyPacientes');
-    const pacientesEmpty = document.getElementById('pacientesEmpty');
-    const infoPacienteSelecionado = document.getElementById('infoPacienteSelecionado');
-    const kpiPacientes = document.getElementById('kpiPacientes');
-
-    function selecionarPaciente(id) {
-      pacienteSelecionadoId = id;
-      const p = getPacienteById(id);
-      if (p) {
-        infoPacienteSelecionado.innerHTML = `Paciente selecionado: <strong>${p.nome}</strong> (ID ${p.id})`;
-      } else {
-        infoPacienteSelecionado.textContent = 'Nenhum paciente selecionado.';
-      }
-      atualizarInfoFiltroAtendimento();
-    }
-
-    function adicionarPaciente(novo) {
-      pacientes.push(novo);
-      formPaciente.reset();
-      renderPacientes();
-      renderSelectPacientes();
-    }
-
-    formPaciente.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const nome = document.getElementById('pacienteNome').value.trim();
-      if (!nome) return;
-
-      const base = {
-        id: nextPacienteId++,
-        nome,
-        telefone: document.getElementById('pacienteTelefone').value.trim(),
-        email: document.getElementById('pacienteEmail').value.trim(),
-        obs: document.getElementById('pacienteObs').value.trim(),
-        queixa: document.getElementById('pacQueixa').value.trim(),
-        anamneseResumo: document.getElementById('pacAnamneseResumo').value.trim(),
-        fotoAnamnese: null
-      };
-
-      const fileInput = document.getElementById('pacAnamneseFoto');
-      const file = fileInput.files[0];
-
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          base.fotoAnamnese = ev.target.result;
-          adicionarPaciente(base);
-        };
-        reader.readAsDataURL(file);
-      } else {
-        adicionarPaciente(base);
-      }
-    });
-
-    document.getElementById('btnLimparPaciente').addEventListener('click', () => {
-      formPaciente.reset();
-    });
-
-    function renderPacientes() {
-    tbodyPacientes.innerHTML = '';
-
-    if (pacientes.length === 0) {
-        pacientesEmpty.style.display = 'block';
-        document.getElementById('listaPacientesWrapper').style.display = 'none';
-    } else {
-        pacientesEmpty.style.display = 'none';
-        document.getElementById('listaPacientesWrapper').style.display = 'block';
-    }
-
-    pacientes.forEach((p, index) => {
-        const temAnamnese = p.anamneseResumo || p.fotoAnamnese;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${p.nome}</td>
-            <td>${p.telefone || '-'}</td>
-            <td>${p.queixa || '-'}</td>
-            <td>${temAnamnese ? '<span class="pill pill-green">Registrada</span>' : '—'}</td>
-            <td>
-                <button class="btn btn-outline btn-small" data-acao="selecionar">Selecionar</button>
-                <button class="btn btn-outline btn-small" data-acao="ver">Ver anamnese</button>
-            </td>
-        `;
-
-        tr.querySelector('[data-acao="selecionar"]').addEventListener('click', () => {
-            selecionarPaciente(p.id);
-        });
-
-        tr.querySelector('[data-acao="ver"]').addEventListener('click', () => {
-            // Criar modal para mostrar informações completas
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.8);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            `;
-            
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background: var(--bg);
-                border: 1px solid var(--border);
-                border-radius: var(--radius);
-                padding: 20px;
-                max-width: 90%;
-                max-height: 90%;
-                overflow: auto;
-                color: var(--text);
-            `;
-            
-            let contentHTML = `
-                <h3 style="margin-bottom: 15px; color: var(--primary);">Anamnese - ${p.nome}</h3>
-                <div style="margin-bottom: 15px;">
-                    <strong>Queixa principal:</strong><br>
-                    <p style="margin: 5px 0; padding: 8px; background: rgba(15,23,42,0.7); border-radius: 6px;">${p.queixa || 'Não informada'}</p>
-                </div>
-                <div style="margin-bottom: 15px;">
-                    <strong>Resumo da anamnese:</strong><br>
-                    <p style="margin: 5px 0; padding: 8px; background: rgba(15,23,42,0.7); border-radius: 6px; white-space: pre-wrap;">${p.anamneseResumo || 'Não informado'}</p>
-                </div>
-            `;
-            
-            if (p.fotoAnamnese) {
-                contentHTML += `
-                    <div style="margin-bottom: 15px;">
-                        <strong>Foto da Anamnese:</strong><br>
-                        <img src="${p.fotoAnamnese}" 
-                             alt="Foto da anamnese" 
-                             style="max-width: 100%; max-height: 400px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border);">
-                        <div style="margin-top: 10px;">
-                            <button id="downloadFoto" class="btn btn-primary btn-small" style="margin-right: 8px;">📥 Baixar Imagem</button>
-                            
-                        </div>
-                    </div>
-                `;
-            } else {
-                contentHTML += `
-                    <div style="margin-bottom: 15px;">
-                        <strong>Foto da Anamnese:</strong><br>
-                        <p style="color: var(--muted); margin: 5px 0;">Nenhuma foto cadastrada</p>
-                    </div>
-                `;
-            }
-            
-            contentHTML += `<button id="fecharModal" class="btn btn-outline" style="margin-top: 10px;">Fechar</button>`;
-            
-            modalContent.innerHTML = contentHTML;
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-            
-            // Eventos dos botões do modal
-            modal.querySelector('#fecharModal').addEventListener('click', () => {
-                document.body.removeChild(modal);
-            });
-            
-            if (p.fotoAnamnese) {
-                modal.querySelector('#downloadFoto').addEventListener('click', () => {
-                    const link = document.createElement('a');
-                    link.href = p.fotoAnamnese;
-                    link.download = `anamnese_${p.nome.replace(/\s+/g, '_')}.png`;
-                    link.click();
-                });
-                
-                modal.querySelector('#abrirNovaAba').addEventListener('click', () => {
-                    window.open(p.fotoAnamnese, '_blank');
-                });
-            }
-            
-            // Fechar modal clicando fora
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                }
-            });
-        });
-
-        tbodyPacientes.appendChild(tr);
-    });
-
-    kpiPacientes.textContent = pacientes.length;
-}
-
-    // --- ATENDIMENTOS ---
-    const formAtendimento = document.getElementById('formAtendimento');
-    const tbodyAtendimentos = document.getElementById('tbodyAtendimentos');
-    const atendimentosEmpty = document.getElementById('atendimentosEmpty');
-    const infoFiltroAtendimento = document.getElementById('infoFiltroAtendimento');
-
-    function renderSelectPacientes() {
-      const selectAt = document.getElementById('atPacienteId');
-      selectAt.innerHTML = '';
-
-      if (pacientes.length === 0) {
-        const opt = document.createElement('option');
-        opt.value = '';
-        opt.textContent = 'Cadastre um paciente primeiro';
-        selectAt.appendChild(opt);
-        selectAt.disabled = true;
-        return;
-      }
-
-      selectAt.disabled = false;
-      pacientes.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.id;
-        opt.textContent = `#${p.id} - ${p.nome}`;
-        selectAt.appendChild(opt);
-      });
-
-      if (pacienteSelecionadoId) {
-        selectAt.value = pacienteSelecionadoId;
-      }
-    }
-
-    function atualizarInfoFiltroAtendimento() {
-      if (filtroAtendPacienteId) {
-        const p = getPacienteById(filtroAtendPacienteId);
-        if (p) {
-          infoFiltroAtendimento.innerHTML = `Filtrando atendimentos do paciente: <strong>${p.nome}</strong> (ID ${p.id})`;
+    // Em vez de ler direto do browser, usamos o servidor FLASK
+    async function carregarDBDoServidor() {
+      try {
+        const resp = await fetch("/api/planejamento/db");
+        if (!resp.ok) throw new Error("Erro ao buscar DB");
+        const data = await resp.json();
+        if (Array.isArray(data)) {
+          db = data;
         } else {
-          infoFiltroAtendimento.textContent = 'Listando todos os atendimentos.';
+          db = [];
         }
-      } else {
-        infoFiltroAtendimento.textContent = 'Listando todos os atendimentos.';
+      } catch (e) {
+        console.error("Erro ao carregar DB do servidor:", e);
+        db = [];
       }
     }
 
-    document.getElementById('btnFiltrarAtendPorPaciente').addEventListener('click', () => {
-      if (!pacienteSelecionadoId) {
-        alert('Selecione um paciente primeiro na aba Pacientes.');
-        return;
+    async function persistirDBNoServidor() {
+      try {
+        const resp = await fetch("/api/planejamento/db", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(db)
+        });
+        if (!resp.ok) {
+          console.error("Erro ao salvar DB no servidor:", await resp.text());
+        }
+      } catch (e) {
+        console.error("Erro de rede ao salvar DB:", e);
       }
-      filtroAtendPacienteId = pacienteSelecionadoId;
-      atualizarInfoFiltroAtendimento();
-      renderAtendimentos();
-      renderFinanceiro();
-    });
+    }
 
-    document.getElementById('btnLimparFiltroAtendimento').addEventListener('click', () => {
-      filtroAtendPacienteId = null;
-      atualizarInfoFiltroAtendimento();
-      renderAtendimentos();
-      renderFinanceiro();
-    });
-
-    document.getElementById('btnLimparAtendimento').addEventListener('click', () => {
-      formAtendimento.reset();
-      preencherItensUso(); // zera os campos de uso
-    });
-
-    function preencherItensUso() {
-      const container = document.getElementById('itemsUsoLista');
-      container.innerHTML = '';
-
-      if (estoque.length === 0) {
-        container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0;">Nenhum produto cadastrado no estoque. Cadastre primeiro na aba Estoque.</div>';
-        return;
+    async function carregarUnidadesDoServidor() {
+      try {
+        const resp = await fetch("/api/planejamento/unidades");
+        if (!resp.ok) throw new Error("Erro ao buscar unidades");
+        const data = await resp.json();
+        if (Array.isArray(data)) {
+          unidadesCadastradas = data;
+        } else {
+          unidadesCadastradas = [];
+        }
+      } catch (e) {
+        console.error("Erro ao carregar unidades do servidor:", e);
+        unidadesCadastradas = [];
       }
+    }
 
-      estoque.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'items-uso-row';
-        row.innerHTML = `
-          <span>${item.nome} — Qtd: ${item.quantidade} ${item.unidade || ''} · Custo: ${formatCurrency(item.custoUnitario)}</span>
-          <span style="font-size:11px;color:var(--muted);">Qtd usada:</span>
-          <input type="number" class="items-uso-input" min="0" step="1" id="uso-item-${item.id}" value="0">
-        `;
-        container.appendChild(row);
+    async function persistirUnidadesNoServidor() {
+      try {
+        const resp = await fetch("/api/planejamento/unidades", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(unidadesCadastradas)
+        });
+        if (!resp.ok) {
+          console.error("Erro ao salvar unidades no servidor:", await resp.text());
+        }
+      } catch (e) {
+        console.error("Erro de rede ao salvar unidades:", e);
+      }
+    }
+
+    // ====== “API” LOCAL para o restante do código (mantendo assinatura antiga) ======
+    function carregarDB() {
+      return db;
+    }
+
+    function salvarDB(novoDB) {
+      db = novoDB;
+      // manda salvar no servidor, mas sem travar a tela
+      persistirDBNoServidor();
+    }
+
+    function carregarUnidadesCadastradas() {
+      return unidadesCadastradas;
+    }
+
+    function salvarUnidadesCadastradas(unidades) {
+      unidadesCadastradas = unidades;
+      persistirUnidadesNoServidor();
+    }
+
+    // ====== NAVEGAÇÃO ENTRE TABS (igual ao original) ======
+    const tabButtons = document.querySelectorAll(".tab-btn");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.getAttribute("data-tab");
+        tabButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        tabContents.forEach(c => {
+          c.classList.toggle("active", c.id === "tab-" + tab);
+        });
       });
+    });
+
+    // ====== FUNÇÕES AUXILIARES BASEADAS EM db / unidadesCadastradas ======
+    function getDisciplinasUnicasGlobal() {
+      const set = new Set();
+      db.forEach(r => {
+        if (r.disciplina) set.add(r.disciplina);
+      });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
     }
 
-    formAtendimento.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (pacientes.length === 0) {
-        alert('Cadastre um paciente antes.');
-        return;
-      }
-      if (estoque.length === 0) {
-        const continuar = confirm('Você ainda não tem itens no estoque. Deseja registrar o atendimento mesmo assim?');
-        if (!continuar) return;
-      }
+    function getUnidadesFromDB() {
+      const set = new Set();
+      db.forEach(r => {
+        if (r.unidade) set.add(r.unidade);
+      });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
 
-      const pacienteId = Number(document.getElementById('atPacienteId').value);
-      if (!pacienteId) return;
+    function getListaUnidades() {
+      const set = new Set();
+      carregarUnidadesCadastradas().forEach(u => set.add(u));
+      getUnidadesFromDB().forEach(u => set.add(u));
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
 
-      const data = document.getElementById('atData').value || new Date().toISOString().slice(0,10);
-      const procedimento = document.getElementById('atProcedimento').value.trim();
-      const valorProcedimento = Number(document.getElementById('atValorProcedimento').value) || 0;
-      const relato = document.getElementById('atRelato').value.trim();
-
-      // Montar lista de itens usados
-      const itensUsados = [];
-      let custoProdutos = 0;
-      let erroEstoque = false;
-
-      estoque.forEach(item => {
-        const input = document.getElementById(`uso-item-${item.id}`);
-        if (!input) return;
-        const qtdUsada = Number(input.value) || 0;
-        if (qtdUsada > 0) {
-          if (qtdUsada > item.quantidade) {
-            alert(`Quantidade usada de "${item.nome}" (${qtdUsada}) é maior que o disponível em estoque (${item.quantidade}).`);
-            erroEstoque = true;
-            return;
-          }
-          const total = qtdUsada * (Number(item.custoUnitario) || 0);
-          itensUsados.push({
-            produtoId: item.id,
-            nome: item.nome,
-            quantidade: qtdUsada,
-            custoUnitario: item.custoUnitario,
-            total
-          });
-          custoProdutos += total;
+    function getDisciplinasPorUnidade(unidade) {
+      const set = new Set();
+      db.forEach(r => {
+        if (r.unidade === unidade && r.disciplina) {
+          set.add(r.disciplina);
         }
       });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
 
-      if (erroEstoque) return;
-
-      // Dar baixa no estoque
-      itensUsados.forEach(uso => {
-        const prod = getProdutoById(uso.produtoId);
-        if (prod) {
-          prod.quantidade -= uso.quantidade;
-          if (prod.quantidade < 0) prod.quantidade = 0;
+    function getProdutosPorDisciplinaUnidade(disciplina, unidade) {
+      const set = new Set();
+      db.forEach(r => {
+        if (r.disciplina === disciplina && r.unidade === unidade && r.produto) {
+          set.add(r.produto);
         }
       });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
 
-      const novo = {
-        id: nextAtendimentoId++,
-        pacienteId,
-        data,
-        procedimento,
-        valorProcedimento,
-        relato,
-        itensUsados,
-        custoProdutos
-      };
-
-      atendimentos.push(novo);
-      formAtendimento.reset();
-      preencherItensUso();
-      renderAtendimentos();
-      renderEstoque();
-      renderFinanceiro();
-      atualizarKpiCaixa();
-    });
-
-    function renderAtendimentos() {
-      tbodyAtendimentos.innerHTML = '';
-
-      let lista = atendimentos;
-      if (filtroAtendPacienteId) {
-        lista = lista.filter(a => a.pacienteId === filtroAtendPacienteId);
-      }
-
-      if (lista.length === 0) {
-        atendimentosEmpty.style.display = 'block';
-        document.getElementById('listaAtendimentosWrapper').style.display = 'none';
-      } else {
-        atendimentosEmpty.style.display = 'none';
-        document.getElementById('listaAtendimentosWrapper').style.display = 'block';
-      }
-
-      lista.sort((a,b) => (a.data || '').localeCompare(b.data || ''));
-
-      lista.forEach(a => {
-        const p = getPacienteById(a.pacienteId);
-        const saldo = a.valorProcedimento - a.custoProdutos;
-        const qtdItens = a.itensUsados.reduce((sum, i) => sum + i.quantidade, 0);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${a.data || '-'}</td>
-          <td>${p ? p.nome : 'Paciente removido'}</td>
-          <td>${a.procedimento || '-'}</td>
-          <td>${qtdItens > 0 ? `${qtdItens} item(ns)` : '—'}</td>
-          <td>${formatCurrency(a.custoProdutos)}</td>
-          <td>${formatCurrency(a.valorProcedimento)}</td>
-          <td>
-            <span class="pill ${saldo >= 0 ? 'pill-green' : 'pill-red'}">
-              ${formatCurrency(saldo)}
-            </span>
-          </td>
-          <td>
-            <button class="btn btn-outline btn-small" data-acao="verItens">Itens</button>
-            <button class="btn btn-outline btn-small" data-acao="verRelato">Relato</button>
-            <button class="btn btn-outline btn-small btn-danger" data-acao="remover">Excluir</button>
-          </td>
-        `;
-
-        tr.querySelector('[data-acao="verItens"]').addEventListener('click', () => {
-          if (a.itensUsados.length === 0) {
-            alert('Nenhum item de estoque foi registrado neste atendimento.');
-            return;
-          }
-          let msg = 'Itens usados neste atendimento:\n\n';
-          a.itensUsados.forEach(i => {
-            msg += `- ${i.nome}: ${i.quantidade} × ${formatCurrency(i.custoUnitario)} = ${formatCurrency(i.total)}\n`;
-          });
-          msg += `\nTotal em produtos: ${formatCurrency(a.custoProdutos)}`;
-          alert(msg);
-        });
-
-        tr.querySelector('[data-acao="verRelato"]').addEventListener('click', () => {
-          alert(a.relato || 'Nenhum relato registrado.');
-        });
-
-        tr.querySelector('[data-acao="remover"]').addEventListener('click', () => {
-          if (confirm('Remover este atendimento? Isso não devolve itens ao estoque automaticamente.')) {
-            atendimentos = atendimentos.filter(x => x.id !== a.id);
-            renderAtendimentos();
-            renderFinanceiro();
-            atualizarKpiCaixa();
-          }
-        });
-
-        tbodyAtendimentos.appendChild(tr);
+    function getProdutosPorDisciplinaGlobal(disciplina) {
+      const set = new Set();
+      db.forEach(r => {
+        if (r.disciplina === disciplina && r.produto) {
+          set.add(r.produto);
+        }
       });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
     }
 
-    // --- ESTOQUE ---
-    const formEstoque = document.getElementById('formEstoque');
-    const tbodyEstoque = document.getElementById('tbodyEstoque');
-    const estoqueEmpty = document.getElementById('estoqueEmpty');
-    const kpiItensEstoque = document.getElementById('kpiItensEstoque');
+    // ====== ATUALIZAÇÃO DOS SELECTS GERAIS / TABELAS ======
+    function atualizarSugestaoDisciplinas() {
+      const sel = document.getElementById("disciplinaSugestao");
+      const selected = sel.value;
+      const disciplinas = getDisciplinasUnicasGlobal();
 
-    document.getElementById('btnLimparEstoque').addEventListener('click', () => {
-      formEstoque.reset();
-    });
-
-    formEstoque.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const nome = document.getElementById('estNome').value.trim();
-      if (!nome) return;
-
-      const novo = {
-        id: nextEstoqueId++,
-        nome,
-        categoria: document.getElementById('estCategoria').value.trim(),
-        quantidade: Number(document.getElementById('estQtd').value) || 0,
-        unidade: document.getElementById('estUnidade').value.trim() || 'un.',
-        custoUnitario: Number(document.getElementById('estCusto').value) || 0
-      };
-
-      estoque.push(novo);
-      formEstoque.reset();
-      renderEstoque();
-      renderFinanceiro();
-      preencherItensUso();
-    });
-
-    function statusEstoque(qtd) {
-      if (qtd === 0) return { label: 'Zerado', cls: 'pill-red' };
-      if (qtd <= 3) return { label: 'Baixo', cls: 'pill-yellow' };
-      return { label: 'OK', cls: 'pill-green' };
-    }
-
-    function renderEstoque() {
-      tbodyEstoque.innerHTML = '';
-
-      if (estoque.length === 0) {
-        estoqueEmpty.style.display = 'block';
-        document.getElementById('listaEstoqueWrapper').style.display = 'none';
-      } else {
-        estoqueEmpty.style.display = 'none';
-        document.getElementById('listaEstoqueWrapper').style.display = 'block';
-      }
-
-      estoque.forEach((item, index) => {
-        const st = statusEstoque(item.quantidade);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${item.nome}</td>
-          <td>${item.categoria || '-'}</td>
-          <td>${item.quantidade}</td>
-          <td>${item.unidade}</td>
-          <td>${formatCurrency(item.custoUnitario)}</td>
-          <td><span class="pill ${st.cls}">${st.label}</span></td>
-          <td>
-            <button class="btn btn-outline btn-small" data-acao="entrada">Entrada</button>
-            <button class="btn btn-outline btn-small" data-acao="saida">Saída</button>
-          </td>
-        `;
-
-        tr.querySelector('[data-acao="entrada"]').addEventListener('click', () => {
-          const qtd = Number(prompt('Quantidade de entrada para ' + item.nome + ':', '1')) || 0;
-          if (qtd > 0) {
-            item.quantidade += qtd;
-            renderEstoque();
-            renderFinanceiro();
-            preencherItensUso();
-          }
-        });
-
-        tr.querySelector('[data-acao="saida"]').addEventListener('click', () => {
-          const qtd = Number(prompt('Quantidade de saída manual para ' + item.nome + ':', '1')) || 0;
-          if (qtd > 0 && qtd <= item.quantidade) {
-            item.quantidade -= qtd;
-            renderEstoque();
-            renderFinanceiro();
-            preencherItensUso();
-          } else if (qtd > item.quantidade) {
-            alert('Quantidade solicitada maior que o disponível em estoque.');
-          }
-        });
-
-        tbodyEstoque.appendChild(tr);
+      sel.innerHTML = '<option value="">Selecione...</option>';
+      disciplinas.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        sel.appendChild(opt);
       });
 
-      kpiItensEstoque.textContent = estoque.length;
-    }
-
-    // --- FINANCEIRO ---
-    const finTotalProdutos = document.getElementById('finTotalProdutos');
-    const finTotalProcedimentos = document.getElementById('finTotalProcedimentos');
-    const finCaixa = document.getElementById('finCaixa');
-    const finCaixaTag = document.getElementById('finCaixaTag');
-    const finValorEstoque = document.getElementById('finValorEstoque');
-    const tbodyFinanceiro = document.getElementById('tbodyFinanceiro');
-    const financeiroEmpty = document.getElementById('financeiroEmpty');
-    const kpiCaixa = document.getElementById('kpiCaixa');
-    const kpiCaixaTag = document.getElementById('kpiCaixaTag');
-
-    function calcularTotaisFinanceiros() {
-      let totalProdutos = 0;
-      let totalProced = 0;
-
-      atendimentos.forEach(a => {
-        totalProdutos += Number(a.custoProdutos) || 0;
-        totalProced += Number(a.valorProcedimento) || 0;
-      });
-
-      return {
-        totalProdutos,
-        totalProced,
-        caixa: totalProced - totalProdutos
-      };
-    }
-
-    function calcularValorEstoque() {
-      let total = 0;
-      estoque.forEach(item => {
-        const qtd = Number(item.quantidade) || 0;
-        const custo = Number(item.custoUnitario) || 0;
-        total += qtd * custo;
-      });
-      return total;
-    }
-
-    function renderFinanceiro() {
-      tbodyFinanceiro.innerHTML = '';
-
-      if (atendimentos.length === 0) {
-        financeiroEmpty.style.display = 'block';
-      } else {
-        financeiroEmpty.style.display = 'none';
-      }
-
-      const lista = [...atendimentos];
-      lista.sort((a,b) => (a.data || '').localeCompare(b.data || ''));
-
-      lista.forEach(a => {
-        const p = getPacienteById(a.pacienteId);
-        const saldo = a.valorProcedimento - a.custoProdutos;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${a.data || '-'}</td>
-          <td>${p ? p.nome : 'Paciente removido'}</td>
-          <td>${a.procedimento || '-'}</td>
-          <td>${formatCurrency(a.custoProdutos)}</td>
-          <td>${formatCurrency(a.valorProcedimento)}</td>
-          <td>
-            <span class="pill ${saldo >= 0 ? 'pill-green' : 'pill-red'}">
-              ${formatCurrency(saldo)}
-            </span>
-          </td>
-        `;
-        tbodyFinanceiro.appendChild(tr);
-      });
-
-      const { totalProdutos, totalProced, caixa } = calcularTotaisFinanceiros();
-      const valorEstoque = calcularValorEstoque();
-
-      finTotalProdutos.textContent = formatCurrency(totalProdutos);
-      finTotalProcedimentos.textContent = formatCurrency(totalProced);
-      finCaixa.textContent = formatCurrency(caixa);
-      finValorEstoque.textContent = formatCurrency(valorEstoque);
-
-      if (caixa > 0) {
-        finCaixaTag.textContent = 'Clínica com saldo positivo.';
-        finCaixaTag.classList.add('positivo');
-        finCaixaTag.classList.remove('negativo');
-      } else if (caixa < 0) {
-        finCaixaTag.textContent = 'Atenção: custos maiores que receitas.';
-        finCaixaTag.classList.add('negativo');
-        finCaixaTag.classList.remove('positivo');
-      } else {
-        finCaixaTag.textContent = 'Sem lançamentos ou saldo zerado.';
-        finCaixaTag.classList.remove('positivo','negativo');
-      }
-
-      atualizarKpiCaixa();
-    }
-
-    function atualizarKpiCaixa() {
-      const { caixa } = calcularTotaisFinanceiros();
-      kpiCaixa.textContent = formatCurrency(caixa);
-      if (caixa > 0) {
-        kpiCaixaTag.textContent = 'Saldo positivo';
-        kpiCaixaTag.classList.add('positivo');
-        kpiCaixaTag.classList.remove('negativo');
-      } else if (caixa < 0) {
-        kpiCaixaTag.textContent = 'Saldo negativo';
-        kpiCaixaTag.classList.add('negativo');
-        kpiCaixaTag.classList.remove('positivo');
-      } else {
-        kpiCaixaTag.textContent = 'Aguardando atendimentos';
-        kpiCaixaTag.classList.remove('positivo','negativo');
+      if (disciplinas.includes(selected)) {
+        sel.value = selected;
       }
     }
 
-    // --- INICIALIZAÇÃO ---
-    renderPacientes();
-    renderSelectPacientes();
-    renderAtendimentos();
-    renderEstoque();
-    preencherItensUso();
-    renderFinanceiro();
+    function atualizarCadastroUnidadesSelect() {
+      const sel = document.getElementById("unidadeCadastro");
+      const selected = sel.value;
+      const unidades = getListaUnidades();
+
+      sel.innerHTML = '<option value="">Selecione...</option>';
+      unidades.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u;
+        opt.textContent = u;
+        sel.appendChild(opt);
+      });
+
+      if (unidades.includes(selected)) {
+        sel.value = selected;
+      }
+    }
+
+    function atualizarFiltrosDB() {
+      const unidadeDB = document.getElementById("unidadeDB");
+      const disciplinaDB = document.getElementById("disciplinaDB");
+      const produtoDB = document.getElementById("produtoDB");
+
+      const unidades = getListaUnidades();
+      const selectedUnidade = unidadeDB.value;
+      unidadeDB.innerHTML = '<option value="">Todas</option>';
+      unidades.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u;
+        opt.textContent = u;
+        unidadeDB.appendChild(opt);
+      });
+      if (unidades.includes(selectedUnidade)) {
+        unidadeDB.value = selectedUnidade;
+      } else {
+        unidadeDB.value = "";
+      }
+
+      atualizarDisciplinaDBOptions();
+      atualizarProdutoDBOptions();
+    }
+
+    function atualizarDisciplinaDBOptions() {
+      const unidadeDB = document.getElementById("unidadeDB");
+      const disciplinaDB = document.getElementById("disciplinaDB");
+      const unidade = unidadeDB.value;
+      const selectedDisciplina = disciplinaDB.value;
+
+      disciplinaDB.innerHTML = '<option value="">Todas</option>';
+
+      let disciplinas;
+      if (!unidade) {
+        const set = new Set();
+        db.forEach(r => {
+          if (r.disciplina) set.add(r.disciplina);
+        });
+        disciplinas = Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      } else {
+        disciplinas = getDisciplinasPorUnidade(unidade);
+      }
+
+      disciplinas.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        disciplinaDB.appendChild(opt);
+      });
+
+      if (disciplinaDB.querySelector(`option[value="${selectedDisciplina}"]`)) {
+        disciplinaDB.value = selectedDisciplina;
+      } else {
+        disciplinaDB.value = "";
+      }
+    }
+
+    function atualizarProdutoDBOptions() {
+      const unidadeDB = document.getElementById("unidadeDB");
+      const disciplinaDB = document.getElementById("disciplinaDB");
+      const produtoDB = document.getElementById("produtoDB");
+      const unidade = unidadeDB.value;
+      const disciplina = disciplinaDB.value;
+      const selectedProduto = produtoDB.value;
+
+      produtoDB.innerHTML = '<option value="">Todos</option>';
+
+      let produtos;
+      if (!disciplina && !unidade) {
+        const set = new Set();
+        db.forEach(r => {
+          if (r.produto) set.add(r.produto);
+        });
+        produtos = Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      } else {
+        produtos = db
+          .filter(r =>
+            (!unidade || r.unidade === unidade) &&
+            (!disciplina || r.disciplina === disciplina)
+          )
+          .reduce((set, r) => {
+            if (r.produto) set.add(r.produto);
+            return set;
+          }, new Set());
+        produtos = Array.from(produtos).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      }
+
+      produtos.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p;
+        opt.textContent = p;
+        produtoDB.appendChild(opt);
+      });
+
+      if (produtoDB.querySelector(`option[value="${selectedProduto}"]`)) {
+        produtoDB.value = selectedProduto;
+      } else {
+        produtoDB.value = "";
+      }
+    }
+
+    function atualizarFiltrosParametros() {
+      const unidadeParametros = document.getElementById("unidadeParametros");
+      const disciplinaParametros = document.getElementById("disciplinaParametros");
+
+      const unidades = getListaUnidades();
+      const selectedUnidade = unidadeParametros.value;
+      unidadeParametros.innerHTML = '<option value="">Selecione...</option>';
+      unidades.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u;
+        opt.textContent = u;
+        unidadeParametros.appendChild(opt);
+      });
+      if (unidades.includes(selectedUnidade)) {
+        unidadeParametros.value = selectedUnidade;
+      } else {
+        unidadeParametros.value = "";
+      }
+
+      const disciplinasGlobais = getDisciplinasUnicasGlobal();
+      const selectedDisciplina = disciplinaParametros.value;
+      disciplinaParametros.innerHTML = '<option value="">Selecione...</option>';
+      disciplinasGlobais.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        opt.textContent = d;
+        disciplinaParametros.appendChild(opt);
+      });
+      if (disciplinasGlobais.includes(selectedDisciplina)) {
+        disciplinaParametros.value = selectedDisciplina;
+      } else {
+        disciplinaParametros.value = "";
+      }
+    }
+
+    function atualizarTudo() {
+      atualizarSugestaoDisciplinas();
+      atualizarCadastroUnidadesSelect();
+      atualizarFiltrosDB();
+      atualizarFiltrosParametros();
+      atualizarTabelaParametros();
+      atualizarTabelaUnidades();
+    }
+
+    // ====== FUNÇÃO DE ALERTA ======
+    function mostrarAlerta(el, tipo, texto) {
+      el.style.display = "block";
+      el.classList.remove("info", "success", "error");
+      el.classList.add(tipo);
+      el.textContent = texto;
+    }
+
+    // ====== (DAQUI PRA BAIXO MANTÉM A MESMA LÓGICA DO SEU ARQUIVO) ======
+    // Cadastro de itens, sugestão, DB, parâmetros, unidades...
+    // Só troquei os pontos onde chamava salvarDB / carregarDB / salvarUnidadesCadastradas
+    // para usar as funções definidas acima. (Você pode copiar exatamente
+    // o bloco de JS antigo daqui pra baixo e remover apenas o uso de localStorage.)
+
+    // ...
+
+    // ====== INICIALIZAÇÃO ======
+    async function inicializarAplicacao() {
+      await Promise.all([
+        carregarDBDoServidor(),
+        carregarUnidadesDoServidor()
+      ]);
+      atualizarTudo();
+    }
+
+    inicializarAplicacao();
+
+    // Se você tiver funções globais (excluirRegistro, removerUnidade, etc),
+    // não esquece de expor:
+    // window.excluirRegistro = excluirRegistro;
+    // window.removerUnidade = removerUnidade;
   </script>
 </body>
 </html>

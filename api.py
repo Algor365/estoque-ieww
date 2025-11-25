@@ -11,11 +11,20 @@ app = Flask(__name__)
 # ⚠️ Em produção, troque por uma chave forte e secreta
 app.secret_key = "troque-esta-chave-em-producao"
 
+# Arquivo do histórico simples (predict / add-turma)
 DATAFILE = "historico.json"
+
+# Arquivo de usuários para login
 USERSFILE = "usuarios.json"
 
+# Arquivos do planejamento (tela com unidades/disciplinas/produtos)
+PLANEJAMENTO_DATAFILE = "planejamento_db.json"
+PLANEJAMENTO_UNIDADES_FILE = "planejamento_unidades.json"
 
-# ========== USERS / LOGIN ==========
+
+# ==========================================================
+#                 CONTROLE DE USUÁRIOS / LOGIN
+# ==========================================================
 
 def carregar_usuarios():
     """
@@ -55,9 +64,14 @@ def login_required(view_func):
     @wraps(view_func)
     def wrapper(*args, **kwargs):
         if "user" not in session:
-            # Se for JSON (fetch/axios), devolve erro 401 em JSON
-            if request.path.startswith(("/predict", "/add-turma")) or request.is_json:
+            # Se for JSON (fetch), devolve erro 401 em JSON
+            if request.path.startswith((
+                "/predict",
+                "/add-turma",
+                "/api/planejamento"
+            )) or request.is_json:
                 return jsonify({"erro": "Não autenticado"}), 401
+
             # Senão, redireciona para tela de login
             next_url = request.path
             return redirect(url_for("login", next=next_url))
@@ -67,6 +81,12 @@ def login_required(view_func):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """
+    Tela de login simples. Usa usuarios.json.
+    Usuário padrão (se o arquivo não existir):
+      - login: admin
+      - senha: admin
+    """
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
@@ -92,8 +112,15 @@ def logout():
     return redirect(url_for("login"))
 
 
-# ========== HISTÓRICO / “DB” ==========
+# ==========================================================
+#          HISTÓRICO SIMPLES (predict / add-turma)
+# ==========================================================
+
 def carregar_historico():
+    """
+    Histórico simples usado nas rotas /predict e /add-turma
+    (não é o mesmo JSON do planejamento).
+    """
     if os.path.exists(DATAFILE):
         with open(DATAFILE, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -151,21 +178,109 @@ def calcular_proporcao_media(historico):
     return sum(proporcoes) / len(proporcoes)
 
 
-# ========== ROTAS PRINCIPAIS ==========
+# ==========================================================
+#               PLANEJAMENTO (JSON COMPLETO)
+# ==========================================================
+
+def carregar_planejamento_db():
+    """
+    Carrega o banco de dados completo do planejamento (disciplinas/produtos).
+    """
+    if os.path.exists(PLANEJAMENTO_DATAFILE):
+        with open(PLANEJAMENTO_DATAFILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
+def salvar_planejamento_db(dados):
+    """
+    Salva o array completo de registros do planejamento em JSON.
+    """
+    with open(PLANEJAMENTO_DATAFILE, "w", encoding="utf-8") as f:
+        json.dump(dados, f, ensure_ascii=False, indent=2)
+
+
+def carregar_planejamento_unidades():
+    """
+    Carrega a lista de unidades cadastradas para o planejamento.
+    """
+    if os.path.exists(PLANEJAMENTO_UNIDADES_FILE):
+        with open(PLANEJAMENTO_UNIDADES_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
+def salvar_planejamento_unidades(unidades):
+    """
+    Salva a lista de unidades do planejamento.
+    """
+    with open(PLANEJAMENTO_UNIDADES_FILE, "w", encoding="utf-8") as f:
+        json.dump(unidades, f, ensure_ascii=False, indent=2)
+
+
+@app.route("/api/planejamento/db", methods=["GET", "POST"])
+@login_required
+def api_planejamento_db():
+    """
+    GET  -> retorna o array completo de registros (para preencher as tabelas do front)
+    POST -> recebe o array completo e sobrescreve o JSON no servidor
+    """
+    if request.method == "GET":
+        dados = carregar_planejamento_db()
+        return jsonify(dados)
+
+    # POST
+    data = request.get_json()
+    if not isinstance(data, list):
+        return jsonify({"erro": "Formato inválido: esperado uma lista de registros."}), 400
+
+    salvar_planejamento_db(data)
+    return jsonify({"mensagem": "Banco de planejamento salvo com sucesso."})
+
+
+@app.route("/api/planejamento/unidades", methods=["GET", "POST"])
+@login_required
+def api_planejamento_unidades():
+    """
+    GET  -> retorna lista de unidades cadastradas
+    POST -> recebe a lista completa de unidades e salva
+    """
+    if request.method == "GET":
+        unidades = carregar_planejamento_unidades()
+        return jsonify(unidades)
+
+    data = request.get_json()
+    if not isinstance(data, list):
+        return jsonify({"erro": "Formato inválido: esperado uma lista de unidades."}), 400
+
+    salvar_planejamento_unidades(data)
+    return jsonify({"mensagem": "Unidades do planejamento salvas com sucesso."})
+
+
+# ==========================================================
+#                     ROTAS PRINCIPAIS
+# ==========================================================
 
 @app.route("/")
 @login_required
 def index():
-    historico = carregar_historico()
+    """
+    Página principal: carrega index.html.
+    O template em si usa JS para consumir /api/planejamento/*
+    e opcionalmente usar o histórico simples.
+    """
+    historico = carregar_historico()   # se quiser exibir ou só garantir que o arquivo exista
     usuario = session.get("user")
-    # Aqui você renderiza sua página principal (index.html)
-    # e pode mostrar o usuário logado no template
     return render_template("index.html", historico=historico, usuario=usuario)
 
 
 @app.route("/predict", methods=["POST"])
 @login_required
 def predict():
+    """
+    Usa o DATAFILE (historico.json) para sugerir quantidade
+    com base em proporção média (modelo simples).
+    """
     data = request.get_json()
     alunos = data.get("alunos", 0)
 
@@ -192,7 +307,7 @@ def predict():
 @login_required
 def add_turma():
     """
-    Salva uma nova turma no histórico:
+    Salva uma nova turma no histórico simples (historico.json):
     - turma (nome)
     - alunos
     - enviados
@@ -224,7 +339,7 @@ def add_turma():
         "enviados": enviados,
         "usados": usados,
         "faltou": faltou,
-        "usuario": usuario_atual  # <-- aqui gravamos quem fez
+        "usuario": usuario_atual
     }
 
     historico.append(nova_turma)
@@ -233,5 +348,10 @@ def add_turma():
     return jsonify({"mensagem": "Turma salva com sucesso!", "turma": nova_turma})
 
 
+# ==========================================================
+#                        MAIN
+# ==========================================================
+
 if __name__ == "__main__":
+    # host 0.0.0.0 para acessar de fora (ex: túnel Cloudflare)
     app.run(host="0.0.0.0", port=5000, debug=True)
