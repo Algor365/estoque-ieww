@@ -202,8 +202,10 @@
       outline: none;
     }
 
+    /* Removido min-height alto para múltiplo:
+       agora ele respeita size="1" e fica tipo dropdown normal */
     .form-group select[multiple] {
-      min-height: 80px;
+      min-height: auto;
     }
 
     .form-group input:focus,
@@ -461,6 +463,28 @@
         font-size: 18px;
       }
     }
+    /* ==================== SELECT DE UNIDADES (CADASTRO) ==================== */
+/* AJUSTE ESPECÍFICO – NÃO ALTERA OS OUTROS SELECTS */
+
+#unidadeCadastro {
+  background: #111827 !important;   /* campo fechado */
+  color: #f9fafb !important;
+  border: 1px solid #4b5563 !important;
+}
+
+/* Opções quando o dropdown abre */
+#unidadeCadastro option {
+  background: #020617 !important;
+  color: #e5e7eb !important;
+}
+
+/* Opção em hover ou selecionada */
+#unidadeCadastro option:hover,
+#unidadeCadastro option:checked {
+  background: #1f2937 !important;
+  color: #ffffff !important;
+}
+
   </style>
 </head>
 <body>
@@ -538,13 +562,14 @@
           <div class="table-wrapper" id="wrapTabelaSugestao" style="display:none;">
             <table id="tabelaSugestao">
               <thead>
-                <tr>
-                  <th>Produto</th>
-                  <th>Média por aluno (histórico)</th>
-                  <th>Registros usados</th>
-                  <th>Sugestão total p/ nova turma</th>
-                </tr>
-              </thead>
+  <tr>
+    <th>Produto</th>
+    <th>Média por aluno (histórico)</th>
+    <th>Registros usados</th>
+    <th>Sugestão total p/ nova turma</th>
+    <th>Valor real</th>
+  </tr>
+</thead>
               <tbody></tbody>
             </table>
           </div>
@@ -568,7 +593,8 @@
           <div class="form-row">
             <div class="form-group">
               <label for="unidadeCadastro">Unidades (multi)</label>
-              <select id="unidadeCadastro" multiple>
+              <!-- AQUI: múltiplo mas com size="1", visual de dropdown -->
+              <select id="unidadeCadastro" multiple size="1">
                 <!-- opções preenchidas via JS -->
               </select>
             </div>
@@ -1291,31 +1317,39 @@
       }
 
       let totalGeral = 0;
-      tabelaSugestaoBody.innerHTML = "";
+tabelaSugestaoBody.innerHTML = "";
 
-      produtos.forEach(p => {
-        const media = p.somaPorAluno / p.registrosValidos;
-        const sugestaoTotal = media * alunosNovaTurma;
-        totalGeral += sugestaoTotal;
+produtos.forEach(p => {
+  const media = p.somaPorAluno / p.registrosValidos;
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${p.produto}</td>
-          <td>${media.toFixed(3)}</td>
-          <td>${p.registrosValidos}</td>
-          <td>${sugestaoTotal.toFixed(2)}</td>
-        `;
-        tabelaSugestaoBody.appendChild(tr);
-      });
+  // Valor "real" (com casas decimais)
+  const sugestaoTotalReal = media * alunosNovaTurma;
+
+  // Valor arredondado para cima (inteiro)
+  const sugestaoTotalArredondada = Math.ceil(sugestaoTotalReal);
+
+  // Para o resumo geral, somamos o valor arredondado
+  totalGeral += sugestaoTotalArredondada;
+
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${p.produto}</td>
+    <td>${media.toFixed(3)}</td>
+    <td>${p.registrosValidos}</td>
+    <td>${sugestaoTotalArredondada}</td>
+    <td>${sugestaoTotalReal.toFixed(2)}</td>
+  `;
+  tabelaSugestaoBody.appendChild(tr);
+});
 
       wrapTabelaSugestao.style.display = "block";
 
-      textoSugestaoResumo.innerHTML = `
-        Disciplina: <strong>${disc}</strong><br>
-        Alunos da nova turma: <strong>${alunosNovaTurma}</strong><br>
-        Quantidade total recomendada (somando todos os produtos): 
-        <strong>${totalGeral.toFixed(2)}</strong> unidades.
-      `;
+     textoSugestaoResumo.innerHTML = `
+  Disciplina: <strong>${disc}</strong><br>
+  Alunos da nova turma: <strong>${alunosNovaTurma}</strong><br>
+  Quantidade total recomendada (somando todos os produtos): 
+  <strong>${totalGeral}</strong> unidades.
+`;
       cardSugestaoResumo.style.display = "block";
     });
 
