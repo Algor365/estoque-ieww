@@ -566,6 +566,10 @@
               </select>
             </div>
             <div class="form-group">
+              <label for="dataCadastro">Data</label>
+              <input type="date" id="dataCadastro" />
+            </div>
+            <div class="form-group">
               <label for="disciplinaCadastro">Disciplina</label>
               <input type="text" id="disciplinaCadastro" placeholder="Ex: Bioestimulador Facial" />
             </div>
@@ -1088,6 +1092,7 @@
     const unidadeCadastroSel = document.getElementById("unidadeCadastro");
     const disciplinaCadastro = document.getElementById("disciplinaCadastro");
     const produtoCadastro = document.getElementById("produtoCadastro");
+    const dataCadastro = document.getElementById("dataCadastro");
     const alunosCadastro = document.getElementById("alunosCadastro");
     const enviadoCadastro = document.getElementById("enviadoCadastro");
     const voltouCadastro = document.getElementById("voltouCadastro");
@@ -1102,6 +1107,7 @@
       const enviado = Number(enviadoCadastro.value) || 0;
       const voltou = Number(voltouCadastro.value) || 0;
       const faltou = Number(faltouCadastro.value) || 0;
+      const dataCadastroStr = dataCadastro.value;
 
       if (!unidade || !disciplina || !produto) {
         mostrarAlerta(alertCadastro, "error", "Preencha unidade, disciplina e produto.");
@@ -1116,9 +1122,13 @@
 
       const consumoPorAluno = alunos > 0 ? consumoIdeal / alunos : 0;
 
+      const dataISO = dataCadastroStr
+        ? new Date(dataCadastroStr + "T00:00:00").toISOString()
+        : new Date().toISOString();
+
       const registro = {
         id: Date.now(),
-        data: new Date().toISOString(),
+        data: dataISO,
         unidade,
         disciplina,
         produto,
