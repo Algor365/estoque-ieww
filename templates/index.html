@@ -191,7 +191,8 @@
     }
 
     .form-group input,
-    .form-group select {
+    .form-group select,
+    .form-group select[multiple] {
       padding: 7px 9px;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -199,6 +200,10 @@
       background: #020617;
       color: var(--text);
       outline: none;
+    }
+
+    .form-group select[multiple] {
+      min-height: 80px;
     }
 
     .form-group input:focus,
@@ -554,15 +559,17 @@
         <div class="tab-content" id="tab-cadastro">
           <div class="section-title">Cadastro de itens (alimentar o banco)</div>
           <div class="section-subtitle">
-            Informe os dados de uma aula / turma: <strong>unidade</strong>, disciplina, produto,
+            Informe os dados de uma aula / turma: <strong>unidade(s)</strong>, disciplina, produto,
             quantidade de alunos, quanto foi enviado, quanto voltou e quanto faltou.
+            <br>
+            <small>Dica: você pode selecionar várias unidades e/ou usar "Todas as unidades".</small>
           </div>
 
           <div class="form-row">
             <div class="form-group">
-              <label for="unidadeCadastro">Unidade</label>
-              <select id="unidadeCadastro">
-                <option value="">Selecione...</option>
+              <label for="unidadeCadastro">Unidades (multi)</label>
+              <select id="unidadeCadastro" multiple>
+                <!-- opções preenchidas via JS -->
               </select>
             </div>
             <div class="form-group">
@@ -598,7 +605,7 @@
             </div>
           </div>
 
-          <button class="btn btn-primary" id="btnSalvarCadastro">Salvar registro</button>
+          <button class="btn btn-primary" id="btnSalvarCadastro">Salvar registro(s)</button>
           <div id="alertCadastro" class="alert"></div>
         </div>
 
@@ -919,10 +926,19 @@
 
     function atualizarCadastroUnidadesSelect() {
       const sel = document.getElementById("unidadeCadastro");
-      const selected = sel.value;
+      // guardar seleções anteriores (para não perder ao atualizar)
+      const anteriores = new Set(Array.from(sel.selectedOptions || []).map(o => o.value));
       const unidades = getListaUnidades();
 
-      sel.innerHTML = '<option value="">Selecione...</option>';
+      sel.innerHTML = "";
+
+      // opção "Todas as unidades"
+      const optTodas = document.createElement("option");
+      optTodas.value = "__TODAS__";
+      optTodas.textContent = "Todas as unidades";
+      sel.appendChild(optTodas);
+
+      // opções de unidades individuais
       unidades.forEach(u => {
         const opt = document.createElement("option");
         opt.value = u;
@@ -930,9 +946,12 @@
         sel.appendChild(opt);
       });
 
-      if (unidades.includes(selected)) {
-        sel.value = selected;
-      }
+      // restaurar seleção anterior, se existir
+      Array.from(sel.options).forEach(opt => {
+        if (anteriores.has(opt.value)) {
+          opt.selected = true;
+        }
+      });
     }
 
     function atualizarFiltrosDB() {
@@ -1100,7 +1119,7 @@
     const alertCadastro = document.getElementById("alertCadastro");
 
     document.getElementById("btnSalvarCadastro").addEventListener("click", () => {
-      const unidade = unidadeCadastroSel.value.trim();
+      const unidadesSelecionadas = Array.from(unidadeCadastroSel.selectedOptions || []).map(o => o.value);
       const disciplina = disciplinaCadastro.value.trim();
       const produto = produtoCadastro.value.trim();
       const alunos = Number(alunosCadastro.value) || 0;
@@ -1109,8 +1128,10 @@
       const faltou = Number(faltouCadastro.value) || 0;
       const dataCadastroStr = dataCadastro.value;
 
-      if (!unidade || !disciplina || !produto) {
-        mostrarAlerta(alertCadastro, "error", "Preencha unidade, disciplina e produto.");
+      alertCadastro.style.display = "none";
+
+      if (!unidadesSelecionadas.length || !disciplina || !produto) {
+        mostrarAlerta(alertCadastro, "error", "Selecione ao menos uma unidade e preencha disciplina e produto.");
         return;
       }
 
@@ -1126,26 +1147,62 @@
         ? new Date(dataCadastroStr + "T00:00:00").toISOString()
         : new Date().toISOString();
 
-      const registro = {
-        id: Date.now(),
-        data: dataISO,
-        unidade,
-        disciplina,
-        produto,
-        alunos,
-        enviado,
-        voltou,
-        faltou,
-        consumoIdeal,
-        consumoPorAluno
-      };
+      // Definir unidades-alvo:
+      let unidadesAlvo;
+      if (unidadesSelecionadas.includes("__TODAS__")) {
+        unidadesAlvo = getListaUnidades();
+        if (!unidadesAlvo.length) {
+          mostrarAlerta(
+            alertCadastro,
+            "error",
+            "Não há unidades cadastradas para usar a opção 'Todas as unidades'."
+          );
+          return;
+        }
+      } else {
+        unidadesAlvo = unidadesSelecionadas;
+      }
 
-      db.push(registro);
+      let registrosCriados = 0;
+
+      unidadesAlvo.forEach((unidade, idx) => {
+        if (!unidade) return;
+
+        const registro = {
+          id: Date.now() + idx, // para evitar id duplicado
+          data: dataISO,
+          unidade,
+          disciplina,
+          produto,
+          alunos,
+          enviado,
+          voltou,
+          faltou,
+          consumoIdeal,
+          consumoPorAluno
+        };
+
+        db.push(registro);
+        registrosCriados++;
+      });
+
+      if (!registrosCriados) {
+        mostrarAlerta(alertCadastro, "error", "Nenhum registro foi criado.");
+        return;
+      }
+
       salvarDB(db);
 
+      // garantir que todas as unidades usadas estejam cadastradas na lista de unidades
       unidadesCadastradas = carregarUnidadesCadastradas();
-      if (unidade && !unidadesCadastradas.includes(unidade)) {
-        unidadesCadastradas.push(unidade);
+      let alterouUnidades = false;
+      unidadesAlvo.forEach(unidade => {
+        if (unidade && !unidadesCadastradas.includes(unidade)) {
+          unidadesCadastradas.push(unidade);
+          alterouUnidades = true;
+        }
+      });
+      if (alterouUnidades) {
         unidadesCadastradas.sort((a, b) => a.localeCompare(b, "pt-BR"));
         salvarUnidadesCadastradas(unidadesCadastradas);
       }
@@ -1155,13 +1212,14 @@
       mostrarAlerta(
         alertCadastro,
         "success",
-        "Registro salvo com sucesso! (consumo ideal: " +
+        `${registrosCriados} registro(s) salvo(s) em ${unidadesAlvo.length} unidade(s)! (consumo ideal: ` +
           consumoIdeal.toFixed(2) +
           ", por aluno: " +
           consumoPorAluno.toFixed(3) +
           ")"
       );
 
+      // limpa somente os campos numéricos (mantém unidades/descrição para agilizar próximo cadastro)
       alunosCadastro.value = 0;
       enviadoCadastro.value = 0;
       voltouCadastro.value = 0;
