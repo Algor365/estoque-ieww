@@ -4,6 +4,7 @@ from flask import (
 )
 import json
 import os
+import time
 from functools import wraps
 
 app = Flask(__name__)
@@ -20,6 +21,9 @@ USERSFILE = "usuarios.json"
 # Arquivos do planejamento (tela com unidades/disciplinas/produtos)
 PLANEJAMENTO_DATAFILE = "planejamento_db.json"
 PLANEJAMENTO_UNIDADES_FILE = "planejamento_unidades.json"
+
+# Arquivo de envios / retornos (novo módulo integrado)
+PLANEJAMENTO_ENVIOS_FILE = "planejamento_envios.json"
 
 
 # ==========================================================
@@ -258,6 +262,92 @@ def api_planejamento_unidades():
 
 
 # ==========================================================
+#            ENVIOS / RETORNOS (NOVO MÓDULO)
+# ==========================================================
+
+def carregar_planejamento_envios():
+    """
+    Carrega a lista de envios/retornos (cada registro com itens, unidade, data, etc.).
+    """
+    if os.path.exists(PLANEJAMENTO_ENVIOS_FILE):
+        with open(PLANEJAMENTO_ENVIOS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
+def salvar_planejamento_envios(envios):
+    """
+    Salva a lista completa de envios/retornos.
+    """
+    with open(PLANEJAMENTO_ENVIOS_FILE, "w", encoding="utf-8") as f:
+        json.dump(envios, f, ensure_ascii=False, indent=2)
+
+
+@app.route("/api/planejamento/envios", methods=["GET", "POST"])
+@login_required
+def api_planejamento_envios():
+    """
+    GET  -> retorna a lista de envios/retornos
+    POST -> recebe UM envio e adiciona no JSON
+
+    Exemplo de JSON esperado no POST:
+    {
+      "data": "2025-01-01T00:00:00Z",
+      "unidade": "São Paulo",
+      "observacao": "Envio para turma de março",
+      "itens": [
+        {"produto": "Livro A", "quantidade": 10},
+        {"produto": "Livro B", "quantidade": 5}
+      ]
+    }
+    """
+    if request.method == "GET":
+        envios = carregar_planejamento_envios()
+        return jsonify(envios)
+
+    # POST
+    data = request.get_json() or {}
+
+    if not isinstance(data, dict):
+        return jsonify({"erro": "Formato inválido: esperado um objeto de envio."}), 400
+
+    # Gera um ID se não vier
+    if "id" not in data:
+        data["id"] = int(time.time() * 1000)
+
+    # Garante campos principais
+    data.setdefault("data", None)
+    data.setdefault("unidade", "")
+    data.setdefault("observacao", "")
+    data.setdefault("itens", [])
+
+    envios = carregar_planejamento_envios()
+    envios.append(data)
+    salvar_planejamento_envios(envios)
+
+    return jsonify({
+        "mensagem": "Envio/retorno salvo com sucesso.",
+        "envio": data
+    })
+
+
+@app.route("/api/planejamento/envios/<int:envio_id>", methods=["DELETE"])
+@login_required
+def api_planejamento_envios_delete(envio_id):
+    """
+    DELETE -> exclui um envio/retorno pelo ID.
+    """
+    envios = carregar_planejamento_envios()
+    envios_filtrados = [e for e in envios if e.get("id") != envio_id]
+
+    if len(envios_filtrados) == len(envios):
+        return jsonify({"erro": "Envio não encontrado."}), 404
+
+    salvar_planejamento_envios(envios_filtrados)
+    return jsonify({"mensagem": "Envio/retorno excluído com sucesso."})
+
+
+# ==========================================================
 #                     ROTAS PRINCIPAIS
 # ==========================================================
 
@@ -265,13 +355,22 @@ def api_planejamento_unidades():
 @login_required
 def index():
     """
-    Página principal: carrega index.html.
-    O template em si usa JS para consumir /api/planejamento/*
-    e opcionalmente usar o histórico simples.
+    Página principal antiga (index.html).
+    Se o template usar o histórico/predict, já está tudo pronto.
     """
-    historico = carregar_historico()   # se quiser exibir ou só garantir que o arquivo exista
+    historico = carregar_historico()
     usuario = session.get("user")
     return render_template("index.html", historico=historico, usuario=usuario)
+
+
+@app.route("/planejamento")
+@login_required
+def planejamento():
+    """
+    Página principal nova para o fluxo de envios, usando envio.html.
+    """
+    usuario = session.get("user")
+    return render_template("envio.html", usuario=usuario)
 
 
 @app.route("/predict", methods=["POST"])

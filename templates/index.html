@@ -202,8 +202,6 @@
       outline: none;
     }
 
-    /* Removido min-height alto para múltiplo:
-       agora ele respeita size="1" e fica tipo dropdown normal */
     .form-group select[multiple] {
       min-height: auto;
     }
@@ -463,27 +461,90 @@
         font-size: 18px;
       }
     }
+
     /* ==================== SELECT DE UNIDADES (CADASTRO) ==================== */
-/* AJUSTE ESPECÍFICO – NÃO ALTERA OS OUTROS SELECTS */
+    #unidadeCadastro {
+      background: #111827 !important;
+      color: #f9fafb !important;
+      border: 1px solid #4b5563 !important;
+    }
 
-#unidadeCadastro {
-  background: #111827 !important;   /* campo fechado */
-  color: #f9fafb !important;
-  border: 1px solid #4b5563 !important;
+    #unidadeCadastro option {
+      background: #020617 !important;
+      color: #e5e7eb !important;
+    }
+
+    #unidadeCadastro option:hover,
+    #unidadeCadastro option:checked {
+      background: #1f2937 !important;
+      color: #ffffff !important;
+    }
+
+    /* ==================== BOTÃO TIPO INTERRUPTOR (PARÂMETROS) ==================== */
+    .toggle-btn {
+      width: 28px;
+      height: 20px;
+      border-radius: 5px;
+      border: 1px solid #111827;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+      background: linear-gradient(180deg,#fee2e2,#b91c1c);
+    }
+
+    /* “Desligado” (vermelho) */
+    .toggle-btn.off {
+      background: linear-gradient(180deg,#fee2e2,#b91c1c);
+    }
+
+    /* “Ligado” (verde) */
+    .toggle-btn.on {
+      background: linear-gradient(180deg,#bbf7d0,#166534);
+    }
+
+    /* Traço | */
+    .toggle-btn::before {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 8px;
+      border-radius: 2px;
+      background: #ffffff;
+    }
+
+    /* Círculo O */
+    .toggle-btn::after {
+      content: "";
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 2px solid #ffffff;
+    }
+
+    /* ==================== ÍCONE DE CALENDÁRIO BRANCO (APENAS PARÂMETROS) ==================== */
+ 
+#dataParametros {
+  color-scheme: white;
+  background-color: #020617;
+  
 }
 
-/* Opções quando o dropdown abre */
-#unidadeCadastro option {
-  background: #020617 !important;
-  color: #e5e7eb !important;
+#dataParametros::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.6);
 }
-
-/* Opção em hover ou selecionada */
-#unidadeCadastro option:hover,
-#unidadeCadastro option:checked {
-  background: #1f2937 !important;
-  color: #ffffff !important;
-}
+   
 
   </style>
 </head>
@@ -562,14 +623,14 @@
           <div class="table-wrapper" id="wrapTabelaSugestao" style="display:none;">
             <table id="tabelaSugestao">
               <thead>
-  <tr>
-    <th>Produto</th>
-    <th>Média por aluno (histórico)</th>
-    <th>Registros usados</th>
-    <th>Sugestão total p/ nova turma</th>
-    <th>Valor real</th>
-  </tr>
-</thead>
+                <tr>
+                  <th>Produto</th>
+                  <th>Média por aluno (histórico)</th>
+                  <th>Registros usados</th>
+                  <th>Sugestão total p/ nova turma</th>
+                  <th>Valor real</th>
+                </tr>
+              </thead>
               <tbody></tbody>
             </table>
           </div>
@@ -593,9 +654,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="unidadeCadastro">Unidades (multi)</label>
-              <!-- AQUI: múltiplo mas com size="1", visual de dropdown -->
               <select id="unidadeCadastro" multiple size="1">
-                <!-- opções preenchidas via JS -->
               </select>
             </div>
             <div class="form-group">
@@ -604,7 +663,13 @@
             </div>
             <div class="form-group">
               <label for="disciplinaCadastro">Disciplina</label>
-              <input type="text" id="disciplinaCadastro" placeholder="Ex: Bioestimulador Facial" />
+              <input
+                type="text"
+                id="disciplinaCadastro"
+                placeholder="Ex: Bioestimulador Facial"
+                list="disciplinasCadastroLista"
+              />
+              <datalist id="disciplinasCadastroLista"></datalist>
             </div>
             <div class="form-group">
               <label for="produtoCadastro">Produto</label>
@@ -811,14 +876,11 @@
     }
 
     function salvarDB(dados) {
-      // Salva no navegador (cache local)
       localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(dados));
-
-      // Também tenta salvar no servidor (JSON em arquivo)
       try {
         fetch("/api/planejamento/db", {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(dados)
         }).catch(err => console.error("Erro ao salvar DB no servidor:", err));
       } catch (e) {
@@ -843,14 +905,11 @@
     }
 
     function salvarUnidadesCadastradas(unidades) {
-      // Salva local
       localStorage.setItem(STORAGE_KEY_UNIDADES, JSON.stringify(unidades));
-
-      // Tenta salvar no servidor
       try {
         fetch("/api/planejamento/unidades", {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(unidades)
         }).catch(err => console.error("Erro ao salvar unidades no servidor:", err));
       } catch (e) {
@@ -952,19 +1011,16 @@
 
     function atualizarCadastroUnidadesSelect() {
       const sel = document.getElementById("unidadeCadastro");
-      // guardar seleções anteriores (para não perder ao atualizar)
       const anteriores = new Set(Array.from(sel.selectedOptions || []).map(o => o.value));
       const unidades = getListaUnidades();
 
       sel.innerHTML = "";
 
-      // opção "Todas as unidades"
       const optTodas = document.createElement("option");
       optTodas.value = "__TODAS__";
       optTodas.textContent = "Todas as unidades";
       sel.appendChild(optTodas);
 
-      // opções de unidades individuais
       unidades.forEach(u => {
         const opt = document.createElement("option");
         opt.value = u;
@@ -972,7 +1028,6 @@
         sel.appendChild(opt);
       });
 
-      // restaurar seleção anterior, se existir
       Array.from(sel.options).forEach(opt => {
         if (anteriores.has(opt.value)) {
           opt.selected = true;
@@ -1116,6 +1171,20 @@
       }
     }
 
+    // ====== LISTA DE DISCIPLINAS DO CADASTRO (DATALIST) ======
+    function atualizarDisciplinasCadastroLista() {
+      const lista = document.getElementById("disciplinasCadastroLista");
+      if (!lista) return;
+
+      const disciplinas = getDisciplinasUnicasGlobal();
+      lista.innerHTML = "";
+      disciplinas.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d;
+        lista.appendChild(opt);
+      });
+    }
+
     function atualizarTudo() {
       atualizarSugestaoDisciplinas();
       atualizarCadastroUnidadesSelect();
@@ -1123,6 +1192,7 @@
       atualizarFiltrosParametros();
       atualizarTabelaParametros();
       atualizarTabelaUnidades();
+      atualizarDisciplinasCadastroLista();
     }
 
     // ====== FUNÇÃO DE ALERTA ======
@@ -1133,460 +1203,432 @@
       el.textContent = texto;
     }
 
-    // ====== PAGINA 2: CADASTRO DE ITENS ======
+    // ====== HELPERS DE CÁLCULO ======
+    function calcularConsumoIdeal(reg) {
+      const enviado = Number(reg.enviado) || 0;
+      const voltou = Number(reg.voltou) || 0;
+      const faltou = Number(reg.faltou) || 0;
+      const consumo = enviado - voltou + faltou;
+      return consumo < 0 ? 0 : consumo;
+    }
+
+    function calcularConsumoPorAluno(reg) {
+      const alunos = Number(reg.alunos) || 0;
+      if (alunos <= 0) return 0;
+      return calcularConsumoIdeal(reg) / alunos;
+    }
+
+    // ====== ELEMENTOS GERAIS ======
+    // Sugestão
+    const disciplinaSugestaoSel = document.getElementById("disciplinaSugestao");
+    const alunosSugestaoInp = document.getElementById("alunosSugestao");
+    const btnGerarSugestao = document.getElementById("btnGerarSugestao");
+    const alertSugestao = document.getElementById("alertSugestao");
+    const wrapTabelaSugestao = document.getElementById("wrapTabelaSugestao");
+    const tabelaSugestao = document.getElementById("tabelaSugestao").querySelector("tbody");
+    const cardSugestaoResumo = document.getElementById("cardSugestaoResumo");
+    const textoSugestaoResumo = document.getElementById("textoSugestaoResumo");
+
+    // Cadastro
     const unidadeCadastroSel = document.getElementById("unidadeCadastro");
-    const disciplinaCadastro = document.getElementById("disciplinaCadastro");
-    const produtoCadastro = document.getElementById("produtoCadastro");
-    const dataCadastro = document.getElementById("dataCadastro");
-    const alunosCadastro = document.getElementById("alunosCadastro");
-    const enviadoCadastro = document.getElementById("enviadoCadastro");
-    const voltouCadastro = document.getElementById("voltouCadastro");
-    const faltouCadastro = document.getElementById("faltouCadastro");
+    const disciplinaCadastroInp = document.getElementById("disciplinaCadastro");
+    const produtoCadastroInp = document.getElementById("produtoCadastro");
+    const dataCadastroInp = document.getElementById("dataCadastro");
+    const alunosCadastroInp = document.getElementById("alunosCadastro");
+    const enviadoCadastroInp = document.getElementById("enviadoCadastro");
+    const voltouCadastroInp = document.getElementById("voltouCadastro");
+    const faltouCadastroInp = document.getElementById("faltouCadastro");
     const alertCadastro = document.getElementById("alertCadastro");
+    const btnSalvarCadastro = document.getElementById("btnSalvarCadastro");
 
-    document.getElementById("btnSalvarCadastro").addEventListener("click", () => {
-      const unidadesSelecionadas = Array.from(unidadeCadastroSel.selectedOptions || []).map(o => o.value);
-      const disciplina = disciplinaCadastro.value.trim();
-      const produto = produtoCadastro.value.trim();
-      const alunos = Number(alunosCadastro.value) || 0;
-      const enviado = Number(enviadoCadastro.value) || 0;
-      const voltou = Number(voltouCadastro.value) || 0;
-      const faltou = Number(faltouCadastro.value) || 0;
-      const dataCadastroStr = dataCadastro.value;
+    // DB
+    const unidadeDBSel = document.getElementById("unidadeDB");
+    const disciplinaDBSel = document.getElementById("disciplinaDB");
+    const produtoDBSel = document.getElementById("produtoDB");
+    const btnVerTodos = document.getElementById("btnVerTodos");
+    const btnApagarItem = document.getElementById("btnApagarItem");
+    const wrapTabelaDB = document.getElementById("wrapTabelaDB");
+    const tabelaDBBody = document.getElementById("tabelaDB").querySelector("tbody");
+    const alertDB = document.getElementById("alertDB");
 
-      alertCadastro.style.display = "none";
+    // Parâmetros
+    const unidadeParametrosSel = document.getElementById("unidadeParametros");
+    const disciplinaParametrosSel = document.getElementById("disciplinaParametros");
+    const dataParametrosInp = document.getElementById("dataParametros");
+    const alunosParametrosGeralInp = document.getElementById("alunosParametrosGeral");
+    const alertParametros = document.getElementById("alertParametros");
+    const wrapTabelaParametros = document.getElementById("wrapTabelaParametros");
+    const tabelaParametrosBody = document.getElementById("tabelaParametros").querySelector("tbody");
+    const acoesParametros = document.getElementById("acoesParametros");
+    const btnSalvarParametros = document.getElementById("btnSalvarParametros");
+    const btnApagarSelecionados = document.getElementById("btnApagarSelecionados");
 
-      if (!unidadesSelecionadas.length || !disciplina || !produto) {
-        mostrarAlerta(alertCadastro, "error", "Selecione ao menos uma unidade e preencha disciplina e produto.");
+    // Unidades
+    const unidadeNovaInp = document.getElementById("unidadeNova");
+    const btnAdicionarUnidade = document.getElementById("btnAdicionarUnidade");
+    const alertUnidades = document.getElementById("alertUnidades");
+    const wrapTabelaUnidades = document.getElementById("wrapTabelaUnidades");
+    const tabelaUnidadesBody = document.getElementById("tabelaUnidades").querySelector("tbody");
+
+    // ====== SUGESTÃO: GERAR TABELA ======
+    btnGerarSugestao.addEventListener("click", () => {
+      const disciplina = disciplinaSugestaoSel.value;
+      const qtdAlunos = Number(alunosSugestaoInp.value) || 0;
+
+      if (!disciplina) {
+        mostrarAlerta(alertSugestao, "error", "Selecione uma disciplina.");
+        wrapTabelaSugestao.style.display = "none";
+        cardSugestaoResumo.style.display = "none";
+        return;
+      }
+      if (qtdAlunos <= 0) {
+        mostrarAlerta(alertSugestao, "error", "Informe a quantidade de alunos da nova turma.");
+        wrapTabelaSugestao.style.display = "none";
+        cardSugestaoResumo.style.display = "none";
         return;
       }
 
-      let usado = enviado - voltou;
-      if (usado < 0) usado = 0;
-
-      let consumoIdeal = usado + faltou;
-      if (consumoIdeal < 0) consumoIdeal = 0;
-
-      const consumoPorAluno = alunos > 0 ? consumoIdeal / alunos : 0;
-
-      const dataISO = dataCadastroStr
-        ? new Date(dataCadastroStr + "T00:00:00").toISOString()
-        : new Date().toISOString();
-
-      // Definir unidades-alvo:
-      let unidadesAlvo;
-      if (unidadesSelecionadas.includes("__TODAS__")) {
-        unidadesAlvo = getListaUnidades();
-        if (!unidadesAlvo.length) {
-          mostrarAlerta(
-            alertCadastro,
-            "error",
-            "Não há unidades cadastradas para usar a opção 'Todas as unidades'."
-          );
-          return;
-        }
-      } else {
-        unidadesAlvo = unidadesSelecionadas;
+      const registros = db.filter(r => r.disciplina === disciplina);
+      if (registros.length === 0) {
+        mostrarAlerta(alertSugestao, "info", "Ainda não há registros para essa disciplina.");
+        wrapTabelaSugestao.style.display = "none";
+        cardSugestaoResumo.style.display = "none";
+        return;
       }
 
-      let registrosCriados = 0;
+      const mapa = new Map();
+      registros.forEach(r => {
+        const prod = r.produto || "(sem nome)";
+        const consumoPorAluno = calcularConsumoPorAluno(r);
+        if (!mapa.has(prod)) {
+          mapa.set(prod, { soma: 0, qtd: 0 });
+        }
+        const obj = mapa.get(prod);
+        obj.soma += consumoPorAluno;
+        obj.qtd += 1;
+      });
 
-      unidadesAlvo.forEach((unidade, idx) => {
-        if (!unidade) return;
+      tabelaSugestao.innerHTML = "";
+      let totalSugestao = 0;
 
-        const registro = {
-          id: Date.now() + idx, // para evitar id duplicado
-          data: dataISO,
-          unidade,
+      mapa.forEach((info, produto) => {
+        const mediaPorAluno = info.qtd > 0 ? info.soma / info.qtd : 0;
+        const sugestaoTotal = mediaPorAluno * qtdAlunos;
+        totalSugestao += sugestaoTotal;
+
+        const tr = document.createElement("tr");
+        const tdProd = document.createElement("td");
+        const tdMedia = document.createElement("td");
+        const tdReg = document.createElement("td");
+        const tdSug = document.createElement("td");
+        const tdReal = document.createElement("td");
+
+        tdProd.textContent = produto;
+        tdMedia.textContent = mediaPorAluno.toFixed(2);
+        tdReg.textContent = info.qtd;
+        tdSug.textContent = sugestaoTotal.toFixed(2);
+        tdReal.textContent = Math.round(sugestaoTotal);
+
+        tr.appendChild(tdProd);
+        tr.appendChild(tdMedia);
+        tr.appendChild(tdReg);
+        tr.appendChild(tdSug);
+        tr.appendChild(tdReal);
+        tabelaSugestao.appendChild(tr);
+      });
+
+      wrapTabelaSugestao.style.display = "block";
+      cardSugestaoResumo.style.display = "block";
+      mostrarAlerta(alertSugestao, "success", "Sugestão gerada com base no histórico.");
+      textoSugestaoResumo.textContent =
+        `Total sugerido (somando todos os produtos): ~${totalSugestao.toFixed(2)} unidades.`;
+    });
+
+    // ====== CADASTRO: SALVAR REGISTROS ======
+    btnSalvarCadastro.addEventListener("click", () => {
+      const data = dataCadastroInp.value;
+      const disciplina = (disciplinaCadastroInp.value || "").trim();
+      const produto = (produtoCadastroInp.value || "").trim();
+      const alunos = Number(alunosCadastroInp.value) || 0;
+      const enviado = Number(enviadoCadastroInp.value) || 0;
+      const voltou = Number(voltouCadastroInp.value) || 0;
+      const faltou = Number(faltouCadastroInp.value) || 0;
+
+      const selecionados = Array.from(unidadeCadastroSel.selectedOptions || []).map(o => o.value);
+      let unidadesDestino = [];
+
+      if (selecionados.includes("__TODAS__")) {
+        unidadesDestino = getListaUnidades();
+      } else {
+        unidadesDestino = selecionados.filter(v => v);
+      }
+
+      if (!data) {
+        mostrarAlerta(alertCadastro, "error", "Informe a data.");
+        return;
+      }
+      if (!disciplina) {
+        mostrarAlerta(alertCadastro, "error", "Informe a disciplina.");
+        return;
+      }
+      if (!produto) {
+        mostrarAlerta(alertCadastro, "error", "Informe o produto.");
+        return;
+      }
+      if (unidadesDestino.length === 0) {
+        mostrarAlerta(alertCadastro, "error", "Selecione ao menos uma unidade (ou 'Todas').");
+        return;
+      }
+      if (alunos <= 0) {
+        mostrarAlerta(alertCadastro, "error", "Informe a quantidade de alunos (maior que zero).");
+        return;
+      }
+
+      unidadesDestino.forEach(un => {
+        db.push({
+          data,
+          unidade: un,
           disciplina,
           produto,
           alunos,
           enviado,
           voltou,
-          faltou,
-          consumoIdeal,
-          consumoPorAluno
-        };
-
-        db.push(registro);
-        registrosCriados++;
+          faltou
+        });
       });
-
-      if (!registrosCriados) {
-        mostrarAlerta(alertCadastro, "error", "Nenhum registro foi criado.");
-        return;
-      }
 
       salvarDB(db);
-
-      // garantir que todas as unidades usadas estejam cadastradas na lista de unidades
-      unidadesCadastradas = carregarUnidadesCadastradas();
-      let alterouUnidades = false;
-      unidadesAlvo.forEach(unidade => {
-        if (unidade && !unidadesCadastradas.includes(unidade)) {
-          unidadesCadastradas.push(unidade);
-          alterouUnidades = true;
-        }
-      });
-      if (alterouUnidades) {
-        unidadesCadastradas.sort((a, b) => a.localeCompare(b, "pt-BR"));
-        salvarUnidadesCadastradas(unidadesCadastradas);
-      }
-
       atualizarTudo();
+      atualizarTabelaDB();
+      mostrarAlerta(alertCadastro, "success", "Registro(s) salvo(s) com sucesso.");
 
-      mostrarAlerta(
-        alertCadastro,
-        "success",
-        `${registrosCriados} registro(s) salvo(s) em ${unidadesAlvo.length} unidade(s)! (consumo ideal: ` +
-          consumoIdeal.toFixed(2) +
-          ", por aluno: " +
-          consumoPorAluno.toFixed(3) +
-          ")"
-      );
-
-      // limpa somente os campos numéricos (mantém unidades/descrição para agilizar próximo cadastro)
-      alunosCadastro.value = 0;
-      enviadoCadastro.value = 0;
-      voltouCadastro.value = 0;
-      faltouCadastro.value = 0;
+      produtoCadastroInp.value = "";
+      enviadoCadastroInp.value = "0";
+      voltouCadastroInp.value = "0";
+      faltouCadastroInp.value = "0";
     });
 
-    // ====== PAGINA 1: SUGESTÃO ======
-    const btnGerarSugestao = document.getElementById("btnGerarSugestao");
-    const disciplinaSugestao = document.getElementById("disciplinaSugestao");
-    const alunosSugestao = document.getElementById("alunosSugestao");
-    const alertSugestao = document.getElementById("alertSugestao");
-    const tabelaSugestao = document.getElementById("tabelaSugestao");
-    const wrapTabelaSugestao = document.getElementById("wrapTabelaSugestao");
-    const tabelaSugestaoBody = tabelaSugestao.querySelector("tbody");
-    const cardSugestaoResumo = document.getElementById("cardSugestaoResumo");
-    const textoSugestaoResumo = document.getElementById("textoSugestaoResumo");
+    // ====== BANCO DE DADOS: TABELA ======
+    function atualizarTabelaDB() {
+      tabelaDBBody.innerHTML = "";
+      const unidadeFiltro = unidadeDBSel.value;
+      const disciplinaFiltro = disciplinaDBSel.value;
+      const produtoFiltro = produtoDBSel.value;
 
-    btnGerarSugestao.addEventListener("click", () => {
-      const disc = disciplinaSugestao.value;
-      const alunosNovaTurma = Number(alunosSugestao.value) || 0;
+      let tem = false;
 
-      wrapTabelaSugestao.style.display = "none";
-      cardSugestaoResumo.style.display = "none";
-      tabelaSugestaoBody.innerHTML = "";
-      alertSugestao.style.display = "none";
+      db.forEach((r, idx) => {
+        if (unidadeFiltro && r.unidade !== unidadeFiltro) return;
+        if (disciplinaFiltro && r.disciplina !== disciplinaFiltro) return;
+        if (produtoFiltro && r.produto !== produtoFiltro) return;
 
-      if (!disc) {
-        mostrarAlerta(alertSugestao, "error", "Selecione uma disciplina.");
-        return;
-      }
-      if (alunosNovaTurma <= 0) {
-        mostrarAlerta(alertSugestao, "error", "Informe a quantidade de alunos da nova turma.");
-        return;
-      }
+        tem = true;
+        const tr = document.createElement("tr");
 
-      const registrosDisciplina = db.filter(r => r.disciplina === disc);
+        const consumoIdeal = calcularConsumoIdeal(r);
+        const consumoPorAluno = calcularConsumoPorAluno(r);
 
-      if (registrosDisciplina.length === 0) {
-        mostrarAlerta(alertSugestao, "info", "Não há registros para esta disciplina ainda.");
-        return;
-      }
+        const tdData = document.createElement("td");
+        const tdUnidade = document.createElement("td");
+        const tdDisciplina = document.createElement("td");
+        const tdProduto = document.createElement("td");
+        const tdAlunos = document.createElement("td");
+        const tdEnviado = document.createElement("td");
+        const tdVoltou = document.createElement("td");
+        const tdFaltou = document.createElement("td");
+        const tdConsumoIdeal = document.createElement("td");
+        const tdConsumoPorAluno = document.createElement("td");
+        const tdAcoes = document.createElement("td");
 
-      const statsPorProduto = {};
-      registrosDisciplina.forEach(r => {
-        if (!statsPorProduto[r.produto]) {
-          statsPorProduto[r.produto] = {
-            produto: r.produto,
-            somaPorAluno: 0,
-            registrosValidos: 0
-          };
-        }
-        if (r.consumoPorAluno > 0) {
-          statsPorProduto[r.produto].somaPorAluno += r.consumoPorAluno;
-          statsPorProduto[r.produto].registrosValidos++;
-        }
+        tdData.textContent = r.data || "";
+        tdUnidade.textContent = r.unidade || "";
+        tdDisciplina.textContent = r.disciplina || "";
+        tdProduto.textContent = r.produto || "";
+        tdAlunos.textContent = r.alunos || 0;
+        tdEnviado.textContent = r.enviado || 0;
+        tdVoltou.textContent = r.voltou || 0;
+        tdFaltou.textContent = r.faltou || 0;
+        tdConsumoIdeal.textContent = consumoIdeal.toFixed(2);
+        tdConsumoPorAluno.textContent = consumoPorAluno.toFixed(4);
+
+        const btnDel = document.createElement("button");
+        btnDel.textContent = "Excluir";
+        btnDel.className = "btn btn-outline btn-small btn-danger";
+        btnDel.addEventListener("click", () => {
+          if (confirm("Deseja realmente excluir este registro?")) {
+            db.splice(idx, 1);
+            salvarDB(db);
+            atualizarTudo();
+            atualizarTabelaDB();
+          }
+        });
+
+        tdAcoes.appendChild(btnDel);
+
+        tr.appendChild(tdData);
+        tr.appendChild(tdUnidade);
+        tr.appendChild(tdDisciplina);
+        tr.appendChild(tdProduto);
+        tr.appendChild(tdAlunos);
+        tr.appendChild(tdEnviado);
+        tr.appendChild(tdVoltou);
+        tr.appendChild(tdFaltou);
+        tr.appendChild(tdConsumoIdeal);
+        tr.appendChild(tdConsumoPorAluno);
+        tr.appendChild(tdAcoes);
+
+        tabelaDBBody.appendChild(tr);
       });
 
-      const produtos = Object.values(statsPorProduto).filter(
-        p => p.registrosValidos > 0
-      );
-
-      if (produtos.length === 0) {
-        mostrarAlerta(
-          alertSugestao,
-          "info",
-          "Não há consumo por aluno válido para esta disciplina ainda."
-        );
-        return;
+      if (!tem) {
+        wrapTabelaDB.style.display = "none";
+        mostrarAlerta(alertDB, "info", "Nenhum registro encontrado com os filtros atuais.");
+      } else {
+        wrapTabelaDB.style.display = "block";
+        alertDB.style.display = "none";
       }
-
-      let totalGeral = 0;
-tabelaSugestaoBody.innerHTML = "";
-
-produtos.forEach(p => {
-  const media = p.somaPorAluno / p.registrosValidos;
-
-  // Valor "real" (com casas decimais)
-  const sugestaoTotalReal = media * alunosNovaTurma;
-
-  // Valor arredondado para cima (inteiro)
-  const sugestaoTotalArredondada = Math.ceil(sugestaoTotalReal);
-
-  // Para o resumo geral, somamos o valor arredondado
-  totalGeral += sugestaoTotalArredondada;
-
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td>${p.produto}</td>
-    <td>${media.toFixed(3)}</td>
-    <td>${p.registrosValidos}</td>
-    <td>${sugestaoTotalArredondada}</td>
-    <td>${sugestaoTotalReal.toFixed(2)}</td>
-  `;
-  tabelaSugestaoBody.appendChild(tr);
-});
-
-      wrapTabelaSugestao.style.display = "block";
-
-     textoSugestaoResumo.innerHTML = `
-  Disciplina: <strong>${disc}</strong><br>
-  Alunos da nova turma: <strong>${alunosNovaTurma}</strong><br>
-  Quantidade total recomendada (somando todos os produtos): 
-  <strong>${totalGeral}</strong> unidades.
-`;
-      cardSugestaoResumo.style.display = "block";
-    });
-
-    // ====== GENÉRICO: APAGAR TODOS DE UM ITEM ======
-    function removerTodosRegistrosItem(unidade, disc, prod) {
-      const registrosAlvo = db.filter(r =>
-        r.unidade === unidade &&
-        r.disciplina === disc &&
-        r.produto === prod
-      );
-      if (registrosAlvo.length === 0) {
-        alert("Não há registros para este item nessa unidade e disciplina.");
-        return false;
-      }
-
-      if (!confirm(`Tem certeza que deseja apagar TODOS os registros do item "${prod}" na unidade "${unidade}" e disciplina "${disc}"?`)) {
-        return false;
-      }
-
-      db = db.filter(r =>
-        !(r.unidade === unidade && r.disciplina === disc && r.produto === prod)
-      );
-      salvarDB(db);
-      atualizarTudo();
-      return true;
     }
-
-    // ====== PAGINA 3: VER DB ======
-    const unidadeDBSel = document.getElementById("unidadeDB");
-    const disciplinaDBSel = document.getElementById("disciplinaDB");
-    const produtoDBSel = document.getElementById("produtoDB");
-    const tabelaDB = document.getElementById("tabelaDB");
-    const wrapTabelaDB = document.getElementById("wrapTabelaDB");
-    const tabelaDBBody = tabelaDB.querySelector("tbody");
-    const alertDB = document.getElementById("alertDB");
-    const btnApagarItem = document.getElementById("btnApagarItem");
 
     unidadeDBSel.addEventListener("change", () => {
       atualizarDisciplinaDBOptions();
       atualizarProdutoDBOptions();
-      mostrarRegistrosDB(unidadeDBSel.value, disciplinaDBSel.value, produtoDBSel.value);
+      atualizarTabelaDB();
     });
-
     disciplinaDBSel.addEventListener("change", () => {
       atualizarProdutoDBOptions();
-      mostrarRegistrosDB(unidadeDBSel.value, disciplinaDBSel.value, produtoDBSel.value);
+      atualizarTabelaDB();
     });
+    produtoDBSel.addEventListener("change", atualizarTabelaDB);
 
-    produtoDBSel.addEventListener("change", () => {
-      mostrarRegistrosDB(unidadeDBSel.value, disciplinaDBSel.value, produtoDBSel.value);
-    });
-
-    document.getElementById("btnVerTodos").addEventListener("click", () => {
+    btnVerTodos.addEventListener("click", () => {
       unidadeDBSel.value = "";
-      disciplinaDBSel.innerHTML = '<option value="">Todas</option>';
-      produtoDBSel.innerHTML = '<option value="">Todos</option>';
-      mostrarRegistrosDB("", "", "");
+      disciplinaDBSel.value = "";
+      produtoDBSel.value = "";
+      atualizarFiltrosDB();
+      atualizarTabelaDB();
     });
 
     btnApagarItem.addEventListener("click", () => {
-      const unidade = unidadeDBSel.value;
-      const disc = disciplinaDBSel.value;
-      const prod = produtoDBSel.value;
+      const unidadeFiltro = unidadeDBSel.value;
+      const disciplinaFiltro = disciplinaDBSel.value;
+      const produtoFiltro = produtoDBSel.value;
 
-      if (!unidade || !disc || !prod) {
-        alert("Para apagar todos de um item, selecione Unidade, Disciplina e Produto.");
+      if (!disciplinaFiltro && !produtoFiltro && !unidadeFiltro) {
+        alert("Para apagar, selecione pelo menos um filtro (unidade, disciplina ou produto).");
         return;
       }
 
-      const ok = removerTodosRegistrosItem(unidade, disc, prod);
-      if (ok) {
-        mostrarRegistrosDB(unidadeDBSel.value, disciplinaDBSel.value, produtoDBSel.value);
-        alert("Todos os registros desse item foram removidos com sucesso.");
-      }
-    });
-
-    function mostrarRegistrosDB(unidadeFiltro, disciplinaFiltro, produtoFiltro) {
-      tabelaDBBody.innerHTML = "";
-      wrapTabelaDB.style.display = "none";
-      alertDB.style.display = "none";
-
-      let registros = db;
-
-      if (unidadeFiltro) {
-        registros = registros.filter(r => r.unidade === unidadeFiltro);
-      }
-      if (disciplinaFiltro) {
-        registros = registros.filter(r => r.disciplina === disciplinaFiltro);
-      }
-      if (produtoFiltro) {
-        registros = registros.filter(r => r.produto === produtoFiltro);
-      }
-
-      if (registros.length === 0) {
-        mostrarAlerta(
-          alertDB,
-          "info",
-          unidadeFiltro || disciplinaFiltro || produtoFiltro
-            ? "Nenhum registro encontrado para o filtro selecionado."
-            : "Nenhum registro encontrado no banco de dados."
-        );
+      if (!confirm("Apagar TODOS os registros filtrados? Esta ação não pode ser desfeita.")) {
         return;
       }
 
-      registros
-        .slice()
-        .sort((a, b) => a.data.localeCompare(b.data))
-        .forEach(r => {
-          const data = new Date(r.data);
-          const dataFormatada = isNaN(data.getTime())
-            ? "-"
-            : data.toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric"
-              });
-
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${dataFormatada}</td>
-            <td>${r.unidade || "-"}</td>
-            <td>${r.disciplina}</td>
-            <td>${r.produto}</td>
-            <td>${r.alunos}</td>
-            <td>${r.enviado}</td>
-            <td>${r.voltou}</td>
-            <td>${r.faltou}</td>
-            <td>${r.consumoIdeal.toFixed(2)}</td>
-            <td>${r.consumoPorAluno.toFixed(3)}</td>
-            <td>
-              <button class="btn btn-outline btn-small btn-danger"
-                onclick="excluirRegistro(${r.id})">
-                Excluir
-              </button>
-            </td>
-          `;
-          tabelaDBBody.appendChild(tr);
-        });
-
-      wrapTabelaDB.style.display = "block";
-    }
-
-    function excluirRegistro(id) {
-      if (!confirm("Tem certeza que deseja excluir este registro?")) return;
-
-      db = db.filter(item => item.id !== id);
-      salvarDB(db);
-      atualizarTudo();
-
-      mostrarRegistrosDB(unidadeDBSel.value, disciplinaDBSel.value, produtoDBSel.value);
-      alert("Registro removido com sucesso!");
-    }
-
-    // ====== PAGINA 4: PARÂMETROS ======
-    const unidadeParametrosSel = document.getElementById("unidadeParametros");
-    const disciplinaParametrosSel = document.getElementById("disciplinaParametros");
-    const dataParametros = document.getElementById("dataParametros");
-    const alunosParametrosGeral = document.getElementById("alunosParametrosGeral");
-    const tabelaParametros = document.getElementById("tabelaParametros");
-    const wrapTabelaParametros = document.getElementById("wrapTabelaParametros");
-    const tabelaParametrosBody = tabelaParametros.querySelector("tbody");
-    const alertParametros = document.getElementById("alertParametros");
-    const btnSalvarParametros = document.getElementById("btnSalvarParametros");
-    const btnApagarSelecionados = document.getElementById("btnApagarSelecionados");
-    const acoesParametros = document.getElementById("acoesParametros");
-
-    let produtosParametrosAtuais = [];
-
-    unidadeParametrosSel.addEventListener("change", () => {
-      atualizarTabelaParametros();
-    });
-
-    disciplinaParametrosSel.addEventListener("change", () => {
-      atualizarTabelaParametros();
-    });
-
-    function atualizarTabelaParametros() {
-      const unidade = unidadeParametrosSel.value;
-      const disc = disciplinaParametrosSel.value;
-
-      tabelaParametrosBody.innerHTML = "";
-      wrapTabelaParametros.style.display = "none";
-      acoesParametros.style.display = "none";
-      alertParametros.style.display = "none";
-      produtosParametrosAtuais = [];
-
-      if (!unidade || !disc) {
-        if (!unidade) {
-          mostrarAlerta(alertParametros, "info", "Selecione uma unidade.");
-        } else {
-          mostrarAlerta(alertParametros, "info", "Selecione uma disciplina.");
-        }
-        return;
-      }
-
-      const produtos = getProdutosPorDisciplinaGlobal(disc);
-      produtosParametrosAtuais = produtos;
-
-      if (produtos.length === 0) {
-        mostrarAlerta(
-          alertParametros,
-          "info",
-          "Ainda não há produtos cadastrados para esta disciplina. Cadastre registros dessa disciplina na tela de Cadastro de Itens."
-        );
-        return;
-      }
-
-      produtos.forEach((prod, index) => {
-        const idx = index;
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><input type="checkbox" class="chk-param"></td>
-          <td>${prod}</td>
-          <td><input type="number" id="enviadoParam_${idx}" min="0" value="0" style="width:80px;"></td>
-          <td><input type="number" id="voltouParam_${idx}" min="0" value="0" style="width:80px;"></td>
-          <td><input type="number" id="faltouParam_${idx}" min="0" value="0" style="width:80px;"></td>
-        `;
-        tabelaParametrosBody.appendChild(tr);
+      db = db.filter(r => {
+        if (unidadeFiltro && r.unidade !== unidadeFiltro) return true;
+        if (disciplinaFiltro && r.disciplina !== disciplinaFiltro) return true;
+        if (produtoFiltro && r.produto !== produtoFiltro) return true;
+        if (!unidadeFiltro && !disciplinaFiltro && !produtoFiltro) return true;
+        return false;
       });
 
+      salvarDB(db);
+      atualizarTudo();
+      atualizarTabelaDB();
+    });
+
+    // ====== PARÂMETROS: TABELA ======
+    function atualizarTabelaParametros() {
+      tabelaParametrosBody.innerHTML = "";
+      const unidade = unidadeParametrosSel.value;
+      const disciplina = disciplinaParametrosSel.value;
+
+      if (!unidade || !disciplina) {
+        wrapTabelaParametros.style.display = "none";
+        acoesParametros.style.display = "none";
+        mostrarAlerta(alertParametros, "info", "Selecione unidade e disciplina para carregar os produtos.");
+        return;
+      }
+
+      const produtos = getProdutosPorDisciplinaGlobal(disciplina);
+      if (produtos.length === 0) {
+        wrapTabelaParametros.style.display = "none";
+        acoesParametros.style.display = "none";
+        mostrarAlerta(alertParametros, "info", "Nenhum produto encontrado para essa disciplina no histórico.");
+        return;
+      }
+
+      alertParametros.style.display = "none";
       wrapTabelaParametros.style.display = "block";
       acoesParametros.style.display = "flex";
+
+      produtos.forEach(p => {
+        const tr = document.createElement("tr");
+
+        const tdSel = document.createElement("td");
+        const tdProd = document.createElement("td");
+        const tdEnv = document.createElement("td");
+        const tdVol = document.createElement("td");
+        const tdFal = document.createElement("td");
+
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.classList.add("toggle-btn", "off"); // padrão desligado (vermelho)
+        toggle.title = "Clique para ligar/desligar";
+        toggle.addEventListener("click", () => {
+          if (toggle.classList.contains("on")) {
+            toggle.classList.remove("on");
+            toggle.classList.add("off");
+          } else {
+            toggle.classList.remove("off");
+            toggle.classList.add("on");
+          }
+        });
+
+        const inpEnv = document.createElement("input");
+        inpEnv.type = "number";
+        inpEnv.min = "0";
+        inpEnv.value = "0";
+
+        const inpVol = document.createElement("input");
+        inpVol.type = "number";
+        inpVol.min = "0";
+        inpVol.value = "0";
+
+        const inpFal = document.createElement("input");
+        inpFal.type = "number";
+        inpFal.min = "0";
+        inpFal.value = "0";
+
+        tdSel.appendChild(toggle);
+        tdProd.textContent = p;
+        tdEnv.appendChild(inpEnv);
+        tdVol.appendChild(inpVol);
+        tdFal.appendChild(inpFal);
+
+        tr.dataset.produto = p;
+        tr.appendChild(tdSel);
+        tr.appendChild(tdProd);
+        tr.appendChild(tdEnv);
+        tr.appendChild(tdVol);
+        tr.appendChild(tdFal);
+
+        tabelaParametrosBody.appendChild(tr);
+      });
     }
+
+    unidadeParametrosSel.addEventListener("change", atualizarTabelaParametros);
+    disciplinaParametrosSel.addEventListener("change", atualizarTabelaParametros);
 
     btnSalvarParametros.addEventListener("click", () => {
       const unidade = unidadeParametrosSel.value;
-      const disc = disciplinaParametrosSel.value;
-      const dataStr = dataParametros.value;
-      const alunosGeral = Number(alunosParametrosGeral.value) || 0;
+      const disciplina = disciplinaParametrosSel.value;
+      const data = dataParametrosInp.value;
+      const alunosGeral = Number(alunosParametrosGeralInp.value) || 0;
 
-      alertParametros.style.display = "none";
-
-      if (!unidade || !disc) {
+      if (!unidade || !disciplina) {
         mostrarAlerta(alertParametros, "error", "Selecione unidade e disciplina.");
         return;
       }
-      if (!dataStr) {
+      if (!data) {
         mostrarAlerta(alertParametros, "error", "Informe a data.");
         return;
       }
@@ -1595,210 +1637,129 @@ produtos.forEach(p => {
         return;
       }
 
-      const dataISO = new Date(dataStr + "T00:00:00").toISOString();
+      let count = 0;
+      Array.from(tabelaParametrosBody.querySelectorAll("tr")).forEach(tr => {
+        const toggle = tr.querySelector(".toggle-btn");
+        const produto = tr.dataset.produto || "";
+        const inputs = tr.querySelectorAll("input[type='number']");
+        const enviado = Number(inputs[0].value) || 0;
+        const voltou = Number(inputs[1].value) || 0;
+        const faltou = Number(inputs[2].value) || 0;
 
-      let registrosCriados = 0;
+        const selecionado = !toggle || toggle.classList.contains("on");
 
-      produtosParametrosAtuais.forEach((prod, idx) => {
-        const enviado = Number(document.getElementById(`enviadoParam_${idx}`)?.value) || 0;
-        const voltou = Number(document.getElementById(`voltouParam_${idx}`)?.value) || 0;
-        const faltou = Number(document.getElementById(`faltouParam_${idx}`)?.value) || 0;
+        if (!selecionado && !enviado && !voltou && !faltou) return;
 
-        if (enviado === 0 && voltou === 0 && faltou === 0) {
-          return;
-        }
-
-        let usado = enviado - voltou;
-        if (usado < 0) usado = 0;
-        let consumoIdeal = usado + faltou;
-        if (consumoIdeal < 0) consumoIdeal = 0;
-        const consumoPorAluno = alunosGeral > 0 ? consumoIdeal / alunosGeral : 0;
-
-        const registro = {
-          id: Date.now() + idx,
-          data: dataISO,
+        db.push({
+          data,
           unidade,
-          disciplina: disc,
-          produto: prod,
+          disciplina,
+          produto,
           alunos: alunosGeral,
           enviado,
           voltou,
-          faltou,
-          consumoIdeal,
-          consumoPorAluno
-        };
-
-        db.push(registro);
-        registrosCriados++;
+          faltou
+        });
+        count++;
       });
 
-      if (registrosCriados === 0) {
-        mostrarAlerta(alertParametros, "error", "Nenhuma linha preenchida para salvar.");
+      if (count === 0) {
+        mostrarAlerta(alertParametros, "error", "Nenhum item selecionado/preenchido para salvar.");
         return;
       }
 
       salvarDB(db);
       atualizarTudo();
-
-      produtosParametrosAtuais.forEach((_, idx) => {
-        const e = document.getElementById(`enviadoParam_${idx}`);
-        const v = document.getElementById(`voltouParam_${idx}`);
-        const f = document.getElementById(`faltouParam_${idx}`);
-        if (e) e.value = 0;
-        if (v) v.value = 0;
-        if (f) f.value = 0;
-      });
-
-      mostrarAlerta(
-        alertParametros,
-        "success",
-        `${registrosCriados} registro(s) salvo(s) para unidade "${unidade}" e disciplina "${disc}".`
-      );
+      atualizarTabelaDB();
+      mostrarAlerta(alertParametros, "success", `${count} registro(s) salvo(s) com sucesso.`);
     });
 
     btnApagarSelecionados.addEventListener("click", () => {
-      const unidade = unidadeParametrosSel.value;
-      const disc = disciplinaParametrosSel.value;
-      if (!unidade || !disc) {
-        alert("Selecione unidade e disciplina primeiro.");
-        return;
-      }
-
-      const checkboxes = tabelaParametrosBody.querySelectorAll(".chk-param");
-      const selecionados = [];
-
-      checkboxes.forEach((chk, idx) => {
-        if (chk.checked) {
-          const prod = produtosParametrosAtuais[idx];
-          if (prod) selecionados.push(prod);
+      const trs = Array.from(tabelaParametrosBody.querySelectorAll("tr"));
+      let removidos = 0;
+      trs.forEach(tr => {
+        const toggle = tr.querySelector(".toggle-btn");
+        if (toggle && toggle.classList.contains("on")) { // verde = selecionado p/ apagar
+          tr.remove();
+          removidos++;
         }
       });
-
-      if (selecionados.length === 0) {
-        alert("Nenhum item selecionado para apagar.");
-        return;
+      if (removidos === 0) {
+        alert("Nenhuma linha marcada (interruptor verde) para remoção.");
       }
-
-      if (!confirm(`Tem certeza que deseja apagar TODOS os registros dos itens selecionados na unidade "${unidade}" e disciplina "${disc}"?`)) {
-        return;
+      if (tabelaParametrosBody.children.length === 0) {
+        wrapTabelaParametros.style.display = "none";
+        acoesParametros.style.display = "none";
       }
-
-      db = db.filter(r =>
-        !(r.unidade === unidade && r.disciplina === disc && selecionados.includes(r.produto))
-      );
-      salvarDB(db);
-      atualizarTudo();
-      atualizarTabelaParametros();
-
-      alert("Registros dos itens selecionados removidos com sucesso.");
     });
 
-    // ====== PAGINA 5: UNIDADES ======
-    const unidadeNovaInput = document.getElementById("unidadeNova");
-    const btnAdicionarUnidade = document.getElementById("btnAdicionarUnidade");
-    const tabelaUnidades = document.getElementById("tabelaUnidades");
-    const wrapTabelaUnidades = document.getElementById("wrapTabelaUnidades");
-    const tabelaUnidadesBody = tabelaUnidades.querySelector("tbody");
-    const alertUnidades = document.getElementById("alertUnidades");
-
+    // ====== UNIDADES: TABELA E AÇÕES ======
     function atualizarTabelaUnidades() {
-      unidadesCadastradas = carregarUnidadesCadastradas();
       tabelaUnidadesBody.innerHTML = "";
-      wrapTabelaUnidades.style.display = "none";
-      alertUnidades.style.display = "none";
+      const unidades = getListaUnidades();
 
-      if (unidadesCadastradas.length === 0) {
-        mostrarAlerta(alertUnidades, "info", "Nenhuma unidade cadastrada ainda.");
+      if (unidades.length === 0) {
+        wrapTabelaUnidades.style.display = "none";
+        mostrarAlerta(alertUnidades, "info", "Nenhuma unidade cadastrada ainda. Adicione a primeira.");
         return;
       }
-
-      unidadesCadastradas.forEach(u => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${u}</td>
-          <td>
-            <button class="btn btn-outline btn-small btn-danger" onclick="removerUnidade('${encodeURIComponent(u)}')">
-              Remover
-            </button>
-          </td>
-        `;
-        tabelaUnidadesBody.appendChild(tr);
-      });
 
       wrapTabelaUnidades.style.display = "block";
-    }
+      alertUnidades.style.display = "none";
 
-    function removerUnidade(uEncoded) {
-      const unidade = decodeURIComponent(uEncoded);
-      if (!confirm(`Remover a unidade "${unidade}" do cadastro de unidades? (Os registros no banco de dados não serão apagados.)`)) {
-        return;
-      }
+      unidades.forEach(u => {
+        const tr = document.createElement("tr");
+        const tdNome = document.createElement("td");
+        const tdAcoes = document.createElement("td");
 
-      unidadesCadastradas = carregarUnidadesCadastradas().filter(u => u !== unidade);
-      salvarUnidadesCadastradas(unidadesCadastradas);
-      atualizarTudo();
-      mostrarAlerta(alertUnidades, "success", `Unidade "${unidade}" removida do cadastro.`);
+        tdNome.textContent = u;
+
+        const btnDel = document.createElement("button");
+        btnDel.textContent = "Excluir";
+        btnDel.className = "btn btn-outline btn-small btn-danger";
+        btnDel.addEventListener("click", () => {
+          if (!confirm(`Remover unidade "${u}"? Todos os registros dessa unidade também podem ser excluídos.`)) return;
+
+          db = db.filter(r => r.unidade !== u);
+          unidadesCadastradas = unidadesCadastradas.filter(x => x !== u);
+          salvarDB(db);
+          salvarUnidadesCadastradas(unidadesCadastradas);
+          atualizarTudo();
+          atualizarTabelaDB();
+        });
+
+        tdAcoes.appendChild(btnDel);
+        tr.appendChild(tdNome);
+        tr.appendChild(tdAcoes);
+        tabelaUnidadesBody.appendChild(tr);
+      });
     }
 
     btnAdicionarUnidade.addEventListener("click", () => {
-      let nome = unidadeNovaInput.value.trim();
-      alertUnidades.style.display = "none";
-
+      const nome = (unidadeNovaInp.value || "").trim();
       if (!nome) {
         mostrarAlerta(alertUnidades, "error", "Informe o nome da unidade.");
         return;
       }
 
-      unidadesCadastradas = carregarUnidadesCadastradas();
-      if (unidadesCadastradas.includes(nome)) {
+      const todas = getListaUnidades().map(u => u.toLowerCase());
+      if (todas.includes(nome.toLowerCase())) {
         mostrarAlerta(alertUnidades, "error", "Essa unidade já está cadastrada.");
         return;
       }
 
       unidadesCadastradas.push(nome);
-      unidadesCadastradas.sort((a, b) => a.localeCompare(b, "pt-BR"));
       salvarUnidadesCadastradas(unidadesCadastradas);
-      unidadeNovaInput.value = "";
-
-      mostrarAlerta(alertUnidades, "success", "Unidade cadastrada com sucesso.");
+      unidadeNovaInp.value = "";
       atualizarTudo();
+      mostrarAlerta(alertUnidades, "success", "Unidade cadastrada com sucesso.");
     });
 
-    // ====== SINCRONIZAR COM O SERVIDOR (CARREGAR JSON ONLINE) ======
-    async function sincronizarComServidor() {
-      try {
-        // Carrega DB do servidor
-        const respDB = await fetch("/api/planejamento/db");
-        if (respDB.ok) {
-          const dadosServidor = await respDB.json();
-          if (Array.isArray(dadosServidor)) {
-            db = dadosServidor;
-            localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(db));
-          }
-        }
-
-        // Carrega unidades do servidor
-        const respUn = await fetch("/api/planejamento/unidades");
-        if (respUn.ok) {
-          const unidadesServidor = await respUn.json();
-          if (Array.isArray(unidadesServidor)) {
-            unidadesCadastradas = unidadesServidor;
-            localStorage.setItem(STORAGE_KEY_UNIDADES, JSON.stringify(unidadesCadastradas));
-          }
-        }
-
-        atualizarTudo();
-      } catch (e) {
-        console.error("Erro ao sincronizar com o servidor:", e);
-      }
-    }
-
     // ====== INICIALIZAÇÃO ======
-    atualizarTudo();
-    sincronizarComServidor();
-
-    window.excluirRegistro = excluirRegistro;
-    window.removerUnidade = removerUnidade;
+    (function init() {
+      atualizarTudo();
+      atualizarTabelaDB();
+    })();
   </script>
 </body>
 </html>
