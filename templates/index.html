@@ -2,866 +2,815 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Planejamento de Produtos por Disciplina</title>
+  <title>Planejamento de Produtos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --bg: #0f172a;
-      --border: #1f2937;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
+      --gold: #D4AF37;
+      --gold-light: #F4D03F;
+      --gold-dark: #B8860B;
+      --black: #0A0A0A;
+      --black-light: #1A1A1A;
+      --black-lighter: #2A2A2A;
+      --text: #F5F5F5;
+      --muted: #A0A0A0;
       --accent: #22c55e;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --shadow: 0 10px 25px rgba(0,0,0,0.35);
+      --danger: #DC2626;
+      --warning: #F59E0B;
+      --shadow: 0 10px 25px rgba(0,0,0,0.5);
       --radius: 12px;
+      --transition: all 0.3s ease;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     body {
-      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
       color: var(--text);
       min-height: 100vh;
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      padding: 20px;
+      padding: 0;
+      overflow-x: hidden;
     }
 
-    .app {
-      display: grid;
-      grid-template-columns: 260px minmax(0,1fr);
-      gap: 20px;
-      max-width: 1300px;
-      width: 100%;
-      background: rgba(15,23,42,0.9);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      overflow: hidden;
+    .app-container {
+      display: flex;
+      min-height: 100vh;
     }
 
     /* Sidebar */
     .sidebar {
-      background: linear-gradient(180deg,#020617,#020617 40%,#111827);
-      border-right: 1px solid var(--border);
-      padding: 20px 18px;
+      width: 280px;
+      background: rgba(10, 10, 10, 0.95);
+      border-right: 1px solid rgba(212, 175, 55, 0.1);
+      padding: 30px 20px;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+    }
+
+    .logo-container {
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
     }
 
     .logo {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      color: #e5e7eb;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--gold);
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
     }
 
-    .logo span {
-      color: var(--primary);
-    }
-
-    .subtitle {
-      font-size: 13px;
+    .logo-subtitle {
+      font-size: 12px;
       color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
 
     .nav {
-      margin-top: 10px;
       display: flex;
       flex-direction: column;
       gap: 8px;
+      flex: 1;
     }
 
-    .nav button {
-      border: none;
-      text-align: left;
-      padding: 10px 12px;
-      font-size: 14px;
-      border-radius: 999px;
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
+    .nav-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      transition: all .2s ease;
-      white-space: nowrap;
-    }
-
-    .nav button span.icon {
-      font-size: 16px;
-    }
-
-    .nav button.active,
-    .nav button:hover {
-      background: rgba(99,102,241,0.14);
-      color: var(--text);
-    }
-
-    .nav button.active {
-      box-shadow: 0 0 0 1px rgba(129,140,248,0.6);
-    }
-
-    .tag {
-      font-size: 11px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.9);
-      border: 1px solid var(--border);
+      gap: 15px;
+      padding: 15px 20px;
+      border-radius: var(--radius);
       color: var(--muted);
-      margin-top: auto;
+      text-decoration: none;
+      transition: var(--transition);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .nav-item i {
+      font-size: 18px;
+      width: 24px;
       text-align: center;
     }
 
-    /* Main */
-    .main {
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
+    .nav-item:hover, .nav-item.active {
+      background: rgba(212, 175, 55, 0.1);
+      color: var(--gold);
+      box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.2);
     }
 
-    .main-header {
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+    }
+
+    .user-info {
+      margin-top: auto;
+      padding: 20px 0;
+      border-top: 1px solid rgba(212, 175, 55, 0.1);
+      text-align: center;
+    }
+
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      color: var(--black);
+      font-weight: bold;
+    }
+
+    .user-name {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .user-role {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Main */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      background: #0A0A0A;
+    }
+
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
+      padding: 20px 30px;
+      background: rgba(10, 10, 10, 0.9);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.1);
     }
 
-    .main-header h1 {
-      font-size: 22px;
+    .page-title h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 5px;
     }
 
-    .main-header small {
-      font-size: 12px;
+    .page-title p {
+      font-size: 14px;
       color: var(--muted);
     }
 
-    .content {
-      background: rgba(15,23,42,0.9);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      padding: 16px;
-      min-height: 420px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      margin-bottom: 2px;
-    }
-
-    .section-subtitle {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 14px;
-    }
-
-    /* Form layout */
-    .form-row {
+    .header-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 12px;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--black);
+      box-shadow: 0 4px 10px rgba(212, 175, 55, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--gold);
+    }
+
+    .btn-outline:hover {
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: rgba(220, 38, 38, 0.1);
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .tab-content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: rgba(26, 26, 26, 0.7);
+      border-radius: var(--radius);
+      border: 1px solid rgba(212, 175, 55, 0.1);
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: var(--transition);
+    }
+
+    .card:hover {
+      border-color: rgba(212, 175, 55, 0.3);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 5px;
+    }
+
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-      font-size: 13px;
-      min-width: 150px;
     }
 
-    .form-group label {
-      margin-bottom: 4px;
-      font-size: 12px;
+    .form-label {
+      font-size: 14px;
+      font-weight: 600;
       color: var(--muted);
+      margin-bottom: 8px;
     }
 
-    .form-group input,
-    .form-group select,
-    .form-group select[multiple] {
-      padding: 7px 9px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      font-size: 13px;
-      background: #020617;
+    .form-control {
+      padding: 12px 15px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      background: rgba(10, 10, 10, 0.7);
       color: var(--text);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
       outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
     }
 
-    .form-group select[multiple] {
-      min-height: auto;
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 1px solid rgba(212, 175, 55, 0.1);
+      margin-top: 20px;
+      max-height: 400px;
+      overflow-y: auto;
     }
 
-    .form-group input:focus,
-    .form-group select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 1px rgba(129,140,248,0.4);
-    }
-
-    /* Buttons */
-    .btn {
-      border-radius: 999px;
-      border: none;
-      padding: 8px 14px;
-      font-size: 13px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all .2s ease;
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg,var(--primary),var(--primary-dark));
-      color: white;
-    }
-
-    .btn-primary:hover {
-      filter: brightness(1.06);
-      transform: translateY(-1px);
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    .btn-outline:hover {
-      border-color: var(--primary);
-      color: var(--text);
-    }
-
-    .btn-small {
-      padding: 4px 9px;
-      font-size: 11px;
-    }
-
-    .btn-danger {
-      border-color: var(--danger);
-      color: var(--danger);
-    }
-
-    .btn-logout {
-      border-color: rgba(248,113,113,0.6);
-      color: #fecaca;
-    }
-
-    .btn-logout:hover {
-      border-color: var(--danger);
-      color: #fecaca;
-      background: rgba(239,68,68,0.1);
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: default;
-    }
-
-    /* Tables */
-    .table-wrapper {
-      margin-top: 8px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      overflow: auto;
-      max-height: 320px;
-      background: #020617;
-    }
-
-    table {
+    .table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 12px;
     }
 
-    thead {
-      background: #020617;
+    .table th {
+      background: rgba(26, 26, 26, 0.9);
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--gold);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+      font-size: 14px;
       position: sticky;
       top: 0;
-      z-index: 1;
     }
 
-    th, td {
-      padding: 7px 10px;
-      border-bottom: 1px solid #111827;
-      text-align: center;
+    .table td {
+      padding: 15px;
+      border-bottom: 1px solid rgba(42, 42, 42, 0.5);
+      font-size: 14px;
     }
 
-    th {
-      font-weight: 500;
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .04em;
+    .table tbody tr:hover {
+      background: rgba(212, 175, 55, 0.05);
     }
 
-    tbody tr:nth-child(even) {
-      background: #020617;
-    }
-
-    tbody tr:hover {
-      background: rgba(55,65,81,0.5);
-    }
-
-    .empty {
-      font-size: 12px;
-      color: var(--muted);
-      padding: 8px;
-    }
-
-    /* Alerts / cards */
     .alert {
-      margin-top: 10px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      font-size: 12px;
+      padding: 15px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
       display: none;
+      font-size: 14px;
     }
 
-    .alert.info {
-      background: rgba(37,99,235,0.08);
-      border: 1px solid rgba(59,130,246,0.6);
+    .alert-success {
+      background: rgba(22, 163, 74, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #bbf7d0;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: #fecaca;
+    }
+
+    .alert-info {
+      background: rgba(37, 99, 235, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
       color: #bfdbfe;
     }
 
-    .alert.success {
-      background: rgba(22,163,74,0.12);
-      border: 1px solid rgba(52,211,153,0.8);
-      color: #bbf7d0;
-    }
-
-    .alert.error {
-      background: rgba(239,68,68,0.12);
-      border: 1px solid rgba(248,113,113,0.8);
-      color: #fecaca;
-    }
-
-    .card-highlight {
-      margin-top: 16px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: rgba(22,163,74,0.14);
-      border: 1px solid rgba(52,211,153,0.8);
-      font-size: 13px;
-    }
-
-    .card-highlight strong {
-      color: #bbf7d0;
-    }
-
-    /* Tab content */
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
-
-    /* Responsivo */
-    @media (max-width: 900px) {
-      body {
-        padding: 12px;
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 80px;
+        padding: 20px 10px;
       }
 
-      .app {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        border-radius: 16px;
+      .logo-container, .nav-item span, .user-name, .user-role {
+        display: none;
+      }
+
+      .nav-item {
+        justify-content: center;
+        padding: 15px 10px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app-container {
+        flex-direction: column;
       }
 
       .sidebar {
+        width: 100%;
         flex-direction: row;
-        align-items: center;
-        overflow-x: auto;
-        padding: 12px;
-        gap: 10px;
+        padding: 15px;
       }
 
-      .logo, .subtitle, .tag {
+      .logo-container {
         display: none;
       }
 
       .nav {
         flex-direction: row;
-        flex-wrap: nowrap;
-        margin-top: 0;
-        gap: 6px;
+        flex: 1;
+        justify-content: space-around;
       }
 
-      .nav button {
-        font-size: 13px;
-        padding: 8px 10px;
+      .user-info {
+        display: none;
       }
 
-      .main {
-        padding: 12px;
-      }
-
-      .content {
-        padding: 12px;
-        min-height: auto;
-      }
-
-      .table-wrapper {
-        max-height: 260px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      body {
-        padding: 10px;
-      }
-
-      .main-header {
+      .header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 15px;
       }
 
-      .content {
-        padding: 10px;
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
       }
 
-      th, td {
-        padding: 6px 8px;
-      }
-
-      .btn {
-        font-size: 12px;
-        padding: 7px 12px;
+      .form-grid {
+        grid-template-columns: 1fr;
       }
     }
 
-    @media (max-width: 420px) {
-      body {
-        padding: 8px;
+    @media (max-width: 480px) {
+      .tab-content {
+        padding: 15px;
       }
 
-      .app {
-        border-radius: 12px;
-        box-shadow: none;
-      }
-
-      .main-header h1 {
-        font-size: 18px;
+      .card {
+        padding: 15px;
       }
     }
-
-    /* ==================== SELECT DE UNIDADES (CADASTRO) ==================== */
-    #unidadeCadastro {
-      background: #111827 !important;
-      color: #f9fafb !important;
-      border: 1px solid #4b5563 !important;
-    }
-
-    #unidadeCadastro option {
-      background: #020617 !important;
-      color: #e5e7eb !important;
-    }
-
-    #unidadeCadastro option:hover,
-    #unidadeCadastro option:checked {
-      background: #1f2937 !important;
-      color: #ffffff !important;
-    }
-
-    /* ==================== BOTÃO TIPO INTERRUPTOR (PARÂMETROS) ==================== */
-    .toggle-btn {
-      width: 28px;
-      height: 20px;
-      border-radius: 5px;
-      border: 1px solid #111827;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
-      background: linear-gradient(180deg,#fee2e2,#b91c1c);
-    }
-
-    /* “Desligado” (vermelho) */
-    .toggle-btn.off {
-      background: linear-gradient(180deg,#fee2e2,#b91c1c);
-    }
-
-    /* “Ligado” (verde) */
-    .toggle-btn.on {
-      background: linear-gradient(180deg,#bbf7d0,#166534);
-    }
-
-    /* Traço | */
-    .toggle-btn::before {
-      content: "";
-      position: absolute;
-      top: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
-      height: 8px;
-      border-radius: 2px;
-      background: #ffffff;
-    }
-
-    /* Círculo O */
-    .toggle-btn::after {
-      content: "";
-      position: absolute;
-      bottom: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      border: 2px solid #ffffff;
-    }
-
-    /* ==================== ÍCONE DE CALENDÁRIO BRANCO (APENAS PARÂMETROS) ==================== */
- 
-#dataParametros {
-  color-scheme: white;
-  background-color: #020617;
-  
-}
-
-#dataParametros::-webkit-calendar-picker-indicator {
-  filter: invert(1) brightness(1.6);
-}
-   
-
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- SIDEBAR -->
+  <div class="app-container">
+    <!-- Sidebar -->
     <aside class="sidebar">
-      <div>
-        <div class="logo">Ecorp <span>Network</span></div>
-        <div class="subtitle">Planejamento de Produtos</div>
+      <div class="logo-container">
+        <div class="logo">ECORP</div>
+        <div class="logo-subtitle">Planejamento</div>
       </div>
-      <div class="nav">
-        <button class="tab-btn active" data-tab="sugestao">
-          <span class="icon">📊</span> Sugestão
-        </button>
-        <button class="tab-btn" data-tab="cadastro">
-          <span class="icon">✏️</span> Cadastro de itens
-        </button>
-        <button class="tab-btn" data-tab="db">
-          <span class="icon">📚</span> Banco de dados
-        </button>
-        <button class="tab-btn" data-tab="parametros">
-          <span class="icon">⚙️</span> Parâmetros
-        </button>
-        <button class="tab-btn" data-tab="unidades">
-          <span class="icon">🏢</span> Unidades
-        </button>
-      </div>
-      <div class="tag">
-        Usuário: {{ usuario }}
+
+      <nav class="nav">
+        <a class="nav-item active" data-tab="sugestao">
+          <i class="fas fa-lightbulb"></i>
+          <span>Sugestão</span>
+        </a>
+        <a class="nav-item" data-tab="cadastro">
+          <i class="fas fa-edit"></i>
+          <span>Cadastro</span>
+        </a>
+        <a class="nav-item" data-tab="database">
+          <i class="fas fa-database"></i>
+          <span>Banco de Dados</span>
+        </a>
+        <a class="nav-item" data-tab="parametros">
+          <i class="fas fa-cogs"></i>
+          <span>Parâmetros</span>
+        </a>
+        <a class="nav-item" data-tab="unidades">
+          <i class="fas fa-building"></i>
+          <span>Unidades</span>
+        </a>
+      </nav>
+
+      <div class="user-info">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
+        <div class="user-role">Administrador</div>
       </div>
     </aside>
 
-    <!-- MAIN -->
-    <main class="main">
-      <header class="main-header">
-        <div>
-          <h1>Planejamento de Produtos por Disciplina</h1>
-          <small>Sistema de análise histórica com sugestão de envio por turma</small>
+    <!-- Main -->
+    <main class="main-content">
+      <header class="header">
+        <div class="page-title">
+          <h1>Sugestão por Disciplina</h1>
+          <p>Gere sugestões baseadas no histórico de consumo</p>
         </div>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline btn-small btn-logout">
-          Sair
-        </a>
+
+        <div class="header-actions">
+          <button class="btn btn-outline" id="btnAtualizar">
+            <i class="fas fa-sync-alt"></i>
+            Atualizar
+          </button>
+          <button class="btn btn-danger" id="btnLogout">
+            <i class="fas fa-sign-out-alt"></i>
+            Sair
+          </button>
+        </div>
       </header>
 
-      <section class="content">
-
-        <!-- TAB 1: SUGESTÃO -->
-        <div class="tab-content active" id="tab-sugestao">
-          <div class="section-title">Sugestão por disciplina</div>
-          <div class="section-subtitle">
-            Escolha a disciplina e informe a quantidade de alunos da próxima turma.
-            A sugestão é baseada na média histórica de consumo por aluno (somando todas as unidades).
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="disciplinaSugestao">Disciplina</label>
-              <select id="disciplinaSugestao">
-                <option value="">Selecione...</option>
-              </select>
+      <div class="tab-content">
+        <!-- Sugestão -->
+        <div class="tab-pane active" id="sugestao">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Sugestão por Disciplina</h2>
+              <p class="card-subtitle">Baseado na média histórica de consumo por aluno</p>
             </div>
 
-            <div class="form-group">
-              <label for="alunosSugestao">Qtd. alunos (nova turma)</label>
-              <input type="number" id="alunosSugestao" min="0" value="0" />
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Disciplina</label>
+                <select class="form-control" id="disciplinaSugestao">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Quantidade de Alunos</label>
+                <input type="number" class="form-control" id="alunosSugestao" min="0" value="0">
+              </div>
             </div>
 
-            <div class="form-group" style="align-self:flex-end;">
-              <button class="btn btn-primary" id="btnGerarSugestao">Gerar sugestão</button>
+            <button class="btn btn-primary" id="btnGerarSugestao">
+              <i class="fas fa-calculator"></i>
+              Gerar Sugestão
+            </button>
+
+            <div id="alertSugestao" class="alert alert-info"></div>
+
+            <div class="table-container" id="wrapTabelaSugestao" style="display:none;">
+              <table class="table" id="tabelaSugestao">
+                <thead>
+                  <tr>
+                    <th>Produto</th>
+                    <th>Média por Aluno</th>
+                    <th>Registros Usados</th>
+                    <th>Sugestão Total</th>
+                    <th>Valor Real</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
-          </div>
 
-          <div id="alertSugestao" class="alert info"></div>
-
-          <div class="table-wrapper" id="wrapTabelaSugestao" style="display:none;">
-            <table id="tabelaSugestao">
-              <thead>
-                <tr>
-                  <th>Produto</th>
-                  <th>Média por aluno (histórico)</th>
-                  <th>Registros usados</th>
-                  <th>Sugestão total p/ nova turma</th>
-                  <th>Valor real</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div id="cardSugestaoResumo" class="card-highlight" style="display:none;">
-            <strong>Resumo geral:</strong>
-            <div id="textoSugestaoResumo"></div>
+            <div id="cardSugestaoResumo" class="card" style="display:none; margin-top: 20px;">
+              <div class="card-header">
+                <h3 class="card-title">Resumo da Sugestão</h3>
+              </div>
+              <div id="textoSugestaoResumo"></div>
+            </div>
           </div>
         </div>
 
-        <!-- TAB 2: CADASTRO DE ITENS -->
-        <div class="tab-content" id="tab-cadastro">
-          <div class="section-title">Cadastro de itens (alimentar o banco)</div>
-          <div class="section-subtitle">
-            Informe os dados de uma aula / turma: <strong>unidade(s)</strong>, disciplina, produto,
-            quantidade de alunos, quanto foi enviado, quanto voltou e quanto faltou.
-            <br>
-            <small>Dica: você pode selecionar várias unidades e/ou usar "Todas as unidades".</small>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="unidadeCadastro">Unidades (multi)</label>
-              <select id="unidadeCadastro" multiple size="1">
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="dataCadastro">Data</label>
-              <input type="date" id="dataCadastro" />
-            </div>
-            <div class="form-group">
-              <label for="disciplinaCadastro">Disciplina</label>
-              <input
-                type="text"
-                id="disciplinaCadastro"
-                placeholder="Ex: Bioestimulador Facial"
-                list="disciplinasCadastroLista"
-              />
-              <datalist id="disciplinasCadastroLista"></datalist>
-            </div>
-            <div class="form-group">
-              <label for="produtoCadastro">Produto</label>
-              <input type="text" id="produtoCadastro" placeholder="Ex: Produto X 15%" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="alunosCadastro">Qtd. alunos</label>
-              <input type="number" id="alunosCadastro" min="0" value="0" />
-            </div>
-            <div class="form-group">
-              <label for="enviadoCadastro">Qtd. enviada</label>
-              <input type="number" id="enviadoCadastro" min="0" value="0" />
-            </div>
-            <div class="form-group">
-              <label for="voltouCadastro">Qtd. voltou</label>
-              <input type="number" id="voltouCadastro" min="0" value="0" />
-            </div>
-            <div class="form-group">
-              <label for="faltouCadastro">Qtd. faltou</label>
-              <input type="number" id="faltouCadastro" min="0" value="0" />
-            </div>
-          </div>
-
-          <button class="btn btn-primary" id="btnSalvarCadastro">Salvar registro(s)</button>
-          <div id="alertCadastro" class="alert"></div>
-        </div>
-
-        <!-- TAB 3: BANCO DE DADOS -->
-        <div class="tab-content" id="tab-db">
-          <div class="section-title">Banco de dados de consumos</div>
-          <div class="section-subtitle">
-            Filtre por unidade, disciplina e, se quiser, item/produto específico.
-            Você pode excluir registros individuais ou apagar todos os registros de um item.
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="unidadeDB">Unidade</label>
-              <select id="unidadeDB">
-                <option value="">Todas</option>
-              </select>
+        <!-- Cadastro -->
+        <div class="tab-pane" id="cadastro">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Cadastro de Itens</h2>
+              <p class="card-subtitle">Alimentar o banco de dados com novos registros</p>
             </div>
 
-            <div class="form-group">
-              <label for="disciplinaDB">Disciplina</label>
-              <select id="disciplinaDB">
-                <option value="">Todas</option>
-              </select>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Unidade</label>
+                <!-- AGORA IGUAL AO CAMPO DE BANCO DE DADOS (SELECT SIMPLES) -->
+                <select class="form-control" id="unidadeCadastro">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Data</label>
+                <input type="date" class="form-control" id="dataCadastro">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Disciplina</label>
+                <input type="text" class="form-control" id="disciplinaCadastro" placeholder="Ex: Bioestimulador Facial" list="disciplinasLista">
+                <datalist id="disciplinasLista"></datalist>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Produto</label>
+                <input type="text" class="form-control" id="produtoCadastro" placeholder="Ex: Produto X 15%">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Quantidade de Alunos</label>
+                <input type="number" class="form-control" id="alunosCadastro" min="0" value="0">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Quantidade Enviada</label>
+                <input type="number" class="form-control" id="enviadoCadastro" min="0" value="0">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Quantidade que Voltou</label>
+                <input type="number" class="form-control" id="voltouCadastro" min="0" value="0">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Quantidade que Faltou</label>
+                <input type="number" class="form-control" id="faltouCadastro" min="0" value="0">
+              </div>
             </div>
 
-            <div class="form-group">
-              <label for="produtoDB">Item / Produto</label>
-              <select id="produtoDB">
-                <option value="">Todos</option>
-              </select>
-            </div>
+            <button class="btn btn-primary" id="btnSalvarCadastro">
+              <i class="fas fa-save"></i>
+              Salvar Registro
+            </button>
 
-            <div class="form-group" style="align-self:flex-end;">
-              <button class="btn btn-outline btn-small" id="btnVerTodos">Limpar filtros</button>
-            </div>
-
-            <div class="form-group" style="align-self:flex-end;">
-              <button class="btn btn-outline btn-small btn-danger" id="btnApagarItem">Apagar TODOS do item filtrado</button>
-            </div>
-          </div>
-
-          <div class="table-wrapper" id="wrapTabelaDB" style="display:none;">
-            <table id="tabelaDB">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Unidade</th>
-                  <th>Disciplina</th>
-                  <th>Produto</th>
-                  <th>Alunos</th>
-                  <th>Enviado</th>
-                  <th>Voltou</th>
-                  <th>Faltou</th>
-                  <th>Consumo ideal</th>
-                  <th>Consumo por aluno</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div id="alertDB" class="alert info"></div>
-        </div>
-
-        <!-- TAB 4: PARÂMETROS -->
-        <div class="tab-content" id="tab-parametros">
-          <div class="section-title">Parâmetros por unidade e disciplina</div>
-          <div class="section-subtitle">
-            Selecione a <strong>unidade</strong> e a <strong>disciplina</strong>,
-            informe a <strong>data</strong> e a <strong>quantidade de alunos</strong> (igual para todos os itens),
-            depois preencha enviado/voltou/faltou por produto e salve tudo de uma vez.
-            A lista de produtos vem de <strong>todos os registros daquela disciplina (qualquer unidade)</strong>.
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="unidadeParametros">Unidade</label>
-              <select id="unidadeParametros">
-                <option value="">Selecione...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="disciplinaParametros">Disciplina</label>
-              <select id="disciplinaParametros">
-                <option value="">Selecione...</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="dataParametros">Data</label>
-              <input type="date" id="dataParametros" />
-            </div>
-            <div class="form-group">
-              <label for="alunosParametrosGeral">Qtd. alunos (para todos os itens)</label>
-              <input type="number" id="alunosParametrosGeral" min="0" value="0" />
-            </div>
-          </div>
-
-          <div id="alertParametros" class="alert info"></div>
-
-          <div class="table-wrapper" id="wrapTabelaParametros" style="display:none;">
-            <table id="tabelaParametros">
-              <thead>
-                <tr>
-                  <th>Sel.</th>
-                  <th>Produto</th>
-                  <th>Enviado</th>
-                  <th>Voltou</th>
-                  <th>Faltou</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-
-          <div class="form-row" id="acoesParametros" style="display:none; margin-top: 8px;">
-            <button class="btn btn-primary btn-small" id="btnSalvarParametros">Salvar registros</button>
-            <button class="btn btn-outline btn-small btn-danger" id="btnApagarSelecionados">Apagar selecionados</button>
+            <div id="alertCadastro" class="alert"></div>
           </div>
         </div>
 
-        <!-- TAB 5: UNIDADES -->
-        <div class="tab-content" id="tab-unidades">
-          <div class="section-title">Cadastro de unidades</div>
-          <div class="section-subtitle">
-            Cadastre aqui os nomes das unidades (ex: Belo Horizonte, Rio de Janeiro, São Paulo).
-            Essas unidades aparecerão automaticamente nas outras páginas (Cadastro, Parâmetros, Banco de Dados).
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="unidadeNova">Nova unidade</label>
-              <input type="text" id="unidadeNova" placeholder="Ex: Belo Horizonte" />
+        <!-- Banco de Dados -->
+        <div class="tab-pane" id="database">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Banco de Dados</h2>
+              <p class="card-subtitle">Consulte e gerencie os registros existentes</p>
             </div>
-            <div class="form-group" style="align-self:flex-end;">
-              <button class="btn btn-primary" id="btnAdicionarUnidade">Adicionar unidade</button>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Unidade</label>
+                <select class="form-control" id="unidadeDB">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Disciplina</label>
+                <select class="form-control" id="disciplinaDB">
+                  <option value="">Todas</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Produto</label>
+                <select class="form-control" id="produtoDB">
+                  <option value="">Todos</option>
+                </select>
+              </div>
             </div>
-          </div>
 
-          <div id="alertUnidades" class="alert info"></div>
+            <div class="form-grid">
+              <div class="form-group">
+                <button class="btn btn-outline btn-small" id="btnLimparFiltros">
+                  <i class="fas fa-times"></i>
+                  Limpar Filtros
+                </button>
+              </div>
 
-          <div class="table-wrapper" id="wrapTabelaUnidades" style="display:none;">
-            <table id="tabelaUnidades">
-              <thead>
-                <tr>
-                  <th>Unidade</th>
-                  <th>Ações</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
+              <div class="form-group">
+                <button class="btn btn-danger btn-small" id="btnApagarFiltrados">
+                  <i class="fas fa-trash"></i>
+                  Apagar Filtrados
+                </button>
+              </div>
+            </div>
+
+            <div class="table-container" id="wrapTabelaDB">
+              <table class="table" id="tabelaDB">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Unidade</th>
+                    <th>Disciplina</th>
+                    <th>Produto</th>
+                    <th>Alunos</th>
+                    <th>Enviado</th>
+                    <th>Voltou</th>
+                    <th>Faltou</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div id="alertDB" class="alert alert-info"></div>
           </div>
         </div>
 
-      </section>
+        <!-- Parâmetros -->
+        <div class="tab-pane" id="parametros">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Parâmetros</h2>
+              <p class="card-subtitle">Configure as opções do sistema</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Unidade</label>
+                <select class="form-control" id="unidadeParametros">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Disciplina</label>
+                <select class="form-control" id="disciplinaParametros">
+                  <option value="">Selecione...</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Data</label>
+                <input type="date" class="form-control" id="dataParametros">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Alunos (Geral)</label>
+                <input type="number" class="form-control" id="alunosParametrosGeral" min="0" value="0">
+              </div>
+            </div>
+
+            <button class="btn btn-primary" id="btnCarregarProdutos">
+              <i class="fas fa-sync"></i>
+              Carregar Produtos
+            </button>
+
+            <div id="alertParametros" class="alert alert-info"></div>
+
+            <div class="table-container" id="wrapTabelaParametros" style="display:none;">
+              <table class="table" id="tabelaParametros">
+                <thead>
+                  <tr>
+                    <th>Selecionar</th>
+                    <th>Produto</th>
+                    <th>Enviado</th>
+                    <th>Voltou</th>
+                    <th>Faltou</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div style="margin-top: 20px; display: none;" id="acoesParametros">
+              <button class="btn btn-primary" id="btnSalvarParametros">
+                <i class="fas fa-save"></i>
+                Salvar Parâmetros
+              </button>
+              <button class="btn btn-danger" id="btnApagarSelecionados">
+                <i class="fas fa-trash"></i>
+                Apagar Selecionados
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unidades -->
+        <div class="tab-pane" id="unidades">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Gerenciar Unidades</h2>
+              <p class="card-subtitle">Adicione e remova unidades do sistema</p>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Nova Unidade</label>
+                <input type="text" class="form-control" id="unidadeNova" placeholder="Ex: São Paulo">
+              </div>
+
+              <div class="form-group" style="align-self: flex-end;">
+                <button class="btn btn-primary" id="btnAdicionarUnidade">
+                  <i class="fas fa-plus"></i>
+                  Adicionar
+                </button>
+              </div>
+            </div>
+
+            <div id="alertUnidades" class="alert alert-info"></div>
+
+            <div class="table-container" id="wrapTabelaUnidades">
+              <table class="table" id="tabelaUnidades">
+                <thead>
+                  <tr>
+                    <th>Unidade</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </main>
   </div>
 
   <script>
-    // ====== STORAGE KEYS ======
+    // STORAGE
     const STORAGE_KEY_DB = "planejamentoProdutosDB";
     const STORAGE_KEY_UNIDADES = "planejamentoUnidades";
 
-    // ====== DB ITENS ======
     function carregarDB() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_DB);
@@ -877,517 +826,483 @@
 
     function salvarDB(dados) {
       localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(dados));
-      try {
-        fetch("/api/planejamento/db", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dados)
-        }).catch(err => console.error("Erro ao salvar DB no servidor:", err));
-      } catch (e) {
-        console.error("Erro ao salvar DB no servidor:", e);
-      }
     }
 
     let db = carregarDB();
 
-    // ====== DB UNIDADES ======
     function carregarUnidadesCadastradas() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_UNIDADES);
-        if (!raw) return [];
+        if (!raw) return ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
         const arr = JSON.parse(raw);
-        if (!Array.isArray(arr)) return [];
+        if (!Array.isArray(arr)) return ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
         return arr;
       } catch (e) {
         console.error("Erro ao ler unidades:", e);
-        return [];
+        return ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
       }
     }
 
     function salvarUnidadesCadastradas(unidades) {
       localStorage.setItem(STORAGE_KEY_UNIDADES, JSON.stringify(unidades));
-      try {
-        fetch("/api/planejamento/unidades", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(unidades)
-        }).catch(err => console.error("Erro ao salvar unidades no servidor:", err));
-      } catch (e) {
-        console.error("Erro ao salvar unidades no servidor:", e);
-      }
     }
 
     let unidadesCadastradas = carregarUnidadesCadastradas();
 
-    // ====== NAVEGAÇÃO ENTRE TABS ======
-    const tabButtons = document.querySelectorAll(".tab-btn");
-    const tabContents = document.querySelectorAll(".tab-content");
+    function mostrarAlerta(elemento, tipo, mensagem) {
+      elemento.textContent = mensagem;
+      elemento.className = `alert alert-${tipo}`;
+      elemento.style.display = 'block';
+      setTimeout(() => {
+        elemento.style.display = 'none';
+      }, 5000);
+    }
 
-    tabButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const tab = btn.getAttribute("data-tab");
+    function formatarData(data) {
+      if (!data) return '';
+      const date = new Date(data);
+      return date.toLocaleDateString('pt-BR');
+    }
 
-        tabButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        tabContents.forEach(c => {
-          c.classList.toggle("active", c.id === "tab-" + tab);
-        });
+    function getDisciplinasUnicas() {
+      const disciplinas = new Set();
+      db.forEach(item => {
+        if (item.disciplina) disciplinas.add(item.disciplina);
       });
-    });
+      return Array.from(disciplinas).sort();
+    }
 
-    // ====== HELPERS: UNIDADE / DISCIPLINA / PRODUTO ======
-    function getDisciplinasUnicasGlobal() {
-      const set = new Set();
-      db.forEach(r => {
-        if (r.disciplina) set.add(r.disciplina);
+    function getProdutosUnicos() {
+      const produtos = new Set();
+      db.forEach(item => {
+        if (item.produto) produtos.add(item.produto);
       });
-      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      return Array.from(produtos).sort();
     }
 
     function getUnidadesFromDB() {
-      const set = new Set();
-      db.forEach(r => {
-        if (r.unidade) set.add(r.unidade);
+      const unidades = new Set();
+      db.forEach(item => {
+        if (item.unidade) unidades.add(item.unidade);
       });
-      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      return Array.from(unidades).sort();
     }
 
     function getListaUnidades() {
-      const set = new Set();
-      carregarUnidadesCadastradas().forEach(u => set.add(u));
-      getUnidadesFromDB().forEach(u => set.add(u));
-      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      const todasUnidades = new Set();
+      unidadesCadastradas.forEach(u => todasUnidades.add(u));
+      getUnidadesFromDB().forEach(u => todasUnidades.add(u));
+      return Array.from(todasUnidades).sort();
     }
 
-    function getDisciplinasPorUnidade(unidade) {
-      const set = new Set();
-      db.forEach(r => {
-        if (r.unidade === unidade && r.disciplina) {
-          set.add(r.disciplina);
+    function getProdutosPorDisciplina(disciplina) {
+      const produtos = new Set();
+      db.forEach(item => {
+        if (item.disciplina === disciplina && item.produto) {
+          produtos.add(item.produto);
         }
       });
-      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+      return Array.from(produtos).sort();
     }
 
-    function getProdutosPorDisciplinaUnidade(disciplina, unidade) {
-      const set = new Set();
-      db.forEach(r => {
-        if (r.disciplina === disciplina && r.unidade === unidade && r.produto) {
-          set.add(r.produto);
-        }
-      });
-      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    function calcularConsumoIdeal(registro) {
+      const enviado = Number(registro.enviado) || 0;
+      const voltou = Number(registro.voltou) || 0;
+      const faltou = Number(registro.faltou) || 0;
+      return Math.max(0, enviado - voltou + faltou);
     }
 
-    function getProdutosPorDisciplinaGlobal(disciplina) {
-      const set = new Set();
-      db.forEach(r => {
-        if (r.disciplina === disciplina && r.produto) {
-          set.add(r.produto);
-        }
-      });
-      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    function calcularConsumoPorAluno(registro) {
+      const alunos = Number(registro.alunos) || 0;
+      if (alunos <= 0) return 0;
+      return calcularConsumoIdeal(registro) / alunos;
     }
 
-    // ====== ATUALIZAÇÃO DOS SELECTS GERAIS ======
-    function atualizarSugestaoDisciplinas() {
-      const sel = document.getElementById("disciplinaSugestao");
-      const selected = sel.value;
-      const disciplinas = getDisciplinasUnicasGlobal();
+    function atualizarSelectUnidades(selectId, incluirTodas = false) {
+      const select = document.getElementById(selectId);
+      const valorAtual = select.value;
+      select.innerHTML = '';
 
-      sel.innerHTML = '<option value="">Selecione...</option>';
-      disciplinas.forEach(d => {
-        const opt = document.createElement("option");
-        opt.value = d;
-        opt.textContent = d;
-        sel.appendChild(opt);
+      if (incluirTodas) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Todas';
+        select.appendChild(option);
+      }
+
+      getListaUnidades().forEach(unidade => {
+        const option = document.createElement('option');
+        option.value = unidade;
+        option.textContent = unidade;
+        select.appendChild(option);
       });
 
-      if (disciplinas.includes(selected)) {
-        sel.value = selected;
+      if (getListaUnidades().includes(valorAtual)) {
+        select.value = valorAtual;
       }
     }
 
-    function atualizarCadastroUnidadesSelect() {
-      const sel = document.getElementById("unidadeCadastro");
-      const anteriores = new Set(Array.from(sel.selectedOptions || []).map(o => o.value));
-      const unidades = getListaUnidades();
+    function atualizarSelectDisciplinas(selectId, incluirTodas = false) {
+      const select = document.getElementById(selectId);
+      const valorAtual = select.value;
+      select.innerHTML = '';
 
-      sel.innerHTML = "";
-
-      const optTodas = document.createElement("option");
-      optTodas.value = "__TODAS__";
-      optTodas.textContent = "Todas as unidades";
-      sel.appendChild(optTodas);
-
-      unidades.forEach(u => {
-        const opt = document.createElement("option");
-        opt.value = u;
-        opt.textContent = u;
-        sel.appendChild(opt);
-      });
-
-      Array.from(sel.options).forEach(opt => {
-        if (anteriores.has(opt.value)) {
-          opt.selected = true;
-        }
-      });
-    }
-
-    function atualizarFiltrosDB() {
-      const unidadeDB = document.getElementById("unidadeDB");
-      const disciplinaDB = document.getElementById("disciplinaDB");
-      const produtoDB = document.getElementById("produtoDB");
-
-      const unidades = getListaUnidades();
-      const selectedUnidade = unidadeDB.value;
-      unidadeDB.innerHTML = '<option value="">Todas</option>';
-      unidades.forEach(u => {
-        const opt = document.createElement("option");
-        opt.value = u;
-        opt.textContent = u;
-        unidadeDB.appendChild(opt);
-      });
-      if (unidades.includes(selectedUnidade)) {
-        unidadeDB.value = selectedUnidade;
-      } else {
-        unidadeDB.value = "";
+      if (incluirTodas) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Todas';
+        select.appendChild(option);
       }
 
-      atualizarDisciplinaDBOptions();
-      atualizarProdutoDBOptions();
+      getDisciplinasUnicas().forEach(disciplina => {
+        const option = document.createElement('option');
+        option.value = disciplina;
+        option.textContent = disciplina;
+        select.appendChild(option);
+      });
+
+      if (getDisciplinasUnicas().includes(valorAtual)) {
+        select.value = valorAtual;
+      }
     }
 
-    function atualizarDisciplinaDBOptions() {
-      const unidadeDB = document.getElementById("unidadeDB");
-      const disciplinaDB = document.getElementById("disciplinaDB");
-      const unidade = unidadeDB.value;
-      const selectedDisciplina = disciplinaDB.value;
+    function atualizarDatalistDisciplinas() {
+      const datalist = document.getElementById('disciplinasLista');
+      datalist.innerHTML = '';
+      getDisciplinasUnicas().forEach(disciplina => {
+        const option = document.createElement('option');
+        option.value = disciplina;
+        datalist.appendChild(option);
+      });
+    }
 
-      disciplinaDB.innerHTML = '<option value="">Todas</option>';
+    function atualizarSelectProdutos(selectId, incluirTodos = false) {
+      const select = document.getElementById(selectId);
+      const valorAtual = select.value;
+      select.innerHTML = '';
 
-      let disciplinas;
-      if (!unidade) {
-        const set = new Set();
-        db.forEach(r => {
-          if (r.disciplina) set.add(r.disciplina);
+      if (incluirTodos) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'Todos';
+        select.appendChild(option);
+      }
+
+      getProdutosUnicos().forEach(produto => {
+        const option = document.createElement('option');
+        option.value = produto;
+        option.textContent = produto;
+        select.appendChild(option);
+      });
+
+      if (getProdutosUnicos().includes(valorAtual)) {
+        select.value = valorAtual;
+      }
+    }
+
+    function atualizarTabelaUnidades() {
+      const tbody = document.querySelector('#tabelaUnidades tbody');
+      tbody.innerHTML = '';
+
+      if (unidadesCadastradas.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 2;
+        td.textContent = 'Nenhuma unidade cadastrada';
+        td.style.textAlign = 'center';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      unidadesCadastradas.forEach((unidade, index) => {
+        const tr = document.createElement('tr');
+
+        const tdNome = document.createElement('td');
+        tdNome.textContent = unidade;
+
+        const tdAcoes = document.createElement('td');
+        const btnExcluir = document.createElement('button');
+        btnExcluir.className = 'btn btn-danger btn-small';
+        btnExcluir.innerHTML = '<i class="fas fa-trash"></i> Excluir';
+        btnExcluir.addEventListener('click', () => {
+          if (confirm(`Tem certeza que deseja excluir a unidade "${unidade}"?`)) {
+            unidadesCadastradas.splice(index, 1);
+            salvarUnidadesCadastradas(unidadesCadastradas);
+            atualizarTudo();
+          }
         });
-        disciplinas = Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
-      } else {
-        disciplinas = getDisciplinasPorUnidade(unidade);
-      }
 
-      disciplinas.forEach(d => {
-        const opt = document.createElement("option");
-        opt.value = d;
-        opt.textContent = d;
-        disciplinaDB.appendChild(opt);
+        tdAcoes.appendChild(btnExcluir);
+        tr.appendChild(tdNome);
+        tr.appendChild(tdAcoes);
+        tbody.appendChild(tr);
       });
-
-      if (disciplinaDB.querySelector(`option[value="${selectedDisciplina}"]`)) {
-        disciplinaDB.value = selectedDisciplina;
-      } else {
-        disciplinaDB.value = "";
-      }
     }
 
-    function atualizarProdutoDBOptions() {
-      const unidadeDB = document.getElementById("unidadeDB");
-      const disciplinaDB = document.getElementById("disciplinaDB");
-      const produtoDB = document.getElementById("produtoDB");
-      const unidade = unidadeDB.value;
-      const disciplina = disciplinaDB.value;
-      const selectedProduto = produtoDB.value;
+    function atualizarTabelaDB() {
+      const tbody = document.querySelector('#tabelaDB tbody');
+      tbody.innerHTML = '';
 
-      produtoDB.innerHTML = '<option value="">Todos</option>';
+      const unidadeFiltro = document.getElementById('unidadeDB').value;
+      const disciplinaFiltro = document.getElementById('disciplinaDB').value;
+      const produtoFiltro = document.getElementById('produtoDB').value;
 
-      let produtos;
-      if (!disciplina && !unidade) {
-        const set = new Set();
-        db.forEach(r => {
-          if (r.produto) set.add(r.produto);
+      const registrosFiltrados = db.filter(registro => {
+        if (unidadeFiltro && registro.unidade !== unidadeFiltro) return false;
+        if (disciplinaFiltro && registro.disciplina !== disciplinaFiltro) return false;
+        if (produtoFiltro && registro.produto !== produtoFiltro) return false;
+        return true;
+      });
+
+      if (registrosFiltrados.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 9;
+        td.textContent = 'Nenhum registro encontrado';
+        td.style.textAlign = 'center';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      registrosFiltrados.forEach(registro => {
+        const tr = document.createElement('tr');
+
+        const dbIndex = db.findIndex(r =>
+          r.data === registro.data &&
+          r.unidade === registro.unidade &&
+          r.disciplina === registro.disciplina &&
+          r.produto === registro.produto
+        );
+
+        const campos = [
+          formatarData(registro.data),
+          registro.unidade,
+          registro.disciplina,
+          registro.produto,
+          registro.alunos,
+          registro.enviado,
+          registro.voltou,
+          registro.faltou
+        ];
+
+        campos.forEach(valor => {
+          const td = document.createElement('td');
+          td.textContent = valor;
+          tr.appendChild(td);
         });
-        produtos = Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
-      } else {
-        produtos = db
-          .filter(r =>
-            (!unidade || r.unidade === unidade) &&
-            (!disciplina || r.disciplina === disciplina)
-          )
-          .reduce((set, r) => {
-            if (r.produto) set.add(r.produto);
-            return set;
-          }, new Set());
-        produtos = Array.from(produtos).sort((a, b) => a.localeCompare(b, "pt-BR"));
-      }
 
-      produtos.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p;
-        opt.textContent = p;
-        produtoDB.appendChild(opt);
-      });
+        const tdAcoes = document.createElement('td');
+        const btnExcluir = document.createElement('button');
+        btnExcluir.className = 'btn btn-danger btn-small';
+        btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
+        btnExcluir.title = 'Excluir registro';
+        btnExcluir.addEventListener('click', () => {
+          if (confirm('Tem certeza que deseja excluir este registro?')) {
+            db.splice(dbIndex, 1);
+            salvarDB(db);
+            atualizarTudo();
+          }
+        });
 
-      if (produtoDB.querySelector(`option[value="${selectedProduto}"]`)) {
-        produtoDB.value = selectedProduto;
-      } else {
-        produtoDB.value = "";
-      }
-    }
-
-    function atualizarFiltrosParametros() {
-      const unidadeParametros = document.getElementById("unidadeParametros");
-      const disciplinaParametros = document.getElementById("disciplinaParametros");
-
-      const unidades = getListaUnidades();
-      const selectedUnidade = unidadeParametros.value;
-      unidadeParametros.innerHTML = '<option value="">Selecione...</option>';
-      unidades.forEach(u => {
-        const opt = document.createElement("option");
-        opt.value = u;
-        opt.textContent = u;
-        unidadeParametros.appendChild(opt);
-      });
-      if (unidades.includes(selectedUnidade)) {
-        unidadeParametros.value = selectedUnidade;
-      } else {
-        unidadeParametros.value = "";
-      }
-
-      const disciplinasGlobais = getDisciplinasUnicasGlobal();
-      const selectedDisciplina = disciplinaParametros.value;
-      disciplinaParametros.innerHTML = '<option value="">Selecione...</option>';
-      disciplinasGlobais.forEach(d => {
-        const opt = document.createElement("option");
-        opt.value = d;
-        opt.textContent = d;
-        disciplinaParametros.appendChild(opt);
-      });
-      if (disciplinasGlobais.includes(selectedDisciplina)) {
-        disciplinaParametros.value = selectedDisciplina;
-      } else {
-        disciplinaParametros.value = "";
-      }
-    }
-
-    // ====== LISTA DE DISCIPLINAS DO CADASTRO (DATALIST) ======
-    function atualizarDisciplinasCadastroLista() {
-      const lista = document.getElementById("disciplinasCadastroLista");
-      if (!lista) return;
-
-      const disciplinas = getDisciplinasUnicasGlobal();
-      lista.innerHTML = "";
-      disciplinas.forEach(d => {
-        const opt = document.createElement("option");
-        opt.value = d;
-        lista.appendChild(opt);
+        tdAcoes.appendChild(btnExcluir);
+        tr.appendChild(tdAcoes);
+        tbody.appendChild(tr);
       });
     }
 
     function atualizarTudo() {
-      atualizarSugestaoDisciplinas();
-      atualizarCadastroUnidadesSelect();
-      atualizarFiltrosDB();
-      atualizarFiltrosParametros();
-      atualizarTabelaParametros();
+      atualizarSelectUnidades('unidadeCadastro');        // cadastro (select simples)
+      atualizarSelectUnidades('unidadeDB', true);        // banco de dados (com "Todas")
+      atualizarSelectUnidades('unidadeParametros');      // parâmetros
+      atualizarSelectDisciplinas('disciplinaSugestao');
+      atualizarSelectDisciplinas('disciplinaDB', true);
+      atualizarSelectDisciplinas('disciplinaParametros');
+      atualizarSelectProdutos('produtoDB', true);
+      atualizarDatalistDisciplinas();
       atualizarTabelaUnidades();
-      atualizarDisciplinasCadastroLista();
+      atualizarTabelaDB();
     }
 
-    // ====== FUNÇÃO DE ALERTA ======
-    function mostrarAlerta(el, tipo, texto) {
-      el.style.display = "block";
-      el.classList.remove("info", "success", "error");
-      el.classList.add(tipo);
-      el.textContent = texto;
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const hoje = new Date().toISOString().split('T')[0];
+      document.getElementById('dataCadastro').value = hoje;
+      document.getElementById('dataParametros').value = hoje;
 
-    // ====== HELPERS DE CÁLCULO ======
-    function calcularConsumoIdeal(reg) {
-      const enviado = Number(reg.enviado) || 0;
-      const voltou = Number(reg.voltou) || 0;
-      const faltou = Number(reg.faltou) || 0;
-      const consumo = enviado - voltou + faltou;
-      return consumo < 0 ? 0 : consumo;
-    }
+      // Navegação abas
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          document.querySelectorAll('.nav-item').forEach(nav => {
+            nav.classList.remove('active');
+          });
+          this.classList.add('active');
 
-    function calcularConsumoPorAluno(reg) {
-      const alunos = Number(reg.alunos) || 0;
-      if (alunos <= 0) return 0;
-      return calcularConsumoIdeal(reg) / alunos;
-    }
+          document.querySelectorAll('.tab-pane').forEach(tab => {
+            tab.classList.remove('active');
+          });
 
-    // ====== ELEMENTOS GERAIS ======
-    // Sugestão
-    const disciplinaSugestaoSel = document.getElementById("disciplinaSugestao");
-    const alunosSugestaoInp = document.getElementById("alunosSugestao");
-    const btnGerarSugestao = document.getElementById("btnGerarSugestao");
-    const alertSugestao = document.getElementById("alertSugestao");
-    const wrapTabelaSugestao = document.getElementById("wrapTabelaSugestao");
-    const tabelaSugestao = document.getElementById("tabelaSugestao").querySelector("tbody");
-    const cardSugestaoResumo = document.getElementById("cardSugestaoResumo");
-    const textoSugestaoResumo = document.getElementById("textoSugestaoResumo");
+          const tabId = this.getAttribute('data-tab');
+          document.getElementById(tabId).classList.add('active');
 
-    // Cadastro
-    const unidadeCadastroSel = document.getElementById("unidadeCadastro");
-    const disciplinaCadastroInp = document.getElementById("disciplinaCadastro");
-    const produtoCadastroInp = document.getElementById("produtoCadastro");
-    const dataCadastroInp = document.getElementById("dataCadastro");
-    const alunosCadastroInp = document.getElementById("alunosCadastro");
-    const enviadoCadastroInp = document.getElementById("enviadoCadastro");
-    const voltouCadastroInp = document.getElementById("voltouCadastro");
-    const faltouCadastroInp = document.getElementById("faltouCadastro");
-    const alertCadastro = document.getElementById("alertCadastro");
-    const btnSalvarCadastro = document.getElementById("btnSalvarCadastro");
+          const pageTitle = document.querySelector('.page-title h1');
+          const pageSubtitle = document.querySelector('.page-title p');
 
-    // DB
-    const unidadeDBSel = document.getElementById("unidadeDB");
-    const disciplinaDBSel = document.getElementById("disciplinaDB");
-    const produtoDBSel = document.getElementById("produtoDB");
-    const btnVerTodos = document.getElementById("btnVerTodos");
-    const btnApagarItem = document.getElementById("btnApagarItem");
-    const wrapTabelaDB = document.getElementById("wrapTabelaDB");
-    const tabelaDBBody = document.getElementById("tabelaDB").querySelector("tbody");
-    const alertDB = document.getElementById("alertDB");
+          switch(tabId) {
+            case 'sugestao':
+              pageTitle.textContent = 'Sugestão por Disciplina';
+              pageSubtitle.textContent = 'Gere sugestões baseadas no histórico de consumo';
+              break;
+            case 'cadastro':
+              pageTitle.textContent = 'Cadastro de Itens';
+              pageSubtitle.textContent = 'Alimente o banco de dados com novos registros';
+              break;
+            case 'database':
+              pageTitle.textContent = 'Banco de Dados';
+              pageSubtitle.textContent = 'Consulte e gerencie os registros existentes';
+              break;
+            case 'parametros':
+              pageTitle.textContent = 'Parâmetros do Sistema';
+              pageSubtitle.textContent = 'Configure as opções do sistema';
+              break;
+            case 'unidades':
+              pageTitle.textContent = 'Gerenciar Unidades';
+              pageSubtitle.textContent = 'Adicione e remova unidades do sistema';
+              break;
+          }
+        });
+      });
 
-    // Parâmetros
-    const unidadeParametrosSel = document.getElementById("unidadeParametros");
-    const disciplinaParametrosSel = document.getElementById("disciplinaParametros");
-    const dataParametrosInp = document.getElementById("dataParametros");
-    const alunosParametrosGeralInp = document.getElementById("alunosParametrosGeral");
-    const alertParametros = document.getElementById("alertParametros");
-    const wrapTabelaParametros = document.getElementById("wrapTabelaParametros");
-    const tabelaParametrosBody = document.getElementById("tabelaParametros").querySelector("tbody");
-    const acoesParametros = document.getElementById("acoesParametros");
-    const btnSalvarParametros = document.getElementById("btnSalvarParametros");
-    const btnApagarSelecionados = document.getElementById("btnApagarSelecionados");
+      // Atualizar
+      document.getElementById('btnAtualizar').addEventListener('click', function() {
+        atualizarTudo();
+        mostrarAlerta(document.getElementById('alertSugestao'), 'success', 'Sistema atualizado com sucesso!');
+      });
 
-    // Unidades
-    const unidadeNovaInp = document.getElementById("unidadeNova");
-    const btnAdicionarUnidade = document.getElementById("btnAdicionarUnidade");
-    const alertUnidades = document.getElementById("alertUnidades");
-    const wrapTabelaUnidades = document.getElementById("wrapTabelaUnidades");
-    const tabelaUnidadesBody = document.getElementById("tabelaUnidades").querySelector("tbody");
-
-    // ====== SUGESTÃO: GERAR TABELA ======
-    btnGerarSugestao.addEventListener("click", () => {
-      const disciplina = disciplinaSugestaoSel.value;
-      const qtdAlunos = Number(alunosSugestaoInp.value) || 0;
-
-      if (!disciplina) {
-        mostrarAlerta(alertSugestao, "error", "Selecione uma disciplina.");
-        wrapTabelaSugestao.style.display = "none";
-        cardSugestaoResumo.style.display = "none";
-        return;
-      }
-      if (qtdAlunos <= 0) {
-        mostrarAlerta(alertSugestao, "error", "Informe a quantidade de alunos da nova turma.");
-        wrapTabelaSugestao.style.display = "none";
-        cardSugestaoResumo.style.display = "none";
-        return;
-      }
-
-      const registros = db.filter(r => r.disciplina === disciplina);
-      if (registros.length === 0) {
-        mostrarAlerta(alertSugestao, "info", "Ainda não há registros para essa disciplina.");
-        wrapTabelaSugestao.style.display = "none";
-        cardSugestaoResumo.style.display = "none";
-        return;
-      }
-
-      const mapa = new Map();
-      registros.forEach(r => {
-        const prod = r.produto || "(sem nome)";
-        const consumoPorAluno = calcularConsumoPorAluno(r);
-        if (!mapa.has(prod)) {
-          mapa.set(prod, { soma: 0, qtd: 0 });
+      // Logout -> volta para rota de logout do Flask
+      document.getElementById('btnLogout').addEventListener('click', function() {
+        if (confirm('Tem certeza que deseja sair do sistema?')) {
+          window.location.href = "{{ url_for('logout') }}";
         }
-        const obj = mapa.get(prod);
-        obj.soma += consumoPorAluno;
-        obj.qtd += 1;
       });
 
-      tabelaSugestao.innerHTML = "";
-      let totalSugestao = 0;
+      // Sugestão
+      document.getElementById('btnGerarSugestao').addEventListener('click', function() {
+        const disciplina = document.getElementById('disciplinaSugestao').value;
+        const alunos = parseInt(document.getElementById('alunosSugestao').value);
+        const alertSugestao = document.getElementById('alertSugestao');
 
-      mapa.forEach((info, produto) => {
-        const mediaPorAluno = info.qtd > 0 ? info.soma / info.qtd : 0;
-        const sugestaoTotal = mediaPorAluno * qtdAlunos;
-        totalSugestao += sugestaoTotal;
+        if (!disciplina) {
+          mostrarAlerta(alertSugestao, 'error', 'Selecione uma disciplina.');
+          return;
+        }
 
-        const tr = document.createElement("tr");
-        const tdProd = document.createElement("td");
-        const tdMedia = document.createElement("td");
-        const tdReg = document.createElement("td");
-        const tdSug = document.createElement("td");
-        const tdReal = document.createElement("td");
+        if (isNaN(alunos) || alunos <= 0) {
+          mostrarAlerta(alertSugestao, 'error', 'Informe uma quantidade válida de alunos.');
+          return;
+        }
 
-        tdProd.textContent = produto;
-        tdMedia.textContent = mediaPorAluno.toFixed(2);
-        tdReg.textContent = info.qtd;
-        tdSug.textContent = sugestaoTotal.toFixed(2);
-        tdReal.textContent = Math.round(sugestaoTotal);
+        const registrosDisciplina = db.filter(item => item.disciplina === disciplina);
 
-        tr.appendChild(tdProd);
-        tr.appendChild(tdMedia);
-        tr.appendChild(tdReg);
-        tr.appendChild(tdSug);
-        tr.appendChild(tdReal);
-        tabelaSugestao.appendChild(tr);
+        if (registrosDisciplina.length === 0) {
+          mostrarAlerta(alertSugestao, 'info', 'Não há registros para esta disciplina.');
+          return;
+        }
+
+        const produtosMap = new Map();
+
+        registrosDisciplina.forEach(registro => {
+          const produto = registro.produto;
+          const consumoPorAluno = calcularConsumoPorAluno(registro);
+
+          if (!produtosMap.has(produto)) {
+            produtosMap.set(produto, {
+              soma: 0,
+              quantidade: 0
+            });
+          }
+
+          const dados = produtosMap.get(produto);
+          dados.soma += consumoPorAluno;
+          dados.quantidade += 1;
+        });
+
+        const tbody = document.querySelector('#tabelaSugestao tbody');
+        tbody.innerHTML = '';
+
+        let totalSugerido = 0;
+
+        produtosMap.forEach((dados, produto) => {
+          const media = dados.quantidade > 0 ? dados.soma / dados.quantidade : 0;
+          const sugestao = media * alunos;
+          totalSugerido += sugestao;
+
+          const tr = document.createElement('tr');
+          const cells = [
+            produto,
+            media.toFixed(2),
+            dados.quantidade,
+            sugestao.toFixed(2),
+            Math.round(sugestao)
+          ];
+
+          cells.forEach(texto => {
+            const td = document.createElement('td');
+            td.textContent = texto;
+            tr.appendChild(td);
+          });
+
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('wrapTabelaSugestao').style.display = 'block';
+        document.getElementById('cardSugestaoResumo').style.display = 'block';
+        document.getElementById('textoSugestaoResumo').textContent =
+          `Total sugerido: ${totalSugerido.toFixed(2)} unidades (${Math.round(totalSugerido)} unidades arredondadas)`;
+
+        mostrarAlerta(alertSugestao, 'success', 'Sugestão gerada com sucesso!');
       });
 
-      wrapTabelaSugestao.style.display = "block";
-      cardSugestaoResumo.style.display = "block";
-      mostrarAlerta(alertSugestao, "success", "Sugestão gerada com base no histórico.");
-      textoSugestaoResumo.textContent =
-        `Total sugerido (somando todos os produtos): ~${totalSugestao.toFixed(2)} unidades.`;
-    });
+      // Cadastro
+      document.getElementById('btnSalvarCadastro').addEventListener('click', function() {
+        const data = document.getElementById('dataCadastro').value;
+        const disciplina = document.getElementById('disciplinaCadastro').value.trim();
+        const produto = document.getElementById('produtoCadastro').value.trim();
+        const alunos = parseInt(document.getElementById('alunosCadastro').value) || 0;
+        const enviado = parseInt(document.getElementById('enviadoCadastro').value) || 0;
+        const voltou = parseInt(document.getElementById('voltouCadastro').value) || 0;
+        const faltou = parseInt(document.getElementById('faltouCadastro').value) || 0;
+        const unidade = document.getElementById('unidadeCadastro').value;
+        const alertCadastro = document.getElementById('alertCadastro');
 
-    // ====== CADASTRO: SALVAR REGISTROS ======
-    btnSalvarCadastro.addEventListener("click", () => {
-      const data = dataCadastroInp.value;
-      const disciplina = (disciplinaCadastroInp.value || "").trim();
-      const produto = (produtoCadastroInp.value || "").trim();
-      const alunos = Number(alunosCadastroInp.value) || 0;
-      const enviado = Number(enviadoCadastroInp.value) || 0;
-      const voltou = Number(voltouCadastroInp.value) || 0;
-      const faltou = Number(faltouCadastroInp.value) || 0;
+        if (!data) {
+          mostrarAlerta(alertCadastro, 'error', 'Informe a data.');
+          return;
+        }
 
-      const selecionados = Array.from(unidadeCadastroSel.selectedOptions || []).map(o => o.value);
-      let unidadesDestino = [];
+        if (!unidade) {
+          mostrarAlerta(alertCadastro, 'error', 'Selecione a unidade.');
+          return;
+        }
 
-      if (selecionados.includes("__TODAS__")) {
-        unidadesDestino = getListaUnidades();
-      } else {
-        unidadesDestino = selecionados.filter(v => v);
-      }
+        if (!disciplina) {
+          mostrarAlerta(alertCadastro, 'error', 'Informe a disciplina.');
+          return;
+        }
 
-      if (!data) {
-        mostrarAlerta(alertCadastro, "error", "Informe a data.");
-        return;
-      }
-      if (!disciplina) {
-        mostrarAlerta(alertCadastro, "error", "Informe a disciplina.");
-        return;
-      }
-      if (!produto) {
-        mostrarAlerta(alertCadastro, "error", "Informe o produto.");
-        return;
-      }
-      if (unidadesDestino.length === 0) {
-        mostrarAlerta(alertCadastro, "error", "Selecione ao menos uma unidade (ou 'Todas').");
-        return;
-      }
-      if (alunos <= 0) {
-        mostrarAlerta(alertCadastro, "error", "Informe a quantidade de alunos (maior que zero).");
-        return;
-      }
+        if (!produto) {
+          mostrarAlerta(alertCadastro, 'error', 'Informe o produto.');
+          return;
+        }
 
-      unidadesDestino.forEach(un => {
+        if (alunos <= 0) {
+          mostrarAlerta(alertCadastro, 'error', 'Informe uma quantidade válida de alunos.');
+          return;
+        }
+
         db.push({
           data,
-          unidade: un,
+          unidade,
           disciplina,
           produto,
           alunos,
@@ -1395,371 +1310,235 @@
           voltou,
           faltou
         });
+
+        salvarDB(db);
+
+        document.getElementById('produtoCadastro').value = '';
+        document.getElementById('alunosCadastro').value = '0';
+        document.getElementById('enviadoCadastro').value = '0';
+        document.getElementById('voltouCadastro').value = '0';
+        document.getElementById('faltouCadastro').value = '0';
+
+        mostrarAlerta(alertCadastro, 'success', 'Registro salvo com sucesso!');
+        atualizarTudo();
       });
 
-      salvarDB(db);
-      atualizarTudo();
-      atualizarTabelaDB();
-      mostrarAlerta(alertCadastro, "success", "Registro(s) salvo(s) com sucesso.");
-
-      produtoCadastroInp.value = "";
-      enviadoCadastroInp.value = "0";
-      voltouCadastroInp.value = "0";
-      faltouCadastroInp.value = "0";
-    });
-
-    // ====== BANCO DE DADOS: TABELA ======
-    function atualizarTabelaDB() {
-      tabelaDBBody.innerHTML = "";
-      const unidadeFiltro = unidadeDBSel.value;
-      const disciplinaFiltro = disciplinaDBSel.value;
-      const produtoFiltro = produtoDBSel.value;
-
-      let tem = false;
-
-      db.forEach((r, idx) => {
-        if (unidadeFiltro && r.unidade !== unidadeFiltro) return;
-        if (disciplinaFiltro && r.disciplina !== disciplinaFiltro) return;
-        if (produtoFiltro && r.produto !== produtoFiltro) return;
-
-        tem = true;
-        const tr = document.createElement("tr");
-
-        const consumoIdeal = calcularConsumoIdeal(r);
-        const consumoPorAluno = calcularConsumoPorAluno(r);
-
-        const tdData = document.createElement("td");
-        const tdUnidade = document.createElement("td");
-        const tdDisciplina = document.createElement("td");
-        const tdProduto = document.createElement("td");
-        const tdAlunos = document.createElement("td");
-        const tdEnviado = document.createElement("td");
-        const tdVoltou = document.createElement("td");
-        const tdFaltou = document.createElement("td");
-        const tdConsumoIdeal = document.createElement("td");
-        const tdConsumoPorAluno = document.createElement("td");
-        const tdAcoes = document.createElement("td");
-
-        tdData.textContent = r.data || "";
-        tdUnidade.textContent = r.unidade || "";
-        tdDisciplina.textContent = r.disciplina || "";
-        tdProduto.textContent = r.produto || "";
-        tdAlunos.textContent = r.alunos || 0;
-        tdEnviado.textContent = r.enviado || 0;
-        tdVoltou.textContent = r.voltou || 0;
-        tdFaltou.textContent = r.faltou || 0;
-        tdConsumoIdeal.textContent = consumoIdeal.toFixed(2);
-        tdConsumoPorAluno.textContent = consumoPorAluno.toFixed(4);
-
-        const btnDel = document.createElement("button");
-        btnDel.textContent = "Excluir";
-        btnDel.className = "btn btn-outline btn-small btn-danger";
-        btnDel.addEventListener("click", () => {
-          if (confirm("Deseja realmente excluir este registro?")) {
-            db.splice(idx, 1);
-            salvarDB(db);
-            atualizarTudo();
-            atualizarTabelaDB();
-          }
-        });
-
-        tdAcoes.appendChild(btnDel);
-
-        tr.appendChild(tdData);
-        tr.appendChild(tdUnidade);
-        tr.appendChild(tdDisciplina);
-        tr.appendChild(tdProduto);
-        tr.appendChild(tdAlunos);
-        tr.appendChild(tdEnviado);
-        tr.appendChild(tdVoltou);
-        tr.appendChild(tdFaltou);
-        tr.appendChild(tdConsumoIdeal);
-        tr.appendChild(tdConsumoPorAluno);
-        tr.appendChild(tdAcoes);
-
-        tabelaDBBody.appendChild(tr);
+      // Banco de Dados
+      document.getElementById('btnLimparFiltros').addEventListener('click', function() {
+        document.getElementById('unidadeDB').value = '';
+        document.getElementById('disciplinaDB').value = '';
+        document.getElementById('produtoDB').value = '';
+        atualizarTabelaDB();
       });
 
-      if (!tem) {
-        wrapTabelaDB.style.display = "none";
-        mostrarAlerta(alertDB, "info", "Nenhum registro encontrado com os filtros atuais.");
-      } else {
-        wrapTabelaDB.style.display = "block";
-        alertDB.style.display = "none";
-      }
-    }
+      document.getElementById('btnApagarFiltrados').addEventListener('click', function() {
+        const unidadeFiltro = document.getElementById('unidadeDB').value;
+        const disciplinaFiltro = document.getElementById('disciplinaDB').value;
+        const produtoFiltro = document.getElementById('produtoDB').value;
 
-    unidadeDBSel.addEventListener("change", () => {
-      atualizarDisciplinaDBOptions();
-      atualizarProdutoDBOptions();
-      atualizarTabelaDB();
-    });
-    disciplinaDBSel.addEventListener("change", () => {
-      atualizarProdutoDBOptions();
-      atualizarTabelaDB();
-    });
-    produtoDBSel.addEventListener("change", atualizarTabelaDB);
-
-    btnVerTodos.addEventListener("click", () => {
-      unidadeDBSel.value = "";
-      disciplinaDBSel.value = "";
-      produtoDBSel.value = "";
-      atualizarFiltrosDB();
-      atualizarTabelaDB();
-    });
-
-    btnApagarItem.addEventListener("click", () => {
-      const unidadeFiltro = unidadeDBSel.value;
-      const disciplinaFiltro = disciplinaDBSel.value;
-      const produtoFiltro = produtoDBSel.value;
-
-      if (!disciplinaFiltro && !produtoFiltro && !unidadeFiltro) {
-        alert("Para apagar, selecione pelo menos um filtro (unidade, disciplina ou produto).");
-        return;
-      }
-
-      if (!confirm("Apagar TODOS os registros filtrados? Esta ação não pode ser desfeita.")) {
-        return;
-      }
-
-      db = db.filter(r => {
-        if (unidadeFiltro && r.unidade !== unidadeFiltro) return true;
-        if (disciplinaFiltro && r.disciplina !== disciplinaFiltro) return true;
-        if (produtoFiltro && r.produto !== produtoFiltro) return true;
-        if (!unidadeFiltro && !disciplinaFiltro && !produtoFiltro) return true;
-        return false;
-      });
-
-      salvarDB(db);
-      atualizarTudo();
-      atualizarTabelaDB();
-    });
-
-    // ====== PARÂMETROS: TABELA ======
-    function atualizarTabelaParametros() {
-      tabelaParametrosBody.innerHTML = "";
-      const unidade = unidadeParametrosSel.value;
-      const disciplina = disciplinaParametrosSel.value;
-
-      if (!unidade || !disciplina) {
-        wrapTabelaParametros.style.display = "none";
-        acoesParametros.style.display = "none";
-        mostrarAlerta(alertParametros, "info", "Selecione unidade e disciplina para carregar os produtos.");
-        return;
-      }
-
-      const produtos = getProdutosPorDisciplinaGlobal(disciplina);
-      if (produtos.length === 0) {
-        wrapTabelaParametros.style.display = "none";
-        acoesParametros.style.display = "none";
-        mostrarAlerta(alertParametros, "info", "Nenhum produto encontrado para essa disciplina no histórico.");
-        return;
-      }
-
-      alertParametros.style.display = "none";
-      wrapTabelaParametros.style.display = "block";
-      acoesParametros.style.display = "flex";
-
-      produtos.forEach(p => {
-        const tr = document.createElement("tr");
-
-        const tdSel = document.createElement("td");
-        const tdProd = document.createElement("td");
-        const tdEnv = document.createElement("td");
-        const tdVol = document.createElement("td");
-        const tdFal = document.createElement("td");
-
-        const toggle = document.createElement("button");
-        toggle.type = "button";
-        toggle.classList.add("toggle-btn", "off"); // padrão desligado (vermelho)
-        toggle.title = "Clique para ligar/desligar";
-        toggle.addEventListener("click", () => {
-          if (toggle.classList.contains("on")) {
-            toggle.classList.remove("on");
-            toggle.classList.add("off");
-          } else {
-            toggle.classList.remove("off");
-            toggle.classList.add("on");
-          }
-        });
-
-        const inpEnv = document.createElement("input");
-        inpEnv.type = "number";
-        inpEnv.min = "0";
-        inpEnv.value = "0";
-
-        const inpVol = document.createElement("input");
-        inpVol.type = "number";
-        inpVol.min = "0";
-        inpVol.value = "0";
-
-        const inpFal = document.createElement("input");
-        inpFal.type = "number";
-        inpFal.min = "0";
-        inpFal.value = "0";
-
-        tdSel.appendChild(toggle);
-        tdProd.textContent = p;
-        tdEnv.appendChild(inpEnv);
-        tdVol.appendChild(inpVol);
-        tdFal.appendChild(inpFal);
-
-        tr.dataset.produto = p;
-        tr.appendChild(tdSel);
-        tr.appendChild(tdProd);
-        tr.appendChild(tdEnv);
-        tr.appendChild(tdVol);
-        tr.appendChild(tdFal);
-
-        tabelaParametrosBody.appendChild(tr);
-      });
-    }
-
-    unidadeParametrosSel.addEventListener("change", atualizarTabelaParametros);
-    disciplinaParametrosSel.addEventListener("change", atualizarTabelaParametros);
-
-    btnSalvarParametros.addEventListener("click", () => {
-      const unidade = unidadeParametrosSel.value;
-      const disciplina = disciplinaParametrosSel.value;
-      const data = dataParametrosInp.value;
-      const alunosGeral = Number(alunosParametrosGeralInp.value) || 0;
-
-      if (!unidade || !disciplina) {
-        mostrarAlerta(alertParametros, "error", "Selecione unidade e disciplina.");
-        return;
-      }
-      if (!data) {
-        mostrarAlerta(alertParametros, "error", "Informe a data.");
-        return;
-      }
-      if (alunosGeral <= 0) {
-        mostrarAlerta(alertParametros, "error", "Informe a quantidade de alunos (maior que zero).");
-        return;
-      }
-
-      let count = 0;
-      Array.from(tabelaParametrosBody.querySelectorAll("tr")).forEach(tr => {
-        const toggle = tr.querySelector(".toggle-btn");
-        const produto = tr.dataset.produto || "";
-        const inputs = tr.querySelectorAll("input[type='number']");
-        const enviado = Number(inputs[0].value) || 0;
-        const voltou = Number(inputs[1].value) || 0;
-        const faltou = Number(inputs[2].value) || 0;
-
-        const selecionado = !toggle || toggle.classList.contains("on");
-
-        if (!selecionado && !enviado && !voltou && !faltou) return;
-
-        db.push({
-          data,
-          unidade,
-          disciplina,
-          produto,
-          alunos: alunosGeral,
-          enviado,
-          voltou,
-          faltou
-        });
-        count++;
-      });
-
-      if (count === 0) {
-        mostrarAlerta(alertParametros, "error", "Nenhum item selecionado/preenchido para salvar.");
-        return;
-      }
-
-      salvarDB(db);
-      atualizarTudo();
-      atualizarTabelaDB();
-      mostrarAlerta(alertParametros, "success", `${count} registro(s) salvo(s) com sucesso.`);
-    });
-
-    btnApagarSelecionados.addEventListener("click", () => {
-      const trs = Array.from(tabelaParametrosBody.querySelectorAll("tr"));
-      let removidos = 0;
-      trs.forEach(tr => {
-        const toggle = tr.querySelector(".toggle-btn");
-        if (toggle && toggle.classList.contains("on")) { // verde = selecionado p/ apagar
-          tr.remove();
-          removidos++;
+        if (!unidadeFiltro && !disciplinaFiltro && !produtoFiltro) {
+          mostrarAlerta(document.getElementById('alertDB'), 'error', 'Selecione pelo menos um filtro para apagar registros.');
+          return;
         }
-      });
-      if (removidos === 0) {
-        alert("Nenhuma linha marcada (interruptor verde) para remoção.");
-      }
-      if (tabelaParametrosBody.children.length === 0) {
-        wrapTabelaParametros.style.display = "none";
-        acoesParametros.style.display = "none";
-      }
-    });
 
-    // ====== UNIDADES: TABELA E AÇÕES ======
-    function atualizarTabelaUnidades() {
-      tabelaUnidadesBody.innerHTML = "";
-      const unidades = getListaUnidades();
+        if (!confirm('Tem certeza que deseja apagar TODOS os registros que correspondem aos filtros atuais?')) {
+          return;
+        }
 
-      if (unidades.length === 0) {
-        wrapTabelaUnidades.style.display = "none";
-        mostrarAlerta(alertUnidades, "info", "Nenhuma unidade cadastrada ainda. Adicione a primeira.");
-        return;
-      }
-
-      wrapTabelaUnidades.style.display = "block";
-      alertUnidades.style.display = "none";
-
-      unidades.forEach(u => {
-        const tr = document.createElement("tr");
-        const tdNome = document.createElement("td");
-        const tdAcoes = document.createElement("td");
-
-        tdNome.textContent = u;
-
-        const btnDel = document.createElement("button");
-        btnDel.textContent = "Excluir";
-        btnDel.className = "btn btn-outline btn-small btn-danger";
-        btnDel.addEventListener("click", () => {
-          if (!confirm(`Remover unidade "${u}"? Todos os registros dessa unidade também podem ser excluídos.`)) return;
-
-          db = db.filter(r => r.unidade !== u);
-          unidadesCadastradas = unidadesCadastradas.filter(x => x !== u);
-          salvarDB(db);
-          salvarUnidadesCadastradas(unidadesCadastradas);
-          atualizarTudo();
-          atualizarTabelaDB();
+        const novosDados = db.filter(registro => {
+          if (unidadeFiltro && registro.unidade !== unidadeFiltro) return true;
+          if (disciplinaFiltro && registro.disciplina !== disciplinaFiltro) return true;
+          if (produtoFiltro && registro.produto !== produtoFiltro) return true;
+          return false;
         });
 
-        tdAcoes.appendChild(btnDel);
-        tr.appendChild(tdNome);
-        tr.appendChild(tdAcoes);
-        tabelaUnidadesBody.appendChild(tr);
+        db = novosDados;
+        salvarDB(db);
+        atualizarTudo();
+        mostrarAlerta(document.getElementById('alertDB'), 'success', 'Registros apagados com sucesso!');
       });
-    }
 
-    btnAdicionarUnidade.addEventListener("click", () => {
-      const nome = (unidadeNovaInp.value || "").trim();
-      if (!nome) {
-        mostrarAlerta(alertUnidades, "error", "Informe o nome da unidade.");
-        return;
-      }
+      document.getElementById('unidadeDB').addEventListener('change', atualizarTabelaDB);
+      document.getElementById('disciplinaDB').addEventListener('change', atualizarTabelaDB);
+      document.getElementById('produtoDB').addEventListener('change', atualizarTabelaDB);
 
-      const todas = getListaUnidades().map(u => u.toLowerCase());
-      if (todas.includes(nome.toLowerCase())) {
-        mostrarAlerta(alertUnidades, "error", "Essa unidade já está cadastrada.");
-        return;
-      }
+      // Parâmetros
+      document.getElementById('btnCarregarProdutos').addEventListener('click', function() {
+        const unidade = document.getElementById('unidadeParametros').value;
+        const disciplina = document.getElementById('disciplinaParametros').value;
+        const alertParametros = document.getElementById('alertParametros');
 
-      unidadesCadastradas.push(nome);
-      salvarUnidadesCadastradas(unidadesCadastradas);
-      unidadeNovaInp.value = "";
+        if (!unidade || !disciplina) {
+          mostrarAlerta(alertParametros, 'error', 'Selecione uma unidade e uma disciplina.');
+          return;
+        }
+
+        const produtos = getProdutosPorDisciplina(disciplina);
+
+        if (produtos.length === 0) {
+          mostrarAlerta(alertParametros, 'info', 'Não há produtos cadastrados para esta disciplina.');
+          return;
+        }
+
+        const tbody = document.querySelector('#tabelaParametros tbody');
+        tbody.innerHTML = '';
+
+        produtos.forEach(produto => {
+          const tr = document.createElement('tr');
+
+          const tdCheck = document.createElement('td');
+          const check = document.createElement('input');
+          check.type = 'checkbox';
+          tdCheck.appendChild(check);
+
+          const tdProduto = document.createElement('td');
+          tdProduto.textContent = produto;
+
+          const tdEnviado = document.createElement('td');
+          const inputEnviado = document.createElement('input');
+          inputEnviado.type = 'number';
+          inputEnviado.min = '0';
+          inputEnviado.value = '0';
+          inputEnviado.className = 'form-control';
+          tdEnviado.appendChild(inputEnviado);
+
+          const tdVoltou = document.createElement('td');
+          const inputVoltou = document.createElement('input');
+          inputVoltou.type = 'number';
+          inputVoltou.min = '0';
+          inputVoltou.value = '0';
+          inputVoltou.className = 'form-control';
+          tdVoltou.appendChild(inputVoltou);
+
+          const tdFaltou = document.createElement('td');
+          const inputFaltou = document.createElement('input');
+          inputFaltou.type = 'number';
+          inputFaltou.min = '0';
+          inputFaltou.value = '0';
+          inputFaltou.className = 'form-control';
+          tdFaltou.appendChild(inputFaltou);
+
+          tr.appendChild(tdCheck);
+          tr.appendChild(tdProduto);
+          tr.appendChild(tdEnviado);
+          tr.appendChild(tdVoltou);
+          tr.appendChild(tdFaltou);
+          tbody.appendChild(tr);
+        });
+
+        document.getElementById('wrapTabelaParametros').style.display = 'block';
+        document.getElementById('acoesParametros').style.display = 'block';
+        mostrarAlerta(alertParametros, 'success', 'Produtos carregados com sucesso!');
+      });
+
+      document.getElementById('btnSalvarParametros').addEventListener('click', function() {
+        const unidade = document.getElementById('unidadeParametros').value;
+        const disciplina = document.getElementById('disciplinaParametros').value;
+        const data = document.getElementById('dataParametros').value;
+        const alunosGeral = parseInt(document.getElementById('alunosParametrosGeral').value) || 0;
+        const alertParametros = document.getElementById('alertParametros');
+
+        if (!unidade || !disciplina) {
+          mostrarAlerta(alertParametros, 'error', 'Selecione uma unidade e uma disciplina.');
+          return;
+        }
+
+        if (!data) {
+          mostrarAlerta(alertParametros, 'error', 'Informe a data.');
+          return;
+        }
+
+        if (alunosGeral <= 0) {
+          mostrarAlerta(alertParametros, 'error', 'Informe uma quantidade válida de alunos.');
+          return;
+        }
+
+        const linhas = document.querySelectorAll('#tabelaParametros tbody tr');
+        let registrosSalvos = 0;
+
+        linhas.forEach(linha => {
+          const check = linha.querySelector('input[type="checkbox"]');
+          const inputs = linha.querySelectorAll('input[type="number"]');
+          const produto = linha.cells[1].textContent;
+
+          if (check.checked ||
+              parseInt(inputs[0].value) > 0 ||
+              parseInt(inputs[1].value) > 0 ||
+              parseInt(inputs[2].value) > 0) {
+
+            db.push({
+              data,
+              unidade,
+              disciplina,
+              produto,
+              alunos: alunosGeral,
+              enviado: parseInt(inputs[0].value) || 0,
+              voltou: parseInt(inputs[1].value) || 0,
+              faltou: parseInt(inputs[2].value) || 0
+            });
+
+            registrosSalvos++;
+          }
+        });
+
+        if (registrosSalvos === 0) {
+          mostrarAlerta(alertParametros, 'error', 'Nenhum registro selecionado para salvar.');
+          return;
+        }
+
+        salvarDB(db);
+        atualizarTudo();
+        mostrarAlerta(alertParametros, 'success', `${registrosSalvos} registro(s) salvo(s) com sucesso!`);
+      });
+
+      document.getElementById('btnApagarSelecionados').addEventListener('click', function() {
+        const linhas = document.querySelectorAll('#tabelaParametros tbody tr');
+        let produtosParaRemover = [];
+
+        linhas.forEach(linha => {
+          const check = linha.querySelector('input[type="checkbox"]');
+          if (check.checked) {
+            produtosParaRemover.push(linha.cells[1].textContent);
+          }
+        });
+
+        if (produtosParaRemover.length === 0) {
+          mostrarAlerta(document.getElementById('alertParametros'), 'error', 'Nenhum produto selecionado para remover.');
+          return;
+        }
+
+        if (!confirm(`Tem certeza que deseja remover ${produtosParaRemover.length} produto(s) da lista?`)) {
+          return;
+        }
+
+        mostrarAlerta(document.getElementById('alertParametros'), 'success', `${produtosParaRemover.length} produto(s) removido(s) da lista!`);
+      });
+
+      // Unidades
+      document.getElementById('btnAdicionarUnidade').addEventListener('click', function() {
+        const novaUnidade = document.getElementById('unidadeNova').value.trim();
+        const alertUnidades = document.getElementById('alertUnidades');
+
+        if (!novaUnidade) {
+          mostrarAlerta(alertUnidades, 'error', 'Informe o nome da unidade.');
+          return;
+        }
+
+        if (unidadesCadastradas.includes(novaUnidade)) {
+          mostrarAlerta(alertUnidades, 'error', 'Esta unidade já está cadastrada.');
+          return;
+        }
+
+        unidadesCadastradas.push(novaUnidade);
+        salvarUnidadesCadastradas(unidadesCadastradas);
+        document.getElementById('unidadeNova').value = '';
+        atualizarTudo();
+        mostrarAlerta(alertUnidades, 'success', 'Unidade cadastrada com sucesso!');
+      });
+
+      // Inicializa
       atualizarTudo();
-      mostrarAlerta(alertUnidades, "success", "Unidade cadastrada com sucesso.");
     });
-
-    // ====== INICIALIZAÇÃO ======
-    (function init() {
-      atualizarTudo();
-      atualizarTabelaDB();
-    })();
   </script>
 </body>
 </html>

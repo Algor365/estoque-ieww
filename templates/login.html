@@ -1,166 +1,456 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Login - Sistema de Sugestão</title>
+  <meta charset="UTF-8" />
+  <title>Login | ECORP Planejamento</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --bg: #0f172a;
-      --border: #1f2937;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --danger: #ef4444;
-      --radius: 12px;
-      --shadow: 0 10px 25px rgba(0,0,0,0.35);
+      --gold: #D4AF37;
+      --gold-light: #F4D03F;
+      --gold-dark: #B8860B;
+      --black: #050505;
+      --black-light: #141414;
+      --muted: #9CA3AF;
+      --text: #F9FAFB;
+      --danger: #EF4444;
+      --radius: 14px;
+      --transition: all 0.25s ease;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     body {
-      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at top left, rgba(212,175,55,0.25), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(212,175,55,0.15), transparent 55%),
+        linear-gradient(135deg, #050505, #141414);
       color: var(--text);
-      padding: 16px;
     }
 
-    .card {
+    .login-wrapper {
       width: 100%;
-      max-width: 380px;
-      background: rgba(15,23,42,0.95);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-      padding: 22px 20px 20px;
+      max-width: 420px;
+      background: radial-gradient(circle at top, rgba(212,175,55,0.18), transparent 55%), #050505;
+      border-radius: 22px;
+      border: 1px solid rgba(212,175,55,0.28);
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.85),
+        0 0 0 1px rgba(0,0,0,0.7);
+      padding: 26px 26px 24px;
+      position: relative;
+      overflow: hidden;
     }
 
-    .logo {
+    .login-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 0 0, rgba(244,208,63,0.18), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(248,250,252,0.05), transparent 55%);
+      opacity: 0.55;
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+
+    .login-header {
+      position: relative;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-circle {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      background: conic-gradient(from 200deg, var(--gold-light), var(--gold-dark), #7c2d12, var(--gold-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow:
+        0 0 0 2px rgba(15,15,15,0.9),
+        0 0 20px rgba(212,175,55,0.55);
+      color: #020617;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .logo-text .brand {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .logo-text .subtitle {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      color: var(--muted);
+    }
+
+    .env-badge {
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.45);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .env-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: radial-gradient(circle, #22c55e 0, #15803d 55%, #052e16 100%);
+      box-shadow: 0 0 12px rgba(34,197,94,0.9);
+    }
+
+    .login-title {
+      position: relative;
+      margin: 6px 0 18px;
+    }
+
+    .login-title h1 {
       font-size: 22px;
       font-weight: 700;
-      letter-spacing: .04em;
+      letter-spacing: .05em;
       text-transform: uppercase;
       margin-bottom: 4px;
     }
 
-    .logo span {
-      color: var(--primary);
-    }
-
-    .subtitle {
-      font-size: 12px;
+    .login-title p {
+      font-size: 13px;
       color: var(--muted);
-      margin-bottom: 16px;
     }
 
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 8px;
+    .form-group {
+      position: relative;
+      margin-bottom: 14px;
     }
 
     label {
-      font-size: 12px;
+      display: block;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
       color: var(--muted);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
-    input {
-      background: #020617;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      padding: 8px 10px;
-      color: var(--text);
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 12px;
       font-size: 14px;
-      outline: none;
+      color: #6b7280;
+    }
+
+    .form-control {
       width: 100%;
+      padding: 10px 12px 10px 34px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,0.95);
+      background:
+        radial-gradient(circle at 0 0, rgba(15,23,42,0.9) 0, #020617 58%);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: var(--transition);
+      box-shadow: inset 0 0 0 1px rgba(15,23,42,0.85);
     }
 
-    input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 1px rgba(129,140,248,0.4);
+    .form-control::placeholder {
+      color: #6b7280;
     }
 
-    .btn {
-      margin-top: 8px;
+    .form-control:focus {
+      border-color: rgba(212,175,55,0.95);
+      box-shadow:
+        0 0 0 1px rgba(212,175,55,0.8),
+        0 0 20px rgba(212,175,55,0.4);
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      cursor: pointer;
+      color: #6b7280;
+      font-size: 14px;
+      transition: color .2s;
+    }
+
+    .toggle-password:hover {
+      color: var(--gold);
+    }
+
+    .form-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 2px 0 16px;
+      font-size: 12px;
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #e5e7eb;
+      cursor: pointer;
+    }
+
+    .remember input {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--gold);
+    }
+
+    .forgot {
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s;
+    }
+
+    .forgot:hover {
+      color: var(--gold);
+    }
+
+    .btn-primary {
+      width: 100%;
       border-radius: 999px;
       border: none;
-      padding: 9px 14px;
-      font-size: 14px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      background: linear-gradient(135deg,var(--primary),var(--primary-dark));
-      color: white;
-      transition: all .2s ease;
+      gap: 8px;
+      color: #020617;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+      box-shadow:
+        0 12px 30px rgba(212,175,55,0.45),
+        0 0 0 1px rgba(148,163,184,0.55);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
     }
 
-    .btn:hover {
-      filter: brightness(1.06);
+    .btn-primary::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0 0, rgba(255,255,255,0.5), transparent 55%);
+      opacity: 0;
+      transition: opacity .25s ease-out;
+    }
+
+    .btn-primary:hover {
       transform: translateY(-1px);
+      box-shadow:
+        0 16px 40px rgba(212,175,55,0.65),
+        0 0 0 1px rgba(248,250,252,0.35);
     }
 
-    .error {
-      margin-top: 8px;
-      padding: 8px 10px;
-      border-radius: 8px;
+    .btn-primary:hover::after {
+      opacity: .85;
+    }
+
+    .btn-primary i {
+      font-size: 14px;
+    }
+
+    .extra {
+      margin-top: 16px;
       font-size: 12px;
-      background: rgba(239,68,68,0.12);
-      border: 1px solid rgba(239,68,68,0.5);
-      color: var(--danger);
+      color: var(--muted);
+      text-align: center;
     }
 
-    .hint {
-      margin-top: 10px;
+    .extra span {
+      color: var(--gold-light);
+      font-weight: 500;
+    }
+
+    .error-message {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--danger);
+      display: none;
+    }
+
+    .footer-note {
+      margin-top: 20px;
       font-size: 11px;
       color: var(--muted);
+      text-align: center;
     }
 
-    .hint code {
-      background: #020617;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      font-size: 11px;
+    @media (max-width: 480px) {
+      .login-wrapper {
+        padding: 20px 18px 18px;
+        border-radius: 18px;
+      }
+
+      .logo-text .brand {
+        font-size: 16px;
+      }
+
+      .login-title h1 {
+        font-size: 19px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="logo">Ecorp <span>Network</span></div>
-    <div class="subtitle">Acesse para usar a sugestão de produtos por turma</div>
+  <div class="login-wrapper">
+    <div class="login-header">
+      <div class="logo-mark">
+        <div class="logo-circle">E</div>
+        <div class="logo-text">
+          <div class="brand">ECORP</div>
+          <div class="subtitle">PLANEJAMENTO</div>
+        </div>
+      </div>
+      <div class="env-badge">
+        <span class="env-dot"></span>
+        <span>Ambiente seguro</span>
+      </div>
+    </div>
 
+    <div class="login-title">
+      <h1>Acessar painel</h1>
+      <p>Informe suas credenciais para entrar no sistema de planejamento.</p>
+    </div>
+
+    <!-- Mensagem de erro server-side (Flask) -->
     {% if error %}
-      <div class="error">{{ error }}</div>
+      <div class="error-message" style="display:block; margin-bottom: 10px;">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        {{ error }}
+      </div>
     {% endif %}
 
-    <form method="post">
-      <div>
-        <label for="username">Usuário</label>
-        <input type="text" id="username" name="username" required autofocus>
-      </div>
-      <div>
-        <label for="password">Senha</label>
-        <input type="password" id="password" name="password" required>
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="form-group">
+        <label for="username">Usuário ou e-mail</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-user"></i>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-control"
+            placeholder="ex: admin@ecorp.com"
+            autocomplete="username"
+            required
+          >
+        </div>
       </div>
 
-      <button class="btn" type="submit">Entrar</button>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <div class="input-wrapper">
+          <i class="fa-solid fa-lock"></i>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-control"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+            required
+          >
+          <span class="toggle-password" id="togglePassword">
+            <i class="fa-regular fa-eye"></i>
+          </span>
+        </div>
+        <div class="error-message" id="errorLocal">Usuário ou senha inválidos.</div>
+      </div>
+
+      <div class="form-row">
+        <label class="remember">
+          <input type="checkbox" name="remember" id="remember">
+          <span>Lembrar de mim</span>
+        </label>
+        <a href="#" class="forgot">Esqueci minha senha</a>
+      </div>
+
+      <button type="submit" class="btn-primary">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        Entrar
+      </button>
     </form>
 
- 
+    <div class="extra">
+      Acesso exclusivo para <span>colaboradores autorizados</span>.
+    </div>
+
+    <div class="footer-note">
+      ECORP • Sistema de Planejamento de Produtos · {{ current_year or "2025" }}
     </div>
   </div>
+
+  <script>
+    // Mostrar / ocultar senha
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const toggleIcon = togglePassword.querySelector('i');
+
+    togglePassword.addEventListener('click', () => {
+      const tipo = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', tipo);
+
+      if (tipo === 'text') {
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+      } else {
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+      }
+    });
+  </script>
 </body>
 </html>
