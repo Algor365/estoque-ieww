@@ -125,7 +125,7 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: #000; /* bolinha preta padrão */
+      background: #000;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -809,90 +809,165 @@
   </div>
 
   <script>
-    // ===== CONFIG DO USUÁRIO (JSON confUser) =====
-    // Espera-se algo como:
-    // window.confUser = { nome: "Gustavo", tipo: "admin" | "user", foto: "caminho_ou_link" };
+    // ===== CONFIG DO USUÁRIO =====
     const ADMIN_AVATAR_URL = "https://i.pinimg.com/236x/c5/ef/e9/c5efe9990be2f5b219b309f5505eaf43.jpg";
 
     function aplicarConfUsuario() {
-      const conf = window.confUser || null;
       const avatarEl = document.getElementById('userAvatar');
-      const nameEl   = document.getElementById('userName');
-      const roleEl   = document.getElementById('userRole');
+      const nameEl = document.getElementById('userName');
+      const roleEl = document.getElementById('userRole');
 
       if (!avatarEl) return;
 
       let nome = "{{ usuario or 'Usuário' }}";
       let tipo = "Administrador";
-      let foto = null;
-
-      if (conf) {
-        nome = conf.nome || conf.name || conf.usuario || nome;
-        tipo = conf.tipo || conf.role || conf.perfil || tipo;
-        foto = conf.foto || conf.foto_perfil || conf.profile_image || conf.avatar || null;
-      }
 
       if (nameEl) nameEl.textContent = nome;
       if (roleEl) roleEl.textContent = tipo;
 
       // Se for admin, usa sempre a foto do Sukuna
       if (String(tipo).toLowerCase() === "admin" || String(tipo).toLowerCase() === "administrador") {
-        foto = ADMIN_AVATAR_URL;
-      }
-
-      if (foto) {
-        avatarEl.style.backgroundImage = `url('${foto}')`;
-        avatarEl.style.backgroundColor = "#000"; // só borda/aporte
-        avatarEl.innerHTML = ""; // tira ícone, se tiver
+        avatarEl.style.backgroundImage = `url('${ADMIN_AVATAR_URL}')`;
+        avatarEl.style.backgroundColor = "#000";
+        avatarEl.innerHTML = "";
       } else {
-        // sem foto -> bolinha preta
         avatarEl.style.backgroundImage = "none";
         avatarEl.style.backgroundColor = "#000";
         avatarEl.innerHTML = "";
       }
     }
 
-    // STORAGE
-    const STORAGE_KEY_DB = "planejamentoProdutosDB";
-    const STORAGE_KEY_UNIDADES = "planejamentoUnidades";
+    // ===== CONFIG DA API =====
+    const API_BASE = window.location.origin;
 
-    function carregarDB() {
+    // Funções para carregar dados da API
+    async function carregarDB() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY_DB);
-        if (!raw) return [];
-        const arr = JSON.parse(raw);
-        if (!Array.isArray(arr)) return [];
-        return arr;
+        console.log("Carregando DB da API...");
+        const response = await fetch(`${API_BASE}/api/planejamento/db`);
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return [];
+          }
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("DB carregado:", data.length, "registros");
+        return Array.isArray(data) ? data : [];
       } catch (e) {
-        console.error("Erro ao ler DB:", e);
+        console.error("Erro ao ler DB da API:", e);
+        // Fallback para localStorage
+        try {
+          const raw = localStorage.getItem("planejamentoProdutosDB");
+          if (raw) {
+            const dados = JSON.parse(raw);
+            console.log("Usando localStorage como fallback:", dados.length, "registros");
+            return dados;
+          }
+        } catch (err) {
+          console.error("Erro ao ler localStorage:", err);
+        }
         return [];
       }
     }
 
-    function salvarDB(dados) {
-      localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(dados));
+    async function salvarDB(dados) {
+      try {
+        console.log("Salvando DB na API...", dados.length, "registros");
+        const response = await fetch(`${API_BASE}/api/planejamento/db`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return false;
+          }
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        const resultado = await response.json();
+        console.log("DB salvo na API:", resultado);
+        
+        // Também salva no localStorage como backup
+        localStorage.setItem("planejamentoProdutosDB", JSON.stringify(dados));
+        return true;
+      } catch (e) {
+        console.error("Erro ao salvar DB na API:", e);
+        // Fallback para localStorage
+        localStorage.setItem("planejamentoProdutosDB", JSON.stringify(dados));
+        return false;
+      }
     }
 
-    let db = carregarDB();
-
-    function carregarUnidadesCadastradas() {
+    async function carregarUnidadesCadastradas() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY_UNIDADES);
-        if (!raw) return ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
-        const arr = JSON.parse(raw);
-        if (!Array.isArray(arr)) return ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
-        return arr;
+        console.log("Carregando unidades da API...");
+        const response = await fetch(`${API_BASE}/api/planejamento/unidades`);
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
+          }
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Unidades carregadas:", data);
+        return Array.isArray(data) ? data : ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
       } catch (e) {
-        console.error("Erro ao ler unidades:", e);
+        console.error("Erro ao ler unidades da API:", e);
+        // Fallback para localStorage
+        try {
+          const raw = localStorage.getItem("planejamentoUnidades");
+          if (raw) {
+            const dados = JSON.parse(raw);
+            console.log("Usando localStorage para unidades:", dados);
+            return dados;
+          }
+        } catch (err) {
+          console.error("Erro ao ler localStorage:", err);
+        }
         return ['São Paulo', 'Rio de Janeiro', 'Belo Horizonte'];
       }
     }
 
-    function salvarUnidadesCadastradas(unidades) {
-      localStorage.setItem(STORAGE_KEY_UNIDADES, JSON.stringify(unidades));
+    async function salvarUnidadesCadastradas(unidades) {
+      try {
+        console.log("Salvando unidades na API...", unidades);
+        const response = await fetch(`${API_BASE}/api/planejamento/unidades`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(unidades)
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.href = "/login";
+            return false;
+          }
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        const resultado = await response.json();
+        console.log("Unidades salvas na API:", resultado);
+        
+        // Também salva no localStorage como backup
+        localStorage.setItem("planejamentoUnidades", JSON.stringify(unidades));
+        return true;
+      } catch (e) {
+        console.error("Erro ao salvar unidades na API:", e);
+        // Fallback para localStorage
+        localStorage.setItem("planejamentoUnidades", JSON.stringify(unidades));
+        return false;
+      }
     }
 
-    let unidadesCadastradas = carregarUnidadesCadastradas();
+    // ===== VARIÁVEIS GLOBAIS =====
+    let db = [];
+    let unidadesCadastradas = [];
 
     function mostrarAlerta(elemento, tipo, mensagem) {
       elemento.textContent = mensagem;
@@ -1070,11 +1145,18 @@
         const btnExcluir = document.createElement('button');
         btnExcluir.className = 'btn btn-danger btn-small';
         btnExcluir.innerHTML = '<i class="fas fa-trash"></i> Excluir';
-        btnExcluir.addEventListener('click', () => {
+        btnExcluir.addEventListener('click', async () => {
           if (confirm(`Tem certeza que deseja excluir a unidade "${unidade}"?`)) {
             unidadesCadastradas.splice(index, 1);
-            salvarUnidadesCadastradas(unidadesCadastradas);
-            atualizarTudo();
+            const salvo = await salvarUnidadesCadastradas(unidadesCadastradas);
+            if (salvo) {
+              await inicializarDados();
+              mostrarAlerta(document.getElementById('alertUnidades'), 'success', 'Unidade excluída com sucesso!');
+            } else {
+              mostrarAlerta(document.getElementById('alertUnidades'), 'error', 'Erro ao excluir unidade.');
+              // Restaura localmente se falhou
+              unidadesCadastradas.splice(index, 0, unidade);
+            }
           }
         });
 
@@ -1143,11 +1225,19 @@
         btnExcluir.className = 'btn btn-danger btn-small';
         btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
         btnExcluir.title = 'Excluir registro';
-        btnExcluir.addEventListener('click', () => {
+        btnExcluir.addEventListener('click', async () => {
           if (confirm('Tem certeza que deseja excluir este registro?')) {
             db.splice(dbIndex, 1);
-            salvarDB(db);
-            atualizarTudo();
+            const salvo = await salvarDB(db);
+            if (salvo) {
+              await inicializarDados();
+              mostrarAlerta(document.getElementById('alertDB'), 'success', 'Registro excluído com sucesso!');
+            } else {
+              mostrarAlerta(document.getElementById('alertDB'), 'error', 'Erro ao excluir registro.');
+              // Restaura localmente se falhou
+              db.splice(dbIndex, 0, registro);
+              atualizarTabelaDB();
+            }
           }
         });
 
@@ -1157,7 +1247,8 @@
       });
     }
 
-    function atualizarTudo() {
+    async function atualizarTudo() {
+      console.log("Atualizando tudo...");
       atualizarSelectUnidades('unidadeCadastro');
       atualizarSelectUnidades('unidadeDB', true);
       atualizarSelectUnidades('unidadeParametros');
@@ -1168,15 +1259,36 @@
       atualizarDatalistDisciplinas();
       atualizarTabelaUnidades();
       atualizarTabelaDB();
+      console.log("Tudo atualizado!");
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    // Função para inicializar dados
+    async function inicializarDados() {
+      console.log("Inicializando dados...");
+      try {
+        db = await carregarDB();
+        unidadesCadastradas = await carregarUnidadesCadastradas();
+        console.log("Dados carregados:", db.length, "registros,", unidadesCadastradas.length, "unidades");
+        await atualizarTudo();
+      } catch (error) {
+        console.error("Erro ao inicializar dados:", error);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
       const hoje = new Date().toISOString().split('T')[0];
-      document.getElementById('dataCadastro').value = hoje;
-      document.getElementById('dataParametros').value = hoje;
+      if (document.getElementById('dataCadastro')) {
+        document.getElementById('dataCadastro').value = hoje;
+      }
+      if (document.getElementById('dataParametros')) {
+        document.getElementById('dataParametros').value = hoje;
+      }
 
       // aplica avatar/nome/role do JSON confUser
       aplicarConfUsuario();
+
+      // Inicializa dados do servidor
+      await inicializarDados();
 
       // Navegação abas
       document.querySelectorAll('.nav-item').forEach(item => {
@@ -1222,8 +1334,8 @@
       });
 
       // Atualizar
-      document.getElementById('btnAtualizar').addEventListener('click', function() {
-        atualizarTudo();
+      document.getElementById('btnAtualizar').addEventListener('click', async function() {
+        await inicializarDados();
         mostrarAlerta(document.getElementById('alertSugestao'), 'success', 'Sistema atualizado com sucesso!');
       });
 
@@ -1312,7 +1424,7 @@
       });
 
       // Cadastro
-      document.getElementById('btnSalvarCadastro').addEventListener('click', function() {
+      document.getElementById('btnSalvarCadastro').addEventListener('click', async function() {
         const data = document.getElementById('dataCadastro').value;
         const disciplina = document.getElementById('disciplinaCadastro').value.trim();
         const produto = document.getElementById('produtoCadastro').value.trim();
@@ -1348,7 +1460,7 @@
           return;
         }
 
-        db.push({
+        const novoRegistro = {
           data,
           unidade,
           disciplina,
@@ -1357,18 +1469,27 @@
           enviado,
           voltou,
           faltou
-        });
+        };
 
-        salvarDB(db);
-
-        document.getElementById('produtoCadastro').value = '';
-        document.getElementById('alunosCadastro').value = '0';
-        document.getElementById('enviadoCadastro').value = '0';
-        document.getElementById('voltouCadastro').value = '0';
-        document.getElementById('faltouCadastro').value = '0';
-
-        mostrarAlerta(alertCadastro, 'success', 'Registro salvo com sucesso!');
-        atualizarTudo();
+        // Adiciona localmente
+        db.push(novoRegistro);
+        
+        // Salva no servidor
+        const salvo = await salvarDB(db);
+        
+        if (salvo) {
+          mostrarAlerta(alertCadastro, 'success', 'Registro salvo com sucesso!');
+          // Limpa campos
+          document.getElementById('produtoCadastro').value = '';
+          document.getElementById('alunosCadastro').value = '0';
+          document.getElementById('enviadoCadastro').value = '0';
+          document.getElementById('voltouCadastro').value = '0';
+          document.getElementById('faltouCadastro').value = '0';
+          // Recarrega os dados (em caso de múltiplos usuários)
+          await inicializarDados();
+        } else {
+          mostrarAlerta(alertCadastro, 'error', 'Erro ao salvar registro. Dados mantidos localmente.');
+        }
       });
 
       // Banco de Dados
@@ -1379,13 +1500,14 @@
         atualizarTabelaDB();
       });
 
-      document.getElementById('btnApagarFiltrados').addEventListener('click', function() {
+      document.getElementById('btnApagarFiltrados').addEventListener('click', async function() {
         const unidadeFiltro = document.getElementById('unidadeDB').value;
         const disciplinaFiltro = document.getElementById('disciplinaDB').value;
         const produtoFiltro = document.getElementById('produtoDB').value;
+        const alertDB = document.getElementById('alertDB');
 
         if (!unidadeFiltro && !disciplinaFiltro && !produtoFiltro) {
-          mostrarAlerta(document.getElementById('alertDB'), 'error', 'Selecione pelo menos um filtro para apagar registros.');
+          mostrarAlerta(alertDB, 'error', 'Selecione pelo menos um filtro para apagar registros.');
           return;
         }
 
@@ -1400,10 +1522,14 @@
           return false;
         });
 
-        db = novosDados;
-        salvarDB(db);
-        atualizarTudo();
-        mostrarAlerta(document.getElementById('alertDB'), 'success', 'Registros apagados com sucesso!');
+        const salvo = await salvarDB(novosDados);
+        
+        if (salvo) {
+          await inicializarDados();
+          mostrarAlerta(alertDB, 'success', 'Registros apagados com sucesso!');
+        } else {
+          mostrarAlerta(alertDB, 'error', 'Erro ao apagar registros. Operação cancelada.');
+        }
       });
 
       document.getElementById('unidadeDB').addEventListener('change', atualizarTabelaDB);
@@ -1479,7 +1605,7 @@
         mostrarAlerta(alertParametros, 'success', 'Produtos carregados com sucesso!');
       });
 
-      document.getElementById('btnSalvarParametros').addEventListener('click', function() {
+      document.getElementById('btnSalvarParametros').addEventListener('click', async function() {
         const unidade = document.getElementById('unidadeParametros').value;
         const disciplina = document.getElementById('disciplinaParametros').value;
         const data = document.getElementById('dataParametros').value;
@@ -1534,9 +1660,13 @@
           return;
         }
 
-        salvarDB(db);
-        atualizarTudo();
-        mostrarAlerta(alertParametros, 'success', `${registrosSalvos} registro(s) salvo(s) com sucesso!`);
+        const salvo = await salvarDB(db);
+        if (salvo) {
+          await inicializarDados();
+          mostrarAlerta(alertParametros, 'success', `${registrosSalvos} registro(s) salvo(s) com sucesso!`);
+        } else {
+          mostrarAlerta(alertParametros, 'error', 'Erro ao salvar registros.');
+        }
       });
 
       document.getElementById('btnApagarSelecionados').addEventListener('click', function() {
@@ -1563,7 +1693,7 @@
       });
 
       // Unidades
-      document.getElementById('btnAdicionarUnidade').addEventListener('click', function() {
+      document.getElementById('btnAdicionarUnidade').addEventListener('click', async function() {
         const novaUnidade = document.getElementById('unidadeNova').value.trim();
         const alertUnidades = document.getElementById('alertUnidades');
 
@@ -1578,14 +1708,20 @@
         }
 
         unidadesCadastradas.push(novaUnidade);
-        salvarUnidadesCadastradas(unidadesCadastradas);
-        document.getElementById('unidadeNova').value = '';
-        atualizarTudo();
-        mostrarAlerta(alertUnidades, 'success', 'Unidade cadastrada com sucesso!');
+        
+        const salvo = await salvarUnidadesCadastradas(unidadesCadastradas);
+        
+        if (salvo) {
+          document.getElementById('unidadeNova').value = '';
+          await inicializarDados();
+          mostrarAlerta(alertUnidades, 'success', 'Unidade cadastrada com sucesso!');
+        } else {
+          mostrarAlerta(alertUnidades, 'error', 'Erro ao salvar unidade. Dados mantidos localmente.');
+          // Remove localmente se falhou
+          const index = unidadesCadastradas.indexOf(novaUnidade);
+          if (index > -1) unidadesCadastradas.splice(index, 1);
+        }
       });
-
-      // Inicializa selects/tabelas
-      atualizarTudo();
     });
   </script>
 </body>
