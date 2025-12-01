@@ -125,13 +125,18 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      background: #000; /* bolinha preta padrão */
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 10px;
       color: var(--black);
       font-weight: bold;
+      overflow: hidden;
+      border: 2px solid rgba(212, 175, 55, 0.4);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     .user-name {
@@ -480,11 +485,9 @@
       </nav>
 
       <div class="user-info">
-        <div class="user-avatar">
-          <i class="fas fa-user"></i>
-        </div>
+        <div class="user-avatar" id="userAvatar"></div>
         <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
-        <div class="user-role">Administrador</div>
+        <div class="user-role" id="userRole">Administrador</div>
       </div>
     </aside>
 
@@ -573,7 +576,6 @@
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">Unidade</label>
-                <!-- AGORA IGUAL AO CAMPO DE BANCO DE DADOS (SELECT SIMPLES) -->
                 <select class="form-control" id="unidadeCadastro">
                   <option value="">Selecione...</option>
                 </select>
@@ -807,10 +809,62 @@
   </div>
 
   <script>
-    // STORAGE
+        // ===== CONFIG DO USUÁRIO (JSON confUser) =====
+    // ...El   = document.getElementById('userName');
+      const roleEl   = document.getElementById('userRole');
+      const avatarEl = document.getElementById('userAvatar');
+
+      let confUser = null;
+
+      try {
+        // Tenta ler arquivo conf_user.json
+        // (caso você esteja servindo esse arquivo pelo backend)
+        // Aqui estamos assumindo que o backend pode servir como "/conf_user.json".
+        // Se não existir, caímos no catch e deixamos uma config padrão.
+        confUser = window.confUser || null;
+      } catch (e) {
+        console.warn("Não foi possível carregar confUser de window:", e);
+      }
+
+      if (!confUser) {
+        // fallback padrão
+        confUser = {
+          "user_name": "Usuário",
+          "user_role": "Admin",
+          "user_avatar": null // se null, mostra bolinha preta
+        };
+      }
+
+      if (nameEl)  nameEl.textContent  = confUser.user_name || "Usuário";
+      if (roleEl)  roleEl.textContent  = confUser.user_role || "Admin";
+      if (avatarEl) {
+        if (confUser.user_avatar) {
+          avatarEl.style.backgroundImage = `url('${confUser.user_avatar}')`;
+          avatarEl.style.backgroundSize  = "cover";
+        } else {
+          avatarEl.style.backgroundImage = "none";
+          avatarEl.style.backgroundColor = "#000"; // bolinha preta
+        }
+      }
+    
+
+    // ===== CONSTANTES E ESTADO GLOBAL =====
     const STORAGE_KEY_DB = "planejamentoProdutosDB";
     const STORAGE_KEY_UNIDADES = "planejamentoUnidades";
 
+    // Estrutura do "DB" de exemplo:
+    // {
+    //   unidade: "São Paulo",
+    //   disciplina: "Toxina Botulínica",
+    //   produto: "Seringa 1ml",
+    //   categoria: "Seringas",
+    //   quantidade_por_aluno: 2,
+    //   alunos_atendidos: 30,
+    //   data: "2025-11-20",
+    //   observacoes: ""
+    // }
+
+    // ===== FUNÇÕES DE PERSISTÊNCIA (localStorage + API) =====
     function carregarDB() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_DB);
@@ -825,7 +879,17 @@
     }
 
     function salvarDB(dados) {
+      // Salva no navegador
       localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(dados));
+
+      // Salva também no servidor (JSON da API)
+      fetch("/api/planejamento/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dados)
+      }).catch(err => {
+        console.error("Erro ao salvar DB no servidor:", err);
+      });
     }
 
     let db = carregarDB();
@@ -844,172 +908,205 @@
     }
 
     function salvarUnidadesCadastradas(unidades) {
+      // Salva no navegador
       localStorage.setItem(STORAGE_KEY_UNIDADES, JSON.stringify(unidades));
+
+      // Salva também no servidor (JSON da API)
+      fetch("/api/planejamento/unidades", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(unidades)
+      }).catch(err => {
+        console.error("Erro ao salvar unidades no servidor:", err);
+      });
+    }
+
+    async function sincronizarComServidor() {
+      try {
+        // Carregar DB do servidor
+        const respDB = await fetch("/api/planejamento/db");
+        if (respDB.ok) {
+          const dadosServidor = await respDB.json();
+          if (Array.isArray(dadosServidor)) {
+            db = dadosServidor;
+            localStorage.setItem(STORAGE_KEY_DB, JSON.stringify(db));
+          }
+        }
+
+        // Carregar Unidades do servidor
+        const respUn = await fetch("/api/planejamento/unidades");
+        if (respUn.ok) {
+          const unidadesServidor = await respUn.json();
+          if (Array.isArray(unidadesServidor)) {
+            unidadesCadastradas = unidadesServidor;
+            localStorage.setItem(
+              STORAGE_KEY_UNIDADES,
+              JSON.stringify(unidadesCadastradas)
+            );
+          }
+        }
+      } catch (e) {
+        console.error("Erro ao sincronizar com servidor:", e);
+      }
     }
 
     let unidadesCadastradas = carregarUnidadesCadastradas();
 
+    // ===== UTILITÁRIOS DE UI =====
     function mostrarAlerta(elemento, tipo, mensagem) {
+      if (!elemento) return;
+      elemento.classList.remove('success', 'error');
+      elemento.classList.add(tipo);
       elemento.textContent = mensagem;
-      elemento.className = `alert alert-${tipo}`;
       elemento.style.display = 'block';
+
       setTimeout(() => {
         elemento.style.display = 'none';
       }, 5000);
     }
 
-    function formatarData(data) {
-      if (!data) return '';
-      const date = new Date(data);
-      return date.toLocaleDateString('pt-BR');
+    function limparFormulario(formId) {
+      const form = document.getElementById(formId);
+      if (form) form.reset();
     }
 
-    function getDisciplinasUnicas() {
+    // ===== ATUALIZAÇÃO DE SELECTS E TABELAS =====
+    function obterDisciplinasUnicas() {
       const disciplinas = new Set();
-      db.forEach(item => {
-        if (item.disciplina) disciplinas.add(item.disciplina);
+      db.forEach(reg => {
+        if (reg.disciplina) disciplinas.add(reg.disciplina);
       });
       return Array.from(disciplinas).sort();
     }
 
-    function getProdutosUnicos() {
+    function obterProdutosUnicosPorDisciplina(disciplina) {
       const produtos = new Set();
-      db.forEach(item => {
-        if (item.produto) produtos.add(item.produto);
-      });
-      return Array.from(produtos).sort();
-    }
-
-    function getUnidadesFromDB() {
-      const unidades = new Set();
-      db.forEach(item => {
-        if (item.unidade) unidades.add(item.unidade);
-      });
-      return Array.from(unidades).sort();
-    }
-
-    function getListaUnidades() {
-      const todasUnidades = new Set();
-      unidadesCadastradas.forEach(u => todasUnidades.add(u));
-      getUnidadesFromDB().forEach(u => todasUnidades.add(u));
-      return Array.from(todasUnidades).sort();
-    }
-
-    function getProdutosPorDisciplina(disciplina) {
-      const produtos = new Set();
-      db.forEach(item => {
-        if (item.disciplina === disciplina && item.produto) {
-          produtos.add(item.produto);
+      db.forEach(reg => {
+        if (reg.disciplina === disciplina && reg.produto) {
+          produtos.add(reg.produto);
         }
       });
       return Array.from(produtos).sort();
     }
 
-    function calcularConsumoIdeal(registro) {
-      const enviado = Number(registro.enviado) || 0;
-      const voltou = Number(registro.voltou) || 0;
-      const faltou = Number(registro.faltou) || 0;
-      return Math.max(0, enviado - voltou + faltou);
-    }
-
-    function calcularConsumoPorAluno(registro) {
-      const alunos = Number(registro.alunos) || 0;
-      if (alunos <= 0) return 0;
-      return calcularConsumoIdeal(registro) / alunos;
-    }
-
-    function atualizarSelectUnidades(selectId, incluirTodas = false) {
+    function atualizarSelectUnidades(selectId) {
       const select = document.getElementById(selectId);
+      if (!select) return;
       const valorAtual = select.value;
       select.innerHTML = '';
 
-      if (incluirTodas) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Todas';
-        select.appendChild(option);
-      }
-
-      getListaUnidades().forEach(unidade => {
-        const option = document.createElement('option');
-        option.value = unidade;
-        option.textContent = unidade;
-        select.appendChild(option);
+      unidadesCadastradas.forEach(un => {
+        const opt = document.createElement('option');
+        opt.value = un;
+        opt.textContent = un;
+        select.appendChild(opt);
       });
 
-      if (getListaUnidades().includes(valorAtual)) {
+      if (unidadesCadastradas.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Nenhuma unidade cadastrada';
+        select.appendChild(opt);
+      }
+
+      if (valorAtual && unidadesCadastradas.includes(valorAtual)) {
         select.value = valorAtual;
       }
     }
 
-    function atualizarSelectDisciplinas(selectId, incluirTodas = false) {
+    function atualizarSelectDisciplinas(selectId) {
       const select = document.getElementById(selectId);
+      if (!select) return;
       const valorAtual = select.value;
       select.innerHTML = '';
 
-      if (incluirTodas) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Todas';
-        select.appendChild(option);
-      }
-
-      getDisciplinasUnicas().forEach(disciplina => {
-        const option = document.createElement('option');
-        option.value = disciplina;
-        option.textContent = disciplina;
-        select.appendChild(option);
+      const disciplinas = obterDisciplinasUnicas();
+      disciplinas.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        select.appendChild(opt);
       });
 
-      if (getDisciplinasUnicas().includes(valorAtual)) {
+      if (disciplinas.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Nenhuma disciplina cadastrada';
+        select.appendChild(opt);
+      }
+
+      if (valorAtual && disciplinas.includes(valorAtual)) {
+        select.value = valorAtual;
+      }
+    }
+
+    function atualizarSelectProdutos(selectId, incluirOpcaoVazia = false) {
+      const select = document.getElementById(selectId);
+      const disciplinaRef = document.getElementById('disciplinaCadastro') || document.getElementById('disciplinaSugestao');
+      if (!select) return;
+
+      const valorAtual = select.value;
+      select.innerHTML = '';
+
+      if (incluirOpcaoVazia) {
+        const optVazio = document.createElement('option');
+        optVazio.value = '';
+        optVazio.textContent = 'Todos os produtos';
+        select.appendChild(optVazio);
+      }
+
+      const disciplina = disciplinaRef ? disciplinaRef.value : null;
+      if (!disciplina) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Selecione uma disciplina primeiro';
+        select.appendChild(opt);
+        return;
+      }
+
+      const produtos = obterProdutosUnicosPorDisciplina(disciplina);
+      produtos.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        select.appendChild(opt);
+      });
+
+      if (produtos.length === 0) {
+        const opt = document.createElement('option');
+        opt.value = '';
+        opt.textContent = 'Nenhum produto cadastrado';
+        select.appendChild(opt);
+      }
+
+      if (valorAtual && produtos.includes(valorAtual)) {
         select.value = valorAtual;
       }
     }
 
     function atualizarDatalistDisciplinas() {
       const datalist = document.getElementById('disciplinasLista');
+      if (!datalist) return;
+
       datalist.innerHTML = '';
-      getDisciplinasUnicas().forEach(disciplina => {
-        const option = document.createElement('option');
-        option.value = disciplina;
-        datalist.appendChild(option);
+      const disciplinas = obterDisciplinasUnicas();
+      disciplinas.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d;
+        datalist.appendChild(opt);
       });
-    }
-
-    function atualizarSelectProdutos(selectId, incluirTodos = false) {
-      const select = document.getElementById(selectId);
-      const valorAtual = select.value;
-      select.innerHTML = '';
-
-      if (incluirTodos) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Todos';
-        select.appendChild(option);
-      }
-
-      getProdutosUnicos().forEach(produto => {
-        const option = document.createElement('option');
-        option.value = produto;
-        option.textContent = produto;
-        select.appendChild(option);
-      });
-
-      if (getProdutosUnicos().includes(valorAtual)) {
-        select.value = valorAtual;
-      }
     }
 
     function atualizarTabelaUnidades() {
       const tbody = document.querySelector('#tabelaUnidades tbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       if (unidadesCadastradas.length === 0) {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
         td.colSpan = 2;
-        td.textContent = 'Nenhuma unidade cadastrada';
-        td.style.textAlign = 'center';
+        td.textContent = 'Nenhuma unidade cadastrada.';
         tr.appendChild(td);
         tbody.appendChild(tr);
         return;
@@ -1023,8 +1120,8 @@
 
         const tdAcoes = document.createElement('td');
         const btnExcluir = document.createElement('button');
-        btnExcluir.className = 'btn btn-danger btn-small';
-        btnExcluir.innerHTML = '<i class="fas fa-trash"></i> Excluir';
+        btnExcluir.textContent = 'Excluir';
+        btnExcluir.className = 'btn btn-secondary';
         btnExcluir.addEventListener('click', () => {
           if (confirm(`Tem certeza que deseja excluir a unidade "${unidade}"?`)) {
             unidadesCadastradas.splice(index, 1);
@@ -1034,6 +1131,7 @@
         });
 
         tdAcoes.appendChild(btnExcluir);
+
         tr.appendChild(tdNome);
         tr.appendChild(tdAcoes);
         tbody.appendChild(tr);
@@ -1042,93 +1140,229 @@
 
     function atualizarTabelaDB() {
       const tbody = document.querySelector('#tabelaDB tbody');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
-      const unidadeFiltro = document.getElementById('unidadeDB').value;
-      const disciplinaFiltro = document.getElementById('disciplinaDB').value;
-      const produtoFiltro = document.getElementById('produtoDB').value;
-
-      const registrosFiltrados = db.filter(registro => {
-        if (unidadeFiltro && registro.unidade !== unidadeFiltro) return false;
-        if (disciplinaFiltro && registro.disciplina !== disciplinaFiltro) return false;
-        if (produtoFiltro && registro.produto !== produtoFiltro) return false;
-        return true;
-      });
-
-      if (registrosFiltrados.length === 0) {
+      if (db.length === 0) {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
         td.colSpan = 9;
-        td.textContent = 'Nenhum registro encontrado';
-        td.style.textAlign = 'center';
+        td.textContent = 'Nenhum registro cadastrado.';
         tr.appendChild(td);
         tbody.appendChild(tr);
         return;
       }
 
-      registrosFiltrados.forEach(registro => {
+      db.forEach((reg, index) => {
         const tr = document.createElement('tr');
 
-        const dbIndex = db.findIndex(r =>
-          r.data === registro.data &&
-          r.unidade === registro.unidade &&
-          r.disciplina === registro.disciplina &&
-          r.produto === registro.produto
-        );
+        const tdIndex = document.createElement('td');
+        tdIndex.textContent = index + 1;
 
-        const campos = [
-          formatarData(registro.data),
-          registro.unidade,
-          registro.disciplina,
-          registro.produto,
-          registro.alunos,
-          registro.enviado,
-          registro.voltou,
-          registro.faltou
-        ];
+        const tdUnidade = document.createElement('td');
+        tdUnidade.textContent = reg.unidade || '-';
 
-        campos.forEach(valor => {
-          const td = document.createElement('td');
-          td.textContent = valor;
-          tr.appendChild(td);
-        });
+        const tdDisciplina = document.createElement('td');
+        tdDisciplina.textContent = reg.disciplina || '-';
 
-        const tdAcoes = document.createElement('td');
-        const btnExcluir = document.createElement('button');
-        btnExcluir.className = 'btn btn-danger btn-small';
-        btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
-        btnExcluir.title = 'Excluir registro';
-        btnExcluir.addEventListener('click', () => {
-          if (confirm('Tem certeza que deseja excluir este registro?')) {
-            db.splice(dbIndex, 1);
-            salvarDB(db);
-            atualizarTudo();
-          }
-        });
+        const tdProduto = document.createElement('td');
+        tdProduto.textContent = reg.produto || '-';
 
-        tdAcoes.appendChild(btnExcluir);
-        tr.appendChild(tdAcoes);
+        const tdCategoria = document.createElement('td');
+        tdCategoria.textContent = reg.categoria || '-';
+
+        const tdQtdAl = document.createElement('td');
+        tdQtdAl.textContent = reg.quantidade_por_aluno != null ? reg.quantidade_por_aluno : '-';
+
+        const tdAlunos = document.createElement('td');
+        tdAlunos.textContent = reg.alunos_atendidos != null ? reg.alunos_atendidos : '-';
+
+        const tdData = document.createElement('td');
+        tdData.textContent = reg.data || '-';
+
+        const tdObs = document.createElement('td');
+        tdObs.textContent = reg.observacoes || '-';
+
+        tr.appendChild(tdIndex);
+        tr.appendChild(tdUnidade);
+        tr.appendChild(tdDisciplina);
+        tr.appendChild(tdProduto);
+        tr.appendChild(tdCategoria);
+        tr.appendChild(tdQtdAl);
+        tr.appendChild(tdAlunos);
+        tr.appendChild(tdData);
+        tr.appendChild(tdObs);
+
         tbody.appendChild(tr);
       });
     }
 
     function atualizarTudo() {
-      atualizarSelectUnidades('unidadeCadastro');        // cadastro (select simples)
-      atualizarSelectUnidades('unidadeDB', true);        // banco de dados (com "Todas")
-      atualizarSelectUnidades('unidadeParametros');      // parâmetros
+      atualizarSelectUnidades('unidadeCadastro');
+      atualizarSelectUnidades('unidadeSugestao');
+      atualizarSelectUnidades('unidadeFiltros');
       atualizarSelectDisciplinas('disciplinaSugestao');
-      atualizarSelectDisciplinas('disciplinaDB', true);
-      atualizarSelectDisciplinas('disciplinaParametros');
-      atualizarSelectProdutos('produtoDB', true);
       atualizarDatalistDisciplinas();
       atualizarTabelaUnidades();
       atualizarTabelaDB();
     }
 
+    // ===== CÁLCULO DE SUGESTÃO =====
+    function calcularSugestao(disciplina, alunos) {
+      const registrosDisciplina = db.filter(reg => reg.disciplina === disciplina);
+
+      if (registrosDisciplina.length === 0) return [];
+
+      const agrupadoPorProduto = {};
+      registrosDisciplina.forEach(reg => {
+        const key = reg.produto || 'Produto sem nome';
+        if (!agrupadoPorProduto[key]) {
+          agrupadoPorProduto[key] = {
+            produto: key,
+            categoria: reg.categoria || '-',
+            totalQuantidadePorAluno: 0,
+            totalAlunosReferenciais: 0
+          };
+        }
+        agrupadoPorProduto[key].totalQuantidadePorAluno += (reg.quantidade_por_aluno || 0) * (reg.alunos_atendidos || 0);
+        agrupadoPorProduto[key].totalAlunosReferenciais += (reg.alunos_atendidos || 0);
+      });
+
+      const sugestoes = [];
+      Object.values(agrupadoPorProduto).forEach(item => {
+        if (item.totalAlunosReferenciais === 0) return;
+        const mediaPorAluno = item.totalQuantidadePorAluno / item.totalAlunosReferenciais;
+        const quantidadeSugerida = Math.ceil(mediaPorAluno * alunos);
+
+        sugestoes.push({
+          produto: item.produto,
+          categoria: item.categoria,
+          mediaPorAluno: parseFloat(mediaPorAluno.toFixed(2)),
+          quantidadeSugerida
+        });
+      });
+
+      return sugestoes;
+    }
+
+    function exibirSugestaoNaTabela(sugestoes) {
+      const tbody = document.querySelector('#tabelaSugestao tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (sugestoes.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.textContent = 'Nenhum dado suficiente para gerar sugestão.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      sugestoes.forEach((sug, index) => {
+        const tr = document.createElement('tr');
+
+        const tdIndex = document.createElement('td');
+        tdIndex.textContent = index + 1;
+
+        const tdProduto = document.createElement('td');
+        tdProduto.textContent = sug.produto;
+
+        const tdMedia = document.createElement('td');
+        tdMedia.textContent = sug.mediaPorAluno;
+
+        const tdQtd = document.createElement('td');
+        tdQtd.textContent = sug.quantidadeSugerida;
+
+        tr.appendChild(tdIndex);
+        tr.appendChild(tdProduto);
+        tr.appendChild(tdMedia);
+        tr.appendChild(tdQtd);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===== FILTROS DO BANCO DE DADOS =====
+    function filtrarDB(unidade, disciplina, produto) {
+      return db.filter(reg => {
+        const matchUnidade = unidade ? reg.unidade === unidade : true;
+        const matchDisciplina = disciplina ? reg.disciplina === disciplina : true;
+        const matchProduto = produto ? reg.produto === produto : true;
+        return matchUnidade && matchDisciplina && matchProduto;
+      });
+    }
+
+    function atualizarTabelaDBFiltrada(unidade, disciplina, produto) {
+      const tbody = document.querySelector('#tabelaDB tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const filtrado = filtrarDB(unidade, disciplina, produto);
+
+      if (filtrado.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 9;
+        td.textContent = 'Nenhum registro encontrado para os filtros selecionados.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      filtrado.forEach((reg, index) => {
+        const tr = document.createElement('tr');
+
+        const tdIndex = document.createElement('td');
+        tdIndex.textContent = index + 1;
+
+        const tdUnidade = document.createElement('td');
+        tdUnidade.textContent = reg.unidade || '-';
+
+        const tdDisciplina = document.createElement('td');
+        tdDisciplina.textContent = reg.disciplina || '-';
+
+        const tdProduto = document.createElement('td');
+        tdProduto.textContent = reg.produto || '-';
+
+        const tdCategoria = document.createElement('td');
+        tdCategoria.textContent = reg.categoria || '-';
+
+        const tdQtdAl = document.createElement('td');
+        tdQtdAl.textContent = reg.quantidade_por_aluno != null ? reg.quantidade_por_aluno : '-';
+
+        const tdAlunos = document.createElement('td');
+        tdAlunos.textContent = reg.alunos_atendidos != null ? reg.alunos_atendidos : '-';
+
+        const tdData = document.createElement('td');
+        tdData.textContent = reg.data || '-';
+
+        const tdObs = document.createElement('td');
+        tdObs.textContent = reg.observacoes || '-';
+
+        tr.appendChild(tdIndex);
+        tr.appendChild(tdUnidade);
+        tr.appendChild(tdDisciplina);
+        tr.appendChild(tdProduto);
+        tr.appendChild(tdCategoria);
+        tr.appendChild(tdQtdAl);
+        tr.appendChild(tdAlunos);
+        tr.appendChild(tdData);
+        tr.appendChild(tdObs);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ===== EVENTOS PRINCIPAIS =====
     document.addEventListener('DOMContentLoaded', function() {
       const hoje = new Date().toISOString().split('T')[0];
       document.getElementById('dataCadastro').value = hoje;
       document.getElementById('dataParametros').value = hoje;
+
+      // aplica avatar/nome/role do JSON confUser
+      aplicarConfUsuario();
 
       // Navegação abas
       document.querySelectorAll('.nav-item').forEach(item => {
@@ -1173,17 +1407,47 @@
         });
       });
 
-      // Atualizar
+      // Atualizar (botão geral)
       document.getElementById('btnAtualizar').addEventListener('click', function() {
         atualizarTudo();
-        mostrarAlerta(document.getElementById('alertSugestao'), 'success', 'Sistema atualizado com sucesso!');
+        mostrarAlerta(document.getElementById('alertGeral'), 'success', 'Dados atualizados com sucesso!');
       });
 
-      // Logout -> volta para rota de logout do Flask
-      document.getElementById('btnLogout').addEventListener('click', function() {
-        if (confirm('Tem certeza que deseja sair do sistema?')) {
-          window.location.href = "{{ url_for('logout') }}";
+      // Cadastro de registro no DB
+      document.getElementById('formCadastro').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const alertCadastro = document.getElementById('alertCadastro');
+
+        const unidade = document.getElementById('unidadeCadastro').value;
+        const disciplina = document.getElementById('disciplinaCadastro').value;
+        const produto = document.getElementById('produtoCadastro').value;
+        const categoria = document.getElementById('categoriaCadastro').value;
+        const quantidade_por_aluno = parseFloat(document.getElementById('qtdPorAluno').value);
+        const alunos_atendidos = parseInt(document.getElementById('alunosAtendidos').value);
+        const data = document.getElementById('dataCadastro').value;
+        const observacoes = document.getElementById('obsCadastro').value;
+
+        if (!unidade || !disciplina || !produto || isNaN(quantidade_por_aluno) || isNaN(alunos_atendidos)) {
+          mostrarAlerta(alertCadastro, 'error', 'Preencha todos os campos obrigatórios.');
+          return;
         }
+
+        const novoRegistro = {
+          unidade,
+          disciplina,
+          produto,
+          categoria,
+          quantidade_por_aluno,
+          alunos_atendidos,
+          data,
+          observacoes
+        };
+
+        db.push(novoRegistro);
+        salvarDB(db);
+        limparFormulario('formCadastro');
+        mostrarAlerta(alertCadastro, 'success', 'Registro cadastrado com sucesso!');
+        atualizarTudo();
       });
 
       // Sugestão
@@ -1202,342 +1466,84 @@
           return;
         }
 
-        const registrosDisciplina = db.filter(item => item.disciplina === disciplina);
-
-        if (registrosDisciplina.length === 0) {
-          mostrarAlerta(alertSugestao, 'info', 'Não há registros para esta disciplina.');
-          return;
-        }
-
-        const produtosMap = new Map();
-
-        registrosDisciplina.forEach(registro => {
-          const produto = registro.produto;
-          const consumoPorAluno = calcularConsumoPorAluno(registro);
-
-          if (!produtosMap.has(produto)) {
-            produtosMap.set(produto, {
-              soma: 0,
-              quantidade: 0
-            });
-          }
-
-          const dados = produtosMap.get(produto);
-          dados.soma += consumoPorAluno;
-          dados.quantidade += 1;
-        });
-
-        const tbody = document.querySelector('#tabelaSugestao tbody');
-        tbody.innerHTML = '';
-
-        let totalSugerido = 0;
-
-        produtosMap.forEach((dados, produto) => {
-          const media = dados.quantidade > 0 ? dados.soma / dados.quantidade : 0;
-          const sugestao = media * alunos;
-          totalSugerido += sugestao;
-
-          const tr = document.createElement('tr');
-          const cells = [
-            produto,
-            media.toFixed(2),
-            dados.quantidade,
-            sugestao.toFixed(2),
-            Math.round(sugestao)
-          ];
-
-          cells.forEach(texto => {
-            const td = document.createElement('td');
-            td.textContent = texto;
-            tr.appendChild(td);
-          });
-
-          tbody.appendChild(tr);
-        });
-
-        document.getElementById('wrapTabelaSugestao').style.display = 'block';
-        document.getElementById('cardSugestaoResumo').style.display = 'block';
-        document.getElementById('textoSugestaoResumo').textContent =
-          `Total sugerido: ${totalSugerido.toFixed(2)} unidades (${Math.round(totalSugerido)} unidades arredondadas)`;
-
-        mostrarAlerta(alertSugestao, 'success', 'Sugestão gerada com sucesso!');
+        const sugestoes = calcularSugestao(disciplina, alunos);
+        exibirSugestaoNaTabela(sugestoes);
+        mostrarAlerta(alertSugestao, 'success', 'Sugestão gerada com base no histórico.');
       });
 
-      // Cadastro
-      document.getElementById('btnSalvarCadastro').addEventListener('click', function() {
-        const data = document.getElementById('dataCadastro').value;
-        const disciplina = document.getElementById('disciplinaCadastro').value.trim();
-        const produto = document.getElementById('produtoCadastro').value.trim();
-        const alunos = parseInt(document.getElementById('alunosCadastro').value) || 0;
-        const enviado = parseInt(document.getElementById('enviadoCadastro').value) || 0;
-        const voltou = parseInt(document.getElementById('voltouCadastro').value) || 0;
-        const faltou = parseInt(document.getElementById('faltouCadastro').value) || 0;
-        const unidade = document.getElementById('unidadeCadastro').value;
-        const alertCadastro = document.getElementById('alertCadastro');
+      // Filtros de Banco de Dados
+      document.getElementById('btnFiltrarDB').addEventListener('click', function() {
+        const unidade = document.getElementById('unidadeFiltros').value || null;
+        const disciplina = document.getElementById('disciplinaFiltros').value || null;
+        const produto = document.getElementById('produtoDB').value || null;
 
-        if (!data) {
-          mostrarAlerta(alertCadastro, 'error', 'Informe a data.');
-          return;
-        }
-
-        if (!unidade) {
-          mostrarAlerta(alertCadastro, 'error', 'Selecione a unidade.');
-          return;
-        }
-
-        if (!disciplina) {
-          mostrarAlerta(alertCadastro, 'error', 'Informe a disciplina.');
-          return;
-        }
-
-        if (!produto) {
-          mostrarAlerta(alertCadastro, 'error', 'Informe o produto.');
-          return;
-        }
-
-        if (alunos <= 0) {
-          mostrarAlerta(alertCadastro, 'error', 'Informe uma quantidade válida de alunos.');
-          return;
-        }
-
-        db.push({
-          data,
-          unidade,
-          disciplina,
-          produto,
-          alunos,
-          enviado,
-          voltou,
-          faltou
-        });
-
-        salvarDB(db);
-
-        document.getElementById('produtoCadastro').value = '';
-        document.getElementById('alunosCadastro').value = '0';
-        document.getElementById('enviadoCadastro').value = '0';
-        document.getElementById('voltouCadastro').value = '0';
-        document.getElementById('faltouCadastro').value = '0';
-
-        mostrarAlerta(alertCadastro, 'success', 'Registro salvo com sucesso!');
-        atualizarTudo();
+        atualizarTabelaDBFiltrada(unidade, disciplina, produto);
       });
 
-      // Banco de Dados
       document.getElementById('btnLimparFiltros').addEventListener('click', function() {
-        document.getElementById('unidadeDB').value = '';
-        document.getElementById('disciplinaDB').value = '';
+        document.getElementById('unidadeFiltros').value = '';
+        document.getElementById('disciplinaFiltros').value = '';
         document.getElementById('produtoDB').value = '';
         atualizarTabelaDB();
       });
 
-      document.getElementById('btnApagarFiltrados').addEventListener('click', function() {
-        const unidadeFiltro = document.getElementById('unidadeDB').value;
-        const disciplinaFiltro = document.getElementById('disciplinaDB').value;
-        const produtoFiltro = document.getElementById('produtoDB').value;
-
-        if (!unidadeFiltro && !disciplinaFiltro && !produtoFiltro) {
-          mostrarAlerta(document.getElementById('alertDB'), 'error', 'Selecione pelo menos um filtro para apagar registros.');
-          return;
-        }
-
-        if (!confirm('Tem certeza que deseja apagar TODOS os registros que correspondem aos filtros atuais?')) {
-          return;
-        }
-
-        const novosDados = db.filter(registro => {
-          if (unidadeFiltro && registro.unidade !== unidadeFiltro) return true;
-          if (disciplinaFiltro && registro.disciplina !== disciplinaFiltro) return true;
-          if (produtoFiltro && registro.produto !== produtoFiltro) return true;
-          return false;
-        });
-
-        db = novosDados;
-        salvarDB(db);
-        atualizarTudo();
-        mostrarAlerta(document.getElementById('alertDB'), 'success', 'Registros apagados com sucesso!');
-      });
-
-      document.getElementById('unidadeDB').addEventListener('change', atualizarTabelaDB);
-      document.getElementById('disciplinaDB').addEventListener('change', atualizarTabelaDB);
-      document.getElementById('produtoDB').addEventListener('change', atualizarTabelaDB);
-
-      // Parâmetros
-      document.getElementById('btnCarregarProdutos').addEventListener('click', function() {
-        const unidade = document.getElementById('unidadeParametros').value;
-        const disciplina = document.getElementById('disciplinaParametros').value;
+      // Parâmetros (exemplo simples: salvar alguma config)
+      document.getElementById('formParametros').addEventListener('submit', function(e) {
+        e.preventDefault();
         const alertParametros = document.getElementById('alertParametros');
 
-        if (!unidade || !disciplina) {
-          mostrarAlerta(alertParametros, 'error', 'Selecione uma unidade e uma disciplina.');
-          return;
-        }
+        const dataParametros = document.getElementById('dataParametros').value;
+        const infoExtra = document.getElementById('infoExtra').value;
 
-        const produtos = getProdutosPorDisciplina(disciplina);
+        // Aqui você pode salvar essa info em algum lugar do DB, se quiser.
+        // Exemplo: grava um registro "especial" no DB
+        const novoRegistro = {
+          unidade: 'CONFIG',
+          disciplina: 'PARAMETROS',
+          produto: 'INFO',
+          categoria: 'SISTEMA',
+          quantidade_por_aluno: 0,
+          alunos_atendidos: 0,
+          data: dataParametros,
+          observacoes: infoExtra
+        };
 
-        if (produtos.length === 0) {
-          mostrarAlerta(alertParametros, 'info', 'Não há produtos cadastrados para esta disciplina.');
-          return;
-        }
-
-        const tbody = document.querySelector('#tabelaParametros tbody');
-        tbody.innerHTML = '';
-
-        produtos.forEach(produto => {
-          const tr = document.createElement('tr');
-
-          const tdCheck = document.createElement('td');
-          const check = document.createElement('input');
-          check.type = 'checkbox';
-          tdCheck.appendChild(check);
-
-          const tdProduto = document.createElement('td');
-          tdProduto.textContent = produto;
-
-          const tdEnviado = document.createElement('td');
-          const inputEnviado = document.createElement('input');
-          inputEnviado.type = 'number';
-          inputEnviado.min = '0';
-          inputEnviado.value = '0';
-          inputEnviado.className = 'form-control';
-          tdEnviado.appendChild(inputEnviado);
-
-          const tdVoltou = document.createElement('td');
-          const inputVoltou = document.createElement('input');
-          inputVoltou.type = 'number';
-          inputVoltou.min = '0';
-          inputVoltou.value = '0';
-          inputVoltou.className = 'form-control';
-          tdVoltou.appendChild(inputVoltou);
-
-          const tdFaltou = document.createElement('td');
-          const inputFaltou = document.createElement('input');
-          inputFaltou.type = 'number';
-          inputFaltou.min = '0';
-          inputFaltou.value = '0';
-          inputFaltou.className = 'form-control';
-          tdFaltou.appendChild(inputFaltou);
-
-          tr.appendChild(tdCheck);
-          tr.appendChild(tdProduto);
-          tr.appendChild(tdEnviado);
-          tr.appendChild(tdVoltou);
-          tr.appendChild(tdFaltou);
-          tbody.appendChild(tr);
-        });
-
-        document.getElementById('wrapTabelaParametros').style.display = 'block';
-        document.getElementById('acoesParametros').style.display = 'block';
-        mostrarAlerta(alertParametros, 'success', 'Produtos carregados com sucesso!');
-      });
-
-      document.getElementById('btnSalvarParametros').addEventListener('click', function() {
-        const unidade = document.getElementById('unidadeParametros').value;
-        const disciplina = document.getElementById('disciplinaParametros').value;
-        const data = document.getElementById('dataParametros').value;
-        const alunosGeral = parseInt(document.getElementById('alunosParametrosGeral').value) || 0;
-        const alertParametros = document.getElementById('alertParametros');
-
-        if (!unidade || !disciplina) {
-          mostrarAlerta(alertParametros, 'error', 'Selecione uma unidade e uma disciplina.');
-          return;
-        }
-
-        if (!data) {
-          mostrarAlerta(alertParametros, 'error', 'Informe a data.');
-          return;
-        }
-
-        if (alunosGeral <= 0) {
-          mostrarAlerta(alertParametros, 'error', 'Informe uma quantidade válida de alunos.');
-          return;
-        }
-
-        const linhas = document.querySelectorAll('#tabelaParametros tbody tr');
-        let registrosSalvos = 0;
-
-        linhas.forEach(linha => {
-          const check = linha.querySelector('input[type="checkbox"]');
-          const inputs = linha.querySelectorAll('input[type="number"]');
-          const produto = linha.cells[1].textContent;
-
-          if (check.checked ||
-              parseInt(inputs[0].value) > 0 ||
-              parseInt(inputs[1].value) > 0 ||
-              parseInt(inputs[2].value) > 0) {
-
-            db.push({
-              data,
-              unidade,
-              disciplina,
-              produto,
-              alunos: alunosGeral,
-              enviado: parseInt(inputs[0].value) || 0,
-              voltou: parseInt(inputs[1].value) || 0,
-              faltou: parseInt(inputs[2].value) || 0
-            });
-
-            registrosSalvos++;
-          }
-        });
-
-        if (registrosSalvos === 0) {
-          mostrarAlerta(alertParametros, 'error', 'Nenhum registro selecionado para salvar.');
-          return;
-        }
-
+        db.push(novoRegistro);
         salvarDB(db);
         atualizarTudo();
-        mostrarAlerta(alertParametros, 'success', `${registrosSalvos} registro(s) salvo(s) com sucesso!`);
+        mostrarAlerta(alertParametros, 'success', 'Parâmetros salvos com sucesso!');
       });
 
-      document.getElementById('btnApagarSelecionados').addEventListener('click', function() {
-        const linhas = document.querySelectorAll('#tabelaParametros tbody tr');
-        let produtosParaRemover = [];
-
-        linhas.forEach(linha => {
-          const check = linha.querySelector('input[type="checkbox"]');
-          if (check.checked) {
-            produtosParaRemover.push(linha.cells[1].textContent);
-          }
-        });
-
-        if (produtosParaRemover.length === 0) {
-          mostrarAlerta(document.getElementById('alertParametros'), 'error', 'Nenhum produto selecionado para remover.');
-          return;
-        }
-
-        if (!confirm(`Tem certeza que deseja remover ${produtosParaRemover.length} produto(s) da lista?`)) {
-          return;
-        }
-
-        mostrarAlerta(document.getElementById('alertParametros'), 'success', `${produtosParaRemover.length} produto(s) removido(s) da lista!`);
-      });
-
-      // Unidades
-      document.getElementById('btnAdicionarUnidade').addEventListener('click', function() {
-        const novaUnidade = document.getElementById('unidadeNova').value.trim();
+      // Cadastro de Unidades
+      document.getElementById('formUnidades').addEventListener('submit', function(e) {
+        e.preventDefault();
         const alertUnidades = document.getElementById('alertUnidades');
+        const unidadeNova = document.getElementById('unidadeNova').value.trim();
 
-        if (!novaUnidade) {
+        if (!unidadeNova) {
           mostrarAlerta(alertUnidades, 'error', 'Informe o nome da unidade.');
           return;
         }
 
-        if (unidadesCadastradas.includes(novaUnidade)) {
-          mostrarAlerta(alertUnidades, 'error', 'Esta unidade já está cadastrada.');
+        if (unidadesCadastradas.includes(unidadeNova)) {
+          mostrarAlerta(alertUnidades, 'error', 'Essa unidade já está cadastrada.');
           return;
         }
 
-        unidadesCadastradas.push(novaUnidade);
+        unidadesCadastradas.push(unidadeNova);
         salvarUnidadesCadastradas(unidadesCadastradas);
         document.getElementById('unidadeNova').value = '';
         atualizarTudo();
         mostrarAlerta(alertUnidades, 'success', 'Unidade cadastrada com sucesso!');
       });
 
-      // Inicializa
-      atualizarTudo();
+      // Inicializa selects/tabelas (sincronizando antes com o servidor)
+      sincronizarComServidor().then(() => {
+        atualizarTudo();
+      }).catch(() => {
+        // Se der erro na sincronização, pelo menos atualiza com o que tiver no localStorage
+        atualizarTudo();
+      });
     });
   </script>
 </body>
