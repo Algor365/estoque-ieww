@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Retorno / Envio de Itens - Ecorp Network</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-elevated: #020617;
+      --accent: #22c55e;
+      --accent-soft: rgba(34,197,94,0.16);
+      --danger: #ef4444;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #111827, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1100px;
+      background: rgba(15,23,42,0.98);
+      border-radius: 18px;
+      border: 1px solid rgba(148,163,184,0.32);
+      box-shadow:
+        0 20px 40px rgba(15,23,42,0.8),
+        0 0 0 1px rgba(148,163,184,0.2);
+      padding: 20px 22px;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .main-header h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .main-header small {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(34,197,94,0.6);
+      background: rgba(22,163,74,0.12);
+      color: #bbf7d0;
+    }
+
+    .content {
+      margin-top: 8px;
+      padding: 14px 14px 16px;
+      border-radius: 14px;
+      background: radial-gradient(circle at top left, #0f172a, #020617);
+      border: 1px solid #111827;
+    }
+
+    .section-title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .section-subtitle strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    select {
+      background: #020617;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      padding: 7px 9px;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.4);
+    }
+
+    /* ícone do calendário branco */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      padding: 8px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      border-color: rgba(34,197,94,0.9);
+      color: #022c22;
+      font-weight: 500;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.4);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: #4b5563;
+      color: var(--text);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent);
+      background: rgba(34,197,94,0.05);
+    }
+
+    .btn-danger {
+      border-color: rgba(248,113,113,0.7);
+      color: #fecaca;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239,68,68,0.1);
+    }
+
+    .btn-small {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+
+    .btn-toggle-on {
+      border-color: rgba(34,197,94,0.9);
+      background: rgba(34,197,94,0.12);
+      color: #bbf7d0;
+    }
+
+    .table-wrapper {
+      margin-top: 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: auto;
+      max-height: 280px;
+      background: #020617;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: #020617;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    th, td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #111827;
+      text-align: center;
+    }
+
+    th {
+      font-weight: 500;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #020617;
+    }
+
+    tbody tr:hover {
+      background: rgba(55,65,81,0.55);
+    }
+
+    .alert {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      display: none;
+    }
+
+    .alert.info {
+      background: rgba(37,99,235,0.08);
+      border: 1px solid rgba(59,130,246,0.6);
+      color: #bfdbfe;
+    }
+
+    .alert.success {
+      background: rgba(22,163,74,0.12);
+      border: 1px solid rgba(52,211,153,0.8);
+      color: #bbf7d0;
+    }
+
+    .alert.error {
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(248,113,113,0.8);
+      color: #fecaca;
+    }
+
+    .details-card {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(15,23,42,0.9);
+      border: 1px solid #1f2937;
+      font-size: 12px;
+    }
+
+    .details-card h3 {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .details-card ul {
+      margin-left: 16px;
+      margin-top: 4px;
+      list-style: disc;
+    }
+
+    .details-card li {
+      margin-bottom: 2px;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 12px 0;
+    }
+
+    /* bolinha de seleção */
+    .produto-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .selector-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 2px solid #4b5563;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.12s ease-in-out;
+    }
+
+    .selector-dot::after {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+      transition: background 0.12s ease-in-out;
+    }
+
+    .selector-dot.selected {
+      border-color: var(--accent);
+      background: rgba(34,197,94,0.12);
+    }
+
+    .selector-dot.selected::after {
+      background: var(--accent);
+    }
+
+    @media (max-width: 900px) {
+      body {
+        padding: 12px;
+      }
+      .form-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        padding: 14px;
+      }
+      .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="main-header">
+      <div>
+        <h1>Retorno / Envio de Itens</h1>
+        <small>
+          Monte e registre remessas usando os <strong>itens e unidades</strong> já cadastrados
+          no sistema principal.
+        </small>
+      </div>
+      <span class="badge">Módulo independente</span>
+    </header>
+
+    <section class="content">
+
+      <div class="section-title">Novo envio / retorno</div>
+      <div class="section-subtitle">
+        Selecione a <strong>unidade (cidade) de destino</strong>, informe a <strong>data</strong> e
+        uma breve <strong>observação</strong>. Em seguida, monte a lista de itens usando
+        os produtos já presentes no <strong>banco de dados histórico</strong>.
+      </div>
+
+      <!-- FORM PRINCIPAL -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="unidadeRetorno">Unidade / Cidade de destino</label>
+          <select id="unidadeRetorno">
+            <option value="">Carregando unidades...</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="dataRetorno">Data do envio</label>
+          <input type="date" id="dataRetorno" />
+        </div>
+
+        <div class="form-group" style="grid-column: span 2;">
+          <label for="observacaoRetorno">Observação (opcional)</label>
+          <input type="text" id="observacaoRetorno"
+                 placeholder="Ex: Envio para turma de março / reposição de estoque" />
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section-subtitle" style="margin-bottom:8px;">
+        Monte a lista de itens deste envio:
+      </div>
+
+      <!-- SELEÇÃO DE DISCIPLINA E LISTA DE ITENS -->
+      <div class="form-row">
+        <div class="form-group" style="grid-column: span 2;">
+          <label for="disciplinaRetorno">Disciplina</label>
+          <select id="disciplinaRetorno">
+            <option value="">Carregando disciplinas...</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="blocoListaDisciplina" style="margin-top:8px; display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div class="section-subtitle" style="margin-bottom:0;">
+            Itens da disciplina selecionada – selecione pelas bolinhas e informe as quantidades:
+          </div>
+          <button class="btn btn-outline btn-small" id="btnToggleTodos">
+            Todos: OFF
+          </button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align:left;">Item</th>
+                <th>Quantidade</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaDisciplinaBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:8px;">
+          <button class="btn btn-outline btn-small" id="btnAplicarDisciplina">
+            ✅ Aplicar itens na lista de envio
+          </button>
+        </div>
+      </div>
+
+      <div id="alertRetorno" class="alert"></div>
+
+      <!-- TABELA DOS ITENS DO ENVIO ATUAL -->
+      <div class="table-wrapper" id="wrapTabelaItensRetorno" style="display:none; margin-top:10px;">
+        <table id="tabelaItensRetorno">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="form-row" style="margin-top:10px;">
+        <div class="form-group">
+          <button class="btn btn-primary btn-small" id="btnSalvarRetorno">
+            💾 Salvar envio / retorno
+          </button>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="section-title">Histórico de envios / retornos</div>
+      <div class="section-subtitle">
+        Todos os envios são salvos no servidor (arquivo JSON),
+        usando os dados de unidades e itens do planejamento.
+      </div>
+
+      <!-- TABELA DOS ENVIOS JÁ SALVOS -->
+      <div class="table-wrapper" id="wrapTabelaEnvios" style="display:none;">
+        <table id="tabelaEnvios">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Unidade</th>
+              <th>Qtd. itens</th>
+              <th>Observação</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <!-- Detalhes de um envio selecionado -->
+      <div id="envioDetalhes" class="details-card" style="display:none;">
+        <h3>Detalhes do envio selecionado</h3>
+        <div id="envioDetalhesTexto"></div>
+      </div>
+
+    </section>
+  </div>
+
+  <script>
+    let db = [];
+    let unidades = [];
+    let envios = [];
+
+    const unidadeRetornoSel = document.getElementById("unidadeRetorno");
+    const dataRetornoInput = document.getElementById("dataRetorno");
+    const observacaoRetornoInput = document.getElementById("observacaoRetorno");
+    const btnSalvarRetorno = document.getElementById("btnSalvarRetorno");
+    const alertRetorno = document.getElementById("alertRetorno");
+
+    const wrapTabelaItensRetorno = document.getElementById("wrapTabelaItensRetorno");
+    const tabelaItensRetornoBody = document
+      .getElementById("tabelaItensRetorno")
+      .querySelector("tbody");
+
+    const wrapTabelaEnvios = document.getElementById("wrapTabelaEnvios");
+    const tabelaEnviosBody = document
+      .getElementById("tabelaEnvios")
+      .querySelector("tbody");
+
+    const envioDetalhes = document.getElementById("envioDetalhes");
+    const envioDetalhesTexto = document.getElementById("envioDetalhesTexto");
+
+    const disciplinaRetornoSel = document.getElementById("disciplinaRetorno");
+    const blocoListaDisciplina = document.getElementById("blocoListaDisciplina");
+    const tabelaDisciplinaBody = document.getElementById("tabelaDisciplinaBody");
+    const btnAplicarDisciplina = document.getElementById("btnAplicarDisciplina");
+    const btnToggleTodos = document.getElementById("btnToggleTodos");
+
+    let todosLigado = false;
+    let envioDetalheAbertoId = null;
+    let itensRetornoAtual = [];
+
+    function mostrarAlerta(el, tipo, texto) {
+      el.style.display = "block";
+      el.classList.remove("info", "success", "error");
+      el.classList.add(tipo);
+      el.textContent = texto;
+
+      if (tipo === "success") {
+        setTimeout(() => {
+          if (el.classList.contains("success")) {
+            el.style.display = "none";
+          }
+        }, 3000);
+      }
+    }
+
+    async function carregarPlanejamentoDB() {
+      const resp = await fetch("/api/planejamento/db");
+      if (!resp.ok) throw new Error("Erro ao carregar planejamento DB");
+      return resp.json();
+    }
+
+    async function carregarPlanejamentoUnidades() {
+      const resp = await fetch("/api/planejamento/unidades");
+      if (!resp.ok) throw new Error("Erro ao carregar unidades");
+      return resp.json();
+    }
+
+    async function carregarPlanejamentoEnvios() {
+      const resp = await fetch("/api/planejamento/envios");
+      if (!resp.ok) throw new Error("Erro ao carregar envios");
+      return resp.json();
+    }
+
+    async function salvarEnvioAPI(envio) {
+      const resp = await fetch("/api/planejamento/envios", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(envio)
+      });
+      if (!resp.ok) {
+        const erro = await resp.json().catch(() => ({}));
+        throw new Error(erro.erro || "Erro ao salvar envio");
+      }
+      return resp.json();
+    }
+
+    async function excluirEnvioAPI(id) {
+      const resp = await fetch(`/api/planejamento/envios/${id}`, {
+        method: "DELETE"
+      });
+      if (!resp.ok) {
+        const erro = await resp.json().catch(() => ({}));
+        throw new Error(erro.erro || "Erro ao excluir envio");
+      }
+      return resp.json();
+    }
+
+    function getListaUnidadesCompletas() {
+      const set = new Set();
+      unidades.forEach(u => set.add(u));
+      db.forEach(r => { if (r.unidade) set.add(r.unidade); });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
+
+    function getDisciplinasUnicasGlobal() {
+      const set = new Set();
+      db.forEach(r => { if (r.disciplina) set.add(r.disciplina); });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
+
+    function getProdutosPorDisciplina(disciplina) {
+      const set = new Set();
+      db.forEach(r => {
+        if (r.disciplina === disciplina && r.produto) set.add(r.produto);
+      });
+      return Array.from(set).sort((a, b) => a.localeCompare(b, "pt-BR"));
+    }
+
+    function atualizarSelects() {
+      const todasUnidades = getListaUnidadesCompletas();
+      unidadeRetornoSel.innerHTML = "";
+      if (!todasUnidades.length) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Nenhuma unidade encontrada (cadastre no sistema principal)";
+        unidadeRetornoSel.appendChild(opt);
+      } else {
+        const optVazio = document.createElement("option");
+        optVazio.value = "";
+        optVazio.textContent = "Selecione...";
+        unidadeRetornoSel.appendChild(optVazio);
+        todasUnidades.forEach(u => {
+          const opt = document.createElement("option");
+          opt.value = u;
+          opt.textContent = u;
+          unidadeRetornoSel.appendChild(opt);
+        });
+      }
+
+      const disciplinas = getDisciplinasUnicasGlobal();
+      disciplinaRetornoSel.innerHTML = "";
+      if (!disciplinas.length) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Nenhuma disciplina encontrada no banco";
+        disciplinaRetornoSel.appendChild(opt);
+      } else {
+        const optVazio = document.createElement("option");
+        optVazio.value = "";
+        optVazio.textContent = "Selecione...";
+        disciplinaRetornoSel.appendChild(optVazio);
+        disciplinas.forEach(d => {
+          const opt = document.createElement("option");
+          opt.value = d;
+          opt.textContent = d;
+          disciplinaRetornoSel.appendChild(opt);
+        });
+      }
+    }
+
+    function renderizarItensRetorno() {
+      tabelaItensRetornoBody.innerHTML = "";
+      if (!itensRetornoAtual.length) {
+        wrapTabelaItensRetorno.style.display = "none";
+        return;
+      }
+      itensRetornoAtual.forEach((item, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="text-align:left;">${item.produto}</td>
+          <td>${item.quantidade}</td>
+          <td>
+            <button class="btn btn-outline btn-small btn-danger"
+                    onclick="removerItemRetorno(${idx})">
+              Remover
+            </button>
+          </td>
+        `;
+        tabelaItensRetornoBody.appendChild(tr);
+      });
+      wrapTabelaItensRetorno.style.display = "block";
+    }
+
+    function removerItemRetorno(idx) {
+      itensRetornoAtual.splice(idx, 1);
+      renderizarItensRetorno();
+    }
+
+    function atualizarListaEnvios() {
+      tabelaEnviosBody.innerHTML = "";
+      envioDetalhes.style.display = "none";
+      envioDetalhesTexto.innerHTML = "";
+      envioDetalheAbertoId = null;
+
+      if (!envios.length) {
+        wrapTabelaEnvios.style.display = "none";
+        return;
+      }
+
+      const ordenados = envios.slice().sort(
+        (a, b) => (a.data || "").localeCompare(b.data || "")
+      );
+
+      ordenados.forEach(e => {
+        const data = e.data ? new Date(e.data) : null;
+        const dataFormatada =
+          data && !isNaN(data.getTime())
+            ? data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })
+            : "-";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${dataFormatada}</td>
+          <td>${e.unidade || "-"}</td>
+          <td>${(e.itens && e.itens.length) || 0}</td>
+          <td>${e.observacao || ""}</td>
+          <td>
+            <button class="btn btn-outline btn-small"
+                    onclick="toggleEnvioDetalhes(${e.id})"
+                    id="btnVerEnvio-${e.id}">
+              Ver itens
+            </button>
+            <button class="btn btn-outline btn-small btn-danger"
+                    onclick="excluirEnvio(${e.id})">
+              Excluir
+            </button>
+          </td>
+        `;
+        tabelaEnviosBody.appendChild(tr);
+      });
+
+      wrapTabelaEnvios.style.display = "block";
+    }
+
+    function verEnvio(id) {
+      const envio = envios.find(e => e.id === id);
+      if (!envio) return;
+
+      const data = envio.data ? new Date(envio.data) : null;
+      const dataFormatada =
+        data && !isNaN(data.getTime())
+          ? data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })
+          : "-";
+
+      let html = `
+        <div><strong>Data:</strong> ${dataFormatada}</div>
+        <div><strong>Unidade:</strong> ${envio.unidade || "-"}</div>
+        <div><strong>Observação:</strong> ${envio.observacao || "-"}</div>
+        <div style="margin-top:6px;"><strong>Itens:</strong></div>
+      `;
+
+      if (!envio.itens || !envio.itens.length) {
+        html += `<div style="margin-top:4px;">Nenhum item registrado.</div>`;
+      } else {
+        html += "<ul>";
+        envio.itens.forEach(i => {
+          html += `<li>${i.produto} – <strong>${i.quantidade}</strong></li>`;
+        });
+        html += "</ul>";
+      }
+
+      envioDetalhesTexto.innerHTML = html;
+      envioDetalhes.style.display = "block";
+    }
+
+    function toggleEnvioDetalhes(id) {
+      const btn = document.getElementById(`btnVerEnvio-${id}`);
+      if (!btn) return;
+
+      if (envioDetalheAbertoId === id) {
+        envioDetalhes.style.display = "none";
+        envioDetalhesTexto.innerHTML = "";
+        envioDetalheAbertoId = null;
+        btn.textContent = "Ver itens";
+        return;
+      }
+
+      if (envioDetalheAbertoId !== null) {
+        const btnPrev = document.getElementById(`btnVerEnvio-${envioDetalheAbertoId}`);
+        if (btnPrev) btnPrev.textContent = "Ver itens";
+      }
+
+      verEnvio(id);
+      envioDetalheAbertoId = id;
+      btn.textContent = "Ver menos";
+    }
+
+    async function excluirEnvio(id) {
+      try {
+        if (!confirm("Tem certeza que deseja excluir este envio/retorno?")) return;
+        await excluirEnvioAPI(id);
+        envios = envios.filter(e => e.id !== id);
+        atualizarListaEnvios();
+        envioDetalhes.style.display = "none";
+        envioDetalhesTexto.innerHTML = "";
+      } catch (err) {
+        console.error(err);
+        alert("Erro ao excluir envio: " + err.message);
+      }
+    }
+
+    // ---- DISCIPLINA ----
+    disciplinaRetornoSel.addEventListener("change", () => {
+      alertRetorno.style.display = "none";
+      tabelaDisciplinaBody.innerHTML = "";
+
+      const disciplina = disciplinaRetornoSel.value;
+
+      todosLigado = false;
+      btnToggleTodos.classList.remove("btn-toggle-on");
+      btnToggleTodos.textContent = "Todos: OFF";
+
+      if (!disciplina) {
+        blocoListaDisciplina.style.display = "none";
+        return;
+      }
+
+      const produtos = getProdutosPorDisciplina(disciplina);
+
+      if (!produtos.length) {
+        blocoListaDisciplina.style.display = "none";
+        mostrarAlerta(alertRetorno, "info", "Nenhum item encontrado para esta disciplina.");
+        return;
+      }
+
+      produtos.forEach(p => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="produto-cell">
+            <span class="selector-dot" data-produto="${p}"></span>
+            <span>${p}</span>
+          </td>
+          <td>
+            <input
+              type="number"
+              min="0"
+              value="0"
+              class="inputQtdDisciplina"
+              data-produto="${p}"
+              style="width:80px;"
+            />
+          </td>
+        `;
+        tabelaDisciplinaBody.appendChild(tr);
+      });
+
+      blocoListaDisciplina.style.display = "block";
+    });
+
+    // clique nas bolinhas – listener fixo (resolve o bug)
+    tabelaDisciplinaBody.addEventListener("click", (ev) => {
+      const dot = ev.target.closest(".selector-dot");
+      if (!dot) return;
+      dot.classList.toggle("selected");
+    });
+
+    btnToggleTodos.addEventListener("click", (e) => {
+      e.preventDefault();
+      alertRetorno.style.display = "none";
+
+      todosLigado = !todosLigado;
+      const dots = tabelaDisciplinaBody.querySelectorAll(".selector-dot");
+
+      if (todosLigado) {
+        dots.forEach(d => d.classList.add("selected"));
+        btnToggleTodos.classList.add("btn-toggle-on");
+        btnToggleTodos.textContent = "Todos: ON";
+      } else {
+        dots.forEach(d => d.classList.remove("selected"));
+        btnToggleTodos.classList.remove("btn-toggle-on");
+        btnToggleTodos.textContent = "Todos: OFF";
+      }
+    });
+
+    btnAplicarDisciplina.addEventListener("click", (e) => {
+      e.preventDefault();
+      alertRetorno.style.display = "none";
+
+      const inputs = tabelaDisciplinaBody.querySelectorAll(".inputQtdDisciplina");
+      const novosItens = [];
+
+      inputs.forEach(input => {
+        const qtd = Number(input.value) || 0;
+        const produto = input.getAttribute("data-produto");
+        const tr = input.closest("tr");
+        const dot = tr.querySelector(".selector-dot");
+        const selecionado = dot && dot.classList.contains("selected");
+
+        if (selecionado && qtd > 0) {
+          novosItens.push({ produto, quantidade: qtd });
+        }
+      });
+
+      if (!novosItens.length) {
+        mostrarAlerta(
+          alertRetorno,
+          "error",
+          "Selecione itens pelas bolinhas e informe quantidades maiores que zero para aplicar."
+        );
+        return;
+      }
+
+      itensRetornoAtual = novosItens;
+      renderizarItensRetorno();
+      mostrarAlerta(
+        alertRetorno,
+        "success",
+        "Itens selecionados da disciplina aplicados na lista de envio."
+      );
+    });
+
+    btnSalvarRetorno.addEventListener("click", async (e) => {
+      e.preventDefault();
+      alertRetorno.style.display = "none";
+
+      const unidade = unidadeRetornoSel.value;
+      const dataStr = dataRetornoInput.value;
+      const observacao = (observacaoRetornoInput.value || "").trim();
+
+      if (!unidade) {
+        mostrarAlerta(alertRetorno, "error", "Selecione a unidade de destino.");
+        return;
+      }
+      if (!dataStr) {
+        mostrarAlerta(alertRetorno, "error", "Informe a data do envio/retorno.");
+        return;
+      }
+      if (!itensRetornoAtual.length) {
+        mostrarAlerta(alertRetorno, "error", "Adicione ao menos um item na lista.");
+        return;
+      }
+
+      const dataISO = new Date(dataStr + "T00:00:00").toISOString();
+
+      const registro = {
+        data: dataISO,
+        unidade,
+        observacao,
+        itens: itensRetornoAtual.slice()
+      };
+
+      try {
+        const resp = await salvarEnvioAPI(registro);
+        const envioSalvo = resp.envio || registro;
+
+        envios.push(envioSalvo);
+
+        itensRetornoAtual = [];
+        renderizarItensRetorno();
+
+        dataRetornoInput.value = "";
+        observacaoRetornoInput.value = "";
+        disciplinaRetornoSel.value = "";
+        tabelaDisciplinaBody.innerHTML = "";
+        blocoListaDisciplina.style.display = "none";
+        todosLigado = false;
+        btnToggleTodos.classList.remove("btn-toggle-on");
+        btnToggleTodos.textContent = "Todos: OFF";
+
+        atualizarListaEnvios();
+        mostrarAlerta(alertRetorno, "success", "Envio/retorno salvo com sucesso!");
+      } catch (err) {
+        console.error(err);
+        mostrarAlerta(alertRetorno, "error", "Erro ao salvar envio: " + err.message);
+      }
+    });
+
+    async function inicializarPagina() {
+      try {
+        const [dbDados, unidadesDados, enviosDados] = await Promise.all([
+          carregarPlanejamentoDB(),
+          carregarPlanejamentoUnidades(),
+          carregarPlanejamentoEnvios()
+        ]);
+
+        db = dbDados || [];
+        unidades = unidadesDados || [];
+        envios = enviosDados || [];
+
+        atualizarSelects();
+        atualizarListaEnvios();
+      } catch (err) {
+        console.error(err);
+        mostrarAlerta(
+          alertRetorno,
+          "error",
+          "Erro ao carregar dados da API. Verifique se está logado e se o servidor está rodando."
+        );
+      }
+    }
+
+    inicializarPagina();
+
+    window.removerItemRetorno = removerItemRetorno;
+    window.verEnvio = verEnvio;
+    window.excluirEnvio = excluirEnvio;
+    window.toggleEnvioDetalhes = toggleEnvioDetalhes;
+  </script>
+</body>
+</html>

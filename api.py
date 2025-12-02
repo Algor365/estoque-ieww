@@ -14,17 +14,20 @@ app = Flask(__name__)
 app.secret_key = "troque-esta-chave-em-producao"
 
 # Arquivo do histórico simples (predict / add-turma)
-DATAFILE = "historico.json"
+HISTORYFILE = "dbs/historico.json"
 
-# Arquivo de usuários para login
-USERSFILE = "usuarios.json"
+# Arquivo de usuários (login)
+USERSFILE = "dbs/usuarios.json"
 
-# Arquivos do planejamento (tela com unidades/disciplinas/produtos)
-PLANEJAMENTO_DATAFILE = "planejamento_db.json"
-PLANEJAMENTO_UNIDADES_FILE = "planejamento_unidades.json"
+# Arquivo principal de planejamento (tela com unidades/disciplinas/produtos)
+PLANEJAMENTO_DATAFILE = "dbs/planejamento_db.json"
+PLANEJAMENTO_UNIDADES_FILE = "dbs/planejamento_unidades.json"
 
 # Arquivo de envios / retornos (novo módulo integrado)
-PLANEJAMENTO_ENVIOS_FILE = "planejamento_envios.json"
+PLANEJAMENTO_ENVIOS_FILE = "dbs/planejamento_envios.json"
+
+# Arquivo de cadastro de produtos (disciplina + nome + unidades)
+PLANEJAMENTO_PRODUTOS_FILE = "dbs/planejamento_produtos.json"
 
 
 # ==========================================================
@@ -53,6 +56,10 @@ def carregar_usuarios():
 
 
 def salvar_usuarios(usuarios):
+    """
+    Salva a lista de usuários no arquivo JSON.
+    """
+    os.makedirs(os.path.dirname(USERSFILE), exist_ok=True)
     with open(USERSFILE, "w", encoding="utf-8") as f:
         json.dump(usuarios, f, ensure_ascii=False, indent=2)
 
@@ -68,7 +75,8 @@ def autenticar(username, password):
 def login_required(view_func):
     """
     Decorator para proteger rotas.
-    - Para páginas HTML: redireciona para /login
+    - Para páginas HTML: 
+      redireciona para /login
     - Para requisições JSON (AJAX): retorna 401 em JSON
     """
     @wraps(view_func)
@@ -85,39 +93,73 @@ def login_required(view_func):
             # Senão, redireciona para tela de login
             next_url = request.path
             return redirect(url_for("login", next=next_url))
+
         return view_func(*args, **kwargs)
     return wrapper
 
 
+# ==========================================================
+#                      HISTÓRICO SIMPLES
+# ==========================================================
+
+def carregar_historico():
+    """
+    Carrega o histórico de ações simples do sistema (predict, add-turma, etc.).
+    """
+    if os.path.exists(HISTORYFILE):
+        with open(HISTORYFILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
+def salvar_historico(historico):
+    """
+    Salva a lista completa de histórico.
+    """
+    os.makedirs(os.path.dirname(HISTORYFILE), exist_ok=True)
+    with open(HISTORYFILE, "w", encoding="utf-8") as f:
+        json.dump(historico, f, ensure_ascii=False, indent=2)
+
+
+def registrar_historico(acao, detalhes=None):
+    """
+    Registra uma nova ação no histórico.
+    """
+    historico = carregar_historico()
+    historico.append({
+        "timestamp": datetime.now().isoformat(),
+        "acao": acao,
+        "detalhes": detalhes or {}
+    })
+    salvar_historico(historico)
+
+
+# ==========================================================
+#                         ROTAS DE LOGIN
+# ==========================================================
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """
-    Tela de login simples. Usa usuarios.json.
-    Usuário padrão (se o arquivo não existir):
-      - login: admin
-      - senha: admin
+    Tela de login simples.
     """
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
-        usuario = autenticar(username, password)
-        if usuario:
-            session["user"] = usuario["username"]
-            session["role"] = usuario.get("role", "Usuário")
-            # redireciona para a página que ele tentou acessar, se tiver
+        user = autenticar(username, password)
+        if user:
+            session["user"] = user["username"]
+            session["role"] = user.get("role", "Usuário")
+
             next_url = request.args.get("next") or url_for("index")
             return redirect(next_url)
-        else:
-            return render_template(
-                "login.html",
-                error="Usuário ou senha inválidos."
-            )
 
-    # GET
+        return render_template("login.html", erro="Usuário ou senha inválidos.")
+
     return render_template("login.html")
 
-#save 2.0
+
 @app.route("/logout")
 def logout():
     session.pop("user", None)
@@ -155,73 +197,29 @@ def api_usuario_atual():
 
 
 # ==========================================================
-#          HISTÓRICO SIMPLES (predict / add-turma)
+#                          PÁGINAS
 # ==========================================================
 
-def carregar_historico():
+@app.route("/")
+@login_required
+def index():
     """
-    Histórico simples usado nas rotas /predict e /add-turma
-    (não é o mesmo JSON do planejamento).
+    Página principal (dashboard).
     """
-    if os.path.exists(DATAFILE):
-        with open(DATAFILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-
-    # Histórico inicial padrão (se ainda não existir arquivo)
-    historico_inicial = [
-        {"turma": "Turma 1", "alunos": 100, "enviados": 100, "usados": 50, "faltou": 0, "usuario": "sistema", "data": "2024-01-15"},
-        {"turma": "Turma 2", "alunos": 100, "enviados": 50,  "usados": 100, "faltou": 50, "usuario": "sistema", "data": "2024-02-20"},
-        {"turma": "Turma 3", "alunos": 30,  "enviados": 30,  "usados": 30,  "faltou": 0, "usuario": "sistema", "data": "2024-03-10"},
-        {"turma": "Turma 4", "alunos": 30,  "enviados": 60,  "usados": 10,  "faltou": 50, "usuario": "sistema", "data": "2024-04-05"},
-    ]
-    salvar_historico(historico_inicial)
-    return historico_inicial
+    return render_template("index.html")
 
 
-def salvar_historico(historico):
-    with open(DATAFILE, "w", encoding="utf-8") as f:
-        json.dump(historico, f, ensure_ascii=False, indent=2)
-
-
-def calcular_proporcao_media(historico):
+@app.route("/planejamento")
+@login_required
+def planejamento():
     """
-    Calcula a proporção média ideal de produtos por aluno,
-    ajustando com base em falta e sobra.
+    Página principal de planejamento (mesma index, se quiser).
     """
-    proporcoes = []
-
-    for h in historico:
-        alunos = h.get("alunos", 0)
-        enviados = h.get("enviados", 0)
-        usados = h.get("usados", 0)
-        faltou = h.get("faltou", 0)
-
-        if alunos <= 0:
-            continue
-
-        ideal = enviados
-
-        if faltou > 0:
-            # se faltou, ideal seria o que foi enviado + o que faltou
-            ideal = enviados + faltou
-        else:
-            # se não faltou, pode ter sobrado
-            sobrou = enviados - usados
-            if sobrou > 0:
-                ideal = enviados - sobrou
-                if ideal < usados:
-                    ideal = usados
-
-        proporcoes.append(ideal / alunos)
-
-    if not proporcoes:
-        return 1.0  # Default: 1 produto por aluno
-
-    return sum(proporcoes) / len(proporcoes)
+    return render_template("index.html")
 
 
 # ==========================================================
-#               PLANEJAMENTO (JSON COMPLETO)
+#                 PLANEJAMENTO (DB PRINCIPAL)
 # ==========================================================
 
 def carregar_planejamento_db():
@@ -258,6 +256,54 @@ def salvar_planejamento_unidades(unidades):
     """
     with open(PLANEJAMENTO_UNIDADES_FILE, "w", encoding="utf-8") as f:
         json.dump(unidades, f, ensure_ascii=False, indent=2)
+
+
+def carregar_planejamento_produtos():
+    """
+    Carrega o banco de produtos (disciplina + nome + unidades).
+    """
+    if os.path.exists(PLANEJAMENTO_PRODUTOS_FILE):
+        with open(PLANEJAMENTO_PRODUTOS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+
+def salvar_planejamento_produtos(dados):
+    """
+    Salva a lista completa de produtos em JSON.
+    Espera uma lista de dicionários.
+    """
+    with open(PLANEJAMENTO_PRODUTOS_FILE, "w", encoding="utf-8") as f:
+        json.dump(dados, f, ensure_ascii=False, indent=2)
+
+
+@app.route("/api/planejamento/produtos", methods=["GET", "POST"])
+@login_required
+def api_planejamento_produtos():
+    """
+    GET  -> retorna a lista de produtos cadastrados.
+    POST -> recebe a lista COMPLETA de produtos e sobrescreve o JSON.
+
+    Exemplo de JSON esperado no POST:
+    [
+        {
+            "unidades": ["teste01"],
+            "disciplina": "Endpoint01",
+            "produto": "Nome do Produto",
+            "dataCadastro": "2025-01-01T00:00:00Z"
+        }
+    ]
+    """
+    if request.method == "GET":
+        produtos = carregar_planejamento_produtos()
+        return jsonify(produtos)
+
+    data = request.get_json()
+    if not isinstance(data, list):
+        return jsonify({"erro": "Formato inválido: esperado uma lista de produtos."}), 400
+
+    salvar_planejamento_produtos(data)
+    return jsonify({"mensagem": "Banco de produtos salvo com sucesso."})
 
 
 @app.route("/api/planejamento/db", methods=["GET", "POST"])
@@ -356,17 +402,15 @@ def api_planejamento_envios():
     # Garante campos principais
     data.setdefault("data", datetime.now().isoformat())
     data.setdefault("unidade", "")
-    data.setdefault("disciplina", "")
     data.setdefault("observacao", "")
     data.setdefault("itens", [])
-    data.setdefault("usuario", session.get("user", "desconhecido"))
 
     envios = carregar_planejamento_envios()
     envios.append(data)
     salvar_planejamento_envios(envios)
 
     return jsonify({
-        "mensagem": "Envio/retorno salvo com sucesso.",
+        "mensagem": "Envio/retorno registrado com sucesso.",
         "envio": data
     })
 
@@ -388,121 +432,19 @@ def api_planejamento_envios_delete(envio_id):
 
 
 # ==========================================================
-#                     ROTAS PRINCIPAIS
+#                  HISTÓRICO - ROTAS EXTRAS
 # ==========================================================
-
-@app.route("/")
-@login_required
-def index():
-    """
-    Página principal com todas as funcionalidades.
-    """
-    historico = carregar_historico()
-    usuario = session.get("user")
-    role = session.get("role", "Usuário")
-    return render_template("index.html", historico=historico, usuario=usuario, role=role)
-
-
-@app.route("/planejamento")
-@login_required
-def planejamento():
-    """
-    Página de planejamento (usando o mesmo index.html).
-    """
-    usuario = session.get("user")
-    role = session.get("role", "Usuário")
-    return render_template("index.html", usuario=usuario, role=role)
-
 
 @app.route("/historico")
 @login_required
-def historico():
+def historico_page():
     """
-    Página de histórico (versão antiga).
+    Exibe (se quiser) uma página simples de histórico.
     """
-    historico = carregar_historico()
-    usuario = session.get("user")
-    role = session.get("role", "Usuário")
-    return render_template("historico.html", historico=historico, usuario=usuario, role=role)
+    return render_template("historico.html")
 
 
-@app.route("/predict", methods=["POST"])
-@login_required
-def predict():
-    """
-    Usa o DATAFILE (historico.json) para sugerir quantidade
-    com base em proporção média (modelo simples).
-    """
-    data = request.get_json()
-    alunos = data.get("alunos", 0)
-
-    try:
-        alunos = int(alunos)
-    except (ValueError, TypeError):
-        return jsonify({"erro": "Número de alunos inválido"}), 400
-
-    if alunos <= 0:
-        return jsonify({"erro": "Informe um número de alunos maior que zero"}), 400
-
-    historico = carregar_historico()
-    proporcao_media = calcular_proporcao_media(historico)
-    sugerido = round(proporcao_media * alunos)
-
-    return jsonify({
-        "alunos": alunos,
-        "proporcao_media": round(proporcao_media, 3),
-        "quantidade_sugerida": sugerido
-    })
-
-
-@app.route("/add-turma", methods=["POST"])
-@login_required
-def add_turma():
-    """
-    Salva uma nova turma no histórico simples (historico.json):
-    - turma (nome)
-    - alunos
-    - enviados
-    - usados
-    - faltou
-    - usuario (pegando do login)
-    """
-    data = request.get_json()
-
-    turma = data.get("turma", "").strip() or "Nova Turma"
-    try:
-        alunos = int(data.get("alunos", 0))
-        enviados = int(data.get("enviados", 0))
-        usados = int(data.get("usados", 0))
-        faltou = int(data.get("faltou", 0))
-    except (ValueError, TypeError):
-        return jsonify({"erro": "Valores numéricos inválidos"}), 400
-
-    if alunos <= 0:
-        return jsonify({"erro": "Alunos deve ser maior que zero"}), 400
-
-    historico = carregar_historico()
-
-    usuario_atual = session.get("user", "desconhecido")
-
-    nova_turma = {
-        "turma": turma,
-        "alunos": alunos,
-        "enviados": enviados,
-        "usados": usados,
-        "faltou": faltou,
-        "usuario": usuario_atual,
-        "data": datetime.now().date().isoformat()
-    }
-
-    historico.append(nova_turma)
-    salvar_historico(historico)
-
-    return jsonify({"mensagem": "Turma salva com sucesso!", "turma": nova_turma})
-
-
-# Adicione esta rota para retornar dados do histórico
-@app.route("/historico-dados")
+@app.route("/api/historico", methods=["GET"])
 @login_required
 def historico_dados():
     """
@@ -510,6 +452,7 @@ def historico_dados():
     """
     historico = carregar_historico()
     return jsonify(historico)
+
 
 # ==========================================================
 #                        MAIN

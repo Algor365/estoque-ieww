@@ -1,0 +1,12 @@
+[
+  {
+    "data": "2025-12-02",
+    "unidade": "unidade_ed_01",
+    "disciplina": "disci_end_01",
+    "produto": "prod_end_01",
+    "alunos": 10,
+    "enviado": 2,
+    "voltou": 0,
+    "faltou": 0
+  }
+]
