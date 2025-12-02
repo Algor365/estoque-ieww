@@ -537,6 +537,31 @@
       gap: 10px;
     }
 
+    /* Estilos para checkboxes na tabela */
+    .table td:first-child,
+    .table th:first-child {
+      width: 30px;
+      text-align: center;
+    }
+
+    .checkItemHistorico {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+
+    #checkAllHistorico {
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
     @media (max-width: 1024px) {
       .sidebar {
         width: 80px;
@@ -596,6 +621,10 @@
       .stats-container {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .btn-group {
+        flex-wrap: wrap;
+      }
     }
 
     @media (max-width: 480px) {
@@ -614,6 +643,11 @@
       .btn {
         padding: 8px 15px;
         font-size: 13px;
+      }
+
+      .table td, .table th {
+        padding: 10px 8px;
+        font-size: 12px;
       }
     }
   </style>
@@ -1129,6 +1163,9 @@
               <table class="table" id="tabelaHistorico">
                 <thead>
                   <tr>
+                    <th style="width: 30px;">
+                      <input type="checkbox" id="checkAllHistorico">
+                    </th>
                     <th>Turma</th>
                     <th>Alunos</th>
                     <th>Enviados</th>
@@ -1137,10 +1174,30 @@
                     <th>Usuário</th>
                     <th>Data</th>
                     <th>Status</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+              <button class="btn btn-outline" id="btnSelecionarTodos">
+                <i class="fas fa-check-square"></i>
+                Selecionar Todos
+              </button>
+              <button class="btn btn-outline" id="btnDeselecionarTodos">
+                <i class="fas fa-square"></i>
+                Deselecionar Todos
+              </button>
+              <button class="btn btn-danger" id="btnApagarSelecionados">
+                <i class="fas fa-trash"></i>
+                Apagar Selecionados
+              </button>
+              <button class="btn btn-danger" id="btnLimparHistorico">
+                <i class="fas fa-broom"></i>
+                Limpar Tudo
+              </button>
             </div>
           </div>
         </div>
@@ -1327,6 +1384,63 @@
       }
     }
 
+    // ===== FUNÇÕES PARA APAGAR HISTÓRICO =====
+    async function apagarItemHistorico(index) {
+      try {
+        const response = await fetch(`${API_BASE}/historico/apagar/${index}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) window.location.href = "/login";
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (e) {
+        console.error("Erro ao apagar item do histórico:", e);
+        return null;
+      }
+    }
+
+    async function apagarVariosItensHistorico(indices) {
+      try {
+        const response = await fetch(`${API_BASE}/historico/apagar-varios`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ indices: indices })
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) window.location.href = "/login";
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (e) {
+        console.error("Erro ao apagar itens do histórico:", e);
+        return null;
+      }
+    }
+
+    async function limparHistoricoCompleto() {
+      try {
+        const response = await fetch(`${API_BASE}/historico/limpar`, {
+          method: 'POST'
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) window.location.href = "/login";
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (e) {
+        console.error("Erro ao limpar histórico:", e);
+        return null;
+      }
+    }
+
     // ===== FUNÇÕES DE DADOS =====
     function getDisciplinasUnicas() {
       const disciplinas = new Set();
@@ -1503,6 +1617,116 @@
       });
     }
 
+    // ===== FUNÇÕES PARA ATUALIZAR TABELA DE HISTÓRICO COM SELEÇÃO =====
+    function atualizarTabelaHistoricoComSelecao() {
+      const tbody = document.querySelector('#tabelaHistorico tbody');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+
+      if (historicoTurmas.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 10;
+        td.textContent = 'Nenhuma turma registrada';
+        td.style.textAlign = 'center';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      historicoTurmas.forEach((turma, index) => {
+        const tr = document.createElement('tr');
+        tr.dataset.index = index;
+
+        // Checkbox de seleção
+        const tdCheck = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'checkItemHistorico';
+        checkbox.dataset.index = index;
+        tdCheck.appendChild(checkbox);
+        tr.appendChild(tdCheck);
+
+        // Dados da turma
+        const campos = [
+          turma.turma,
+          turma.alunos,
+          turma.enviados,
+          turma.usados,
+          turma.faltou,
+          turma.usuario || 'sistema',
+          formatarData(turma.data),
+          getStatusHistorico(turma)
+        ];
+
+        campos.forEach(valor => {
+          const td = document.createElement('td');
+          if (typeof valor === 'string' && valor.includes('badge')) {
+            td.innerHTML = valor;
+          } else {
+            td.textContent = valor;
+          }
+          tr.appendChild(td);
+        });
+
+        // Ações
+        const tdAcoes = document.createElement('td');
+        const btnExcluir = document.createElement('button');
+        btnExcluir.className = 'btn btn-danger btn-small';
+        btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
+        btnExcluir.title = 'Excluir este item';
+        
+        btnExcluir.addEventListener('click', () => {
+          mostrarModalConfirmacao(
+            `Tem certeza que deseja excluir a turma "${turma.turma}"?`,
+            async () => {
+              const resultado = await apagarItemHistorico(index);
+              if (resultado) {
+                if (resultado.erro) {
+                  mostrarAlerta(document.getElementById('alertHistorico'), 'error', resultado.erro);
+                } else {
+                  mostrarAlerta(document.getElementById('alertHistorico'), 'success', resultado.mensagem);
+                  // Recarrega os dados
+                  historicoTurmas = await carregarHistorico();
+                  atualizarTabelaHistoricoComSelecao();
+                  atualizarStats();
+                }
+              } else {
+                mostrarAlerta(document.getElementById('alertHistorico'), 'error', 'Erro ao excluir item.');
+              }
+            }
+          );
+        });
+
+        tdAcoes.appendChild(btnExcluir);
+        tr.appendChild(tdAcoes);
+        tbody.appendChild(tr);
+      });
+
+      // Atualiza o checkbox "Selecionar Todos"
+      const checkAll = document.getElementById('checkAllHistorico');
+      if (checkAll) {
+        checkAll.checked = false;
+        checkAll.addEventListener('change', function() {
+          const checkboxes = document.querySelectorAll('.checkItemHistorico');
+          checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+          });
+        });
+      }
+    }
+
+    // Função para obter itens selecionados
+    function getItensSelecionadosHistorico() {
+      const checkboxes = document.querySelectorAll('.checkItemHistorico:checked');
+      const indices = [];
+      checkboxes.forEach(checkbox => {
+        indices.push(parseInt(checkbox.dataset.index));
+      });
+      return indices;
+    }
+
     function atualizarTabelaUnidades() {
       const tbody = document.querySelector('#tabelaUnidades tbody');
       if (!tbody) return;
@@ -1670,50 +1894,6 @@
       });
     }
 
-    function atualizarTabelaHistorico() {
-      const tbody = document.querySelector('#tabelaHistorico tbody');
-      if (!tbody) return;
-      
-      tbody.innerHTML = '';
-
-      if (historicoTurmas.length === 0) {
-        const tr = document.createElement('tr');
-        const td = document.createElement('td');
-        td.colSpan = 8;
-        td.textContent = 'Nenhuma turma registrada';
-        td.style.textAlign = 'center';
-        tr.appendChild(td);
-        tbody.appendChild(tr);
-        return;
-      }
-
-      historicoTurmas.forEach(turma => {
-        const tr = document.createElement('tr');
-        const campos = [
-          turma.turma,
-          turma.alunos,
-          turma.enviados,
-          turma.usados,
-          turma.faltou,
-          turma.usuario || 'sistema',
-          formatarData(turma.data),
-          getStatusHistorico(turma)
-        ];
-
-        campos.forEach(valor => {
-          const td = document.createElement('td');
-          if (typeof valor === 'string' && valor.includes('badge')) {
-            td.innerHTML = valor;
-          } else {
-            td.textContent = valor;
-          }
-          tr.appendChild(td);
-        });
-
-        tbody.appendChild(tr);
-      });
-    }
-
     function atualizarTabelaAtividades() {
       const tbody = document.querySelector('#tabelaAtividades tbody');
       if (!tbody) return;
@@ -1824,7 +2004,7 @@
       // Atualiza tabelas
       atualizarTabelaUnidades();
       atualizarTabelaDB();
-      atualizarTabelaHistorico();
+      atualizarTabelaHistoricoComSelecao();
       atualizarTabelaAtividades();
       atualizarStats();
     }
@@ -2003,6 +2183,85 @@
             acaoPendente = null;
           }
         }
+      });
+
+      // ===== ABA HISTÓRICO - Event Listeners para apagar =====
+
+      // Botão Selecionar Todos
+      document.getElementById('btnSelecionarTodos')?.addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.checkItemHistorico');
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = true;
+        });
+        document.getElementById('checkAllHistorico').checked = true;
+      });
+
+      // Botão Deselecionar Todos
+      document.getElementById('btnDeselecionarTodos')?.addEventListener('click', function() {
+        const checkboxes = document.querySelectorAll('.checkItemHistorico');
+        checkboxes.forEach(checkbox => {
+          checkbox.checked = false;
+        });
+        document.getElementById('checkAllHistorico').checked = false;
+      });
+
+      // Botão Apagar Selecionados
+      document.getElementById('btnApagarSelecionados')?.addEventListener('click', async function() {
+        const indices = getItensSelecionadosHistorico();
+        const alertHistorico = document.getElementById('alertHistorico');
+        
+        if (indices.length === 0) {
+          mostrarAlerta(alertHistorico, 'error', 'Selecione pelo menos um item para apagar.');
+          return;
+        }
+        
+        mostrarModalConfirmacao(
+          `Tem certeza que deseja apagar ${indices.length} item(s) selecionado(s)?`,
+          async () => {
+            const resultado = await apagarVariosItensHistorico(indices);
+            if (resultado) {
+              if (resultado.erro) {
+                mostrarAlerta(alertHistorico, 'error', resultado.erro);
+              } else {
+                mostrarAlerta(alertHistorico, 'success', resultado.mensagem);
+                // Recarrega os dados
+                historicoTurmas = await carregarHistorico();
+                atualizarTabelaHistoricoComSelecao();
+                atualizarStats();
+                
+                // Desmarca "Selecionar Todos"
+                document.getElementById('checkAllHistorico').checked = false;
+              }
+            } else {
+              mostrarAlerta(alertHistorico, 'error', 'Erro ao apagar itens.');
+            }
+          }
+        );
+      });
+
+      // Botão Limpar Tudo
+      document.getElementById('btnLimparHistorico')?.addEventListener('click', function() {
+        const alertHistorico = document.getElementById('alertHistorico');
+        
+        mostrarModalConfirmacao(
+          'ATENÇÃO: Tem certeza que deseja limpar TODO o histórico? Esta ação não pode ser desfeita!',
+          async () => {
+            const resultado = await limparHistoricoCompleto();
+            if (resultado) {
+              if (resultado.erro) {
+                mostrarAlerta(alertHistorico, 'error', resultado.erro);
+              } else {
+                mostrarAlerta(alertHistorico, 'success', resultado.mensagem);
+                // Recarrega os dados
+                historicoTurmas = await carregarHistorico();
+                atualizarTabelaHistoricoComSelecao();
+                atualizarStats();
+              }
+            } else {
+              mostrarAlerta(alertHistorico, 'error', 'Erro ao limpar histórico.');
+            }
+          }
+        );
       });
 
       // ===== ABA SUGESTÃO =====
@@ -2465,7 +2724,7 @@
         }
       });
 
-      // ===== ABA HISTÓRICO =====
+      // ===== ABA HISTÓRICO - Calcular Sugestão e Salvar Turma =====
       document.getElementById('btnCalcularSugestao').addEventListener('click', async function() {
         const alunos = parseInt(document.getElementById('turmaAlunos').value) || 0;
         const alertHistorico = document.getElementById('alertHistorico');
@@ -2524,7 +2783,7 @@
           } else {
             mostrarAlerta(alertHistorico, 'success', resultado.mensagem || 'Turma salva com sucesso!');
             historicoTurmas = await carregarHistorico();
-            await atualizarTabelaHistorico();
+            atualizarTabelaHistoricoComSelecao();
             atualizarStats();
             document.getElementById('turmaNome').value = '';
             document.getElementById('turmaAlunos').value = '10';
