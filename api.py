@@ -6,6 +6,7 @@ import json
 import os
 import time
 from functools import wraps
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -40,7 +41,12 @@ def carregar_usuarios():
             return json.load(f)
 
     usuarios_iniciais = [
-        {"username": "admin", "password": "admin"}
+        {
+            "username": "admin", 
+            "password": "admin",
+            "foto": "https://i.pinimg.com/236x/c5/ef/e9/c5efe9990be2f5b219b309f5505eaf43.jpg",
+            "role": "Administrador"
+        }
     ]
     salvar_usuarios(usuarios_iniciais)
     return usuarios_iniciais
@@ -55,8 +61,8 @@ def autenticar(username, password):
     usuarios = carregar_usuarios()
     for u in usuarios:
         if u["username"] == username and u["password"] == password:
-            return True
-    return False
+            return u  # Retorna o usuário completo
+    return None
 
 
 def login_required(view_func):
@@ -95,8 +101,10 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
-        if autenticar(username, password):
-            session["user"] = username
+        usuario = autenticar(username, password)
+        if usuario:
+            session["user"] = usuario["username"]
+            session["role"] = usuario.get("role", "Usuário")
             # redireciona para a página que ele tentou acessar, se tiver
             next_url = request.args.get("next") or url_for("index")
             return redirect(next_url)
@@ -113,7 +121,37 @@ def login():
 @app.route("/logout")
 def logout():
     session.pop("user", None)
+    session.pop("role", None)
     return redirect(url_for("login"))
+
+
+@app.route("/api/usuario/<username>/foto", methods=["GET"])
+@login_required
+def api_usuario_foto(username):
+    """
+    Retorna a foto do usuário do arquivo usuarios.json.
+    """
+    usuarios = carregar_usuarios()
+    
+    for usuario in usuarios:
+        if usuario["username"] == username:
+            # Retorna a foto se existir, senão None
+            foto = usuario.get("foto")
+            return jsonify({"foto": foto})
+    
+    return jsonify({"foto": None})
+
+
+@app.route("/api/usuario/atual", methods=["GET"])
+@login_required
+def api_usuario_atual():
+    """
+    Retorna informações do usuário atual.
+    """
+    return jsonify({
+        "username": session.get("user"),
+        "role": session.get("role", "Usuário")
+    })
 
 
 # ==========================================================
@@ -131,10 +169,10 @@ def carregar_historico():
 
     # Histórico inicial padrão (se ainda não existir arquivo)
     historico_inicial = [
-        {"turma": "Turma 1", "alunos": 100, "enviados": 100, "usados": 50, "faltou": 0, "usuario": "sistema"},
-        {"turma": "Turma 2", "alunos": 100, "enviados": 50,  "usados": 100, "faltou": 50, "usuario": "sistema"},
-        {"turma": "Turma 3", "alunos": 30,  "enviados": 30,  "usados": 30,  "faltou": 0, "usuario": "sistema"},
-        {"turma": "Turma 4", "alunos": 30,  "enviados": 60,  "usados": 10,  "faltou": 50, "usuario": "sistema"},
+        {"turma": "Turma 1", "alunos": 100, "enviados": 100, "usados": 50, "faltou": 0, "usuario": "sistema", "data": "2024-01-15"},
+        {"turma": "Turma 2", "alunos": 100, "enviados": 50,  "usados": 100, "faltou": 50, "usuario": "sistema", "data": "2024-02-20"},
+        {"turma": "Turma 3", "alunos": 30,  "enviados": 30,  "usados": 30,  "faltou": 0, "usuario": "sistema", "data": "2024-03-10"},
+        {"turma": "Turma 4", "alunos": 30,  "enviados": 60,  "usados": 10,  "faltou": 50, "usuario": "sistema", "data": "2024-04-05"},
     ]
     salvar_historico(historico_inicial)
     return historico_inicial
@@ -177,7 +215,7 @@ def calcular_proporcao_media(historico):
         proporcoes.append(ideal / alunos)
 
     if not proporcoes:
-        return 0
+        return 1.0  # Default: 1 produto por aluno
 
     return sum(proporcoes) / len(proporcoes)
 
@@ -316,10 +354,12 @@ def api_planejamento_envios():
         data["id"] = int(time.time() * 1000)
 
     # Garante campos principais
-    data.setdefault("data", None)
+    data.setdefault("data", datetime.now().isoformat())
     data.setdefault("unidade", "")
+    data.setdefault("disciplina", "")
     data.setdefault("observacao", "")
     data.setdefault("itens", [])
+    data.setdefault("usuario", session.get("user", "desconhecido"))
 
     envios = carregar_planejamento_envios()
     envios.append(data)
@@ -355,22 +395,35 @@ def api_planejamento_envios_delete(envio_id):
 @login_required
 def index():
     """
-    Página principal antiga (index.html).
-    Se o template usar o histórico/predict, já está tudo pronto.
+    Página principal com todas as funcionalidades.
     """
     historico = carregar_historico()
     usuario = session.get("user")
-    return render_template("index.html", historico=historico, usuario=usuario)
+    role = session.get("role", "Usuário")
+    return render_template("index.html", historico=historico, usuario=usuario, role=role)
 
 
 @app.route("/planejamento")
 @login_required
 def planejamento():
     """
-    Página principal nova para o fluxo de envios, usando envio.html.
+    Página de planejamento (usando o mesmo index.html).
     """
     usuario = session.get("user")
-    return render_template("envio.html", usuario=usuario)
+    role = session.get("role", "Usuário")
+    return render_template("index.html", usuario=usuario, role=role)
+
+
+@app.route("/historico")
+@login_required
+def historico():
+    """
+    Página de histórico (versão antiga).
+    """
+    historico = carregar_historico()
+    usuario = session.get("user")
+    role = session.get("role", "Usuário")
+    return render_template("historico.html", historico=historico, usuario=usuario, role=role)
 
 
 @app.route("/predict", methods=["POST"])
@@ -438,7 +491,8 @@ def add_turma():
         "enviados": enviados,
         "usados": usados,
         "faltou": faltou,
-        "usuario": usuario_atual
+        "usuario": usuario_atual,
+        "data": datetime.now().date().isoformat()
     }
 
     historico.append(nova_turma)
@@ -446,6 +500,16 @@ def add_turma():
 
     return jsonify({"mensagem": "Turma salva com sucesso!", "turma": nova_turma})
 
+
+# Adicione esta rota para retornar dados do histórico
+@app.route("/historico-dados")
+@login_required
+def historico_dados():
+    """
+    Retorna dados do histórico para o frontend.
+    """
+    historico = carregar_historico()
+    return jsonify(historico)
 
 # ==========================================================
 #                        MAIN

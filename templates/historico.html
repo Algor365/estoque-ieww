@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histórico - Sistema de Planejamento</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --gold: #D4AF37;
+      --gold-light: #F4D03F;
+      --gold-dark: #B8860B;
+      --black: #0A0A0A;
+      --black-light: #1A1A1A;
+      --text: #F5F5F5;
+      --muted: #A0A0A0;
+      --accent: #22c55e;
+      --danger: #DC2626;
+      --shadow: 0 10px 25px rgba(0,0,0,0.5);
+      --radius: 12px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--black);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--gold);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+    }
+
+    .card {
+      background: rgba(26, 26, 26, 0.7);
+      border-radius: var(--radius);
+      border: 1px solid rgba(212, 175, 55, 0.1);
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 15px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .form-control {
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      background: rgba(10, 10, 10, 0.7);
+      color: var(--text);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .table th {
+      background: rgba(26, 26, 26, 0.9);
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--gold);
+      border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+    }
+
+    .table td {
+      padding: 15px;
+      border-bottom: 1px solid rgba(42, 42, 42, 0.5);
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .alert-success {
+      background: rgba(22, 163, 74, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: #bbf7d0;
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: #fecaca;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">ECORP - Histórico</div>
+      <div class="user-info">
+        <span>Olá, {{ usuario }}</span>
+        <a href="/" class="btn btn-outline">
+          <i class="fas fa-home"></i> Voltar
+        </a>
+        <a href="/logout" class="btn btn-danger">
+          <i class="fas fa-sign-out-alt"></i> Sair
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Histórico de Turmas</h2>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nome da Turma</label>
+          <input type="text" class="form-control" id="turmaNome" placeholder="Ex: Turma Março 2024">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Alunos</label>
+          <input type="number" class="form-control" id="turmaAlunos" min="1" value="10">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Enviados</label>
+          <input type="number" class="form-control" id="turmaEnviados" min="0" value="15">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Usados</label>
+          <input type="number" class="form-control" id="turmaUsados" min="0" value="10">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Faltou</label>
+          <input type="number" class="form-control" id="turmaFaltou" min="0" value="0">
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-primary" id="btnCalcularSugestao">
+          <i class="fas fa-calculator"></i> Calcular Sugestão
+        </button>
+        <button class="btn btn-primary" id="btnSalvarTurma">
+          <i class="fas fa-save"></i> Salvar Turma
+        </button>
+      </div>
+
+      <div id="alertHistorico" class="alert"></div>
+
+      <div id="resultadoSugestao" class="card" style="display:none; margin-top: 20px;">
+        <h3>Resultado da Sugestão</h3>
+        <div id="textoSugestaoHistorico"></div>
+      </div>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Turma</th>
+            <th>Alunos</th>
+            <th>Enviados</th>
+            <th>Usados</th>
+            <th>Faltou</th>
+            <th>Usuário</th>
+            <th>Data</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for turma in historico %}
+          <tr>
+            <td>{{ turma.turma }}</td>
+            <td>{{ turma.alunos }}</td>
+            <td>{{ turma.enviados }}</td>
+            <td>{{ turma.usados }}</td>
+            <td>{{ turma.faltou }}</td>
+            <td>{{ turma.usuario }}</td>
+            <td>{{ turma.data if turma.data else '' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = window.location.origin;
+
+    function mostrarAlerta(elemento, tipo, mensagem) {
+      elemento.textContent = mensagem;
+      elemento.className = `alert alert-${tipo}`;
+      elemento.style.display = 'block';
+      setTimeout(() => {
+        elemento.style.display = 'none';
+      }, 5000);
+    }
+
+    async function calcularSugestao(alunos) {
+      try {
+        const response = await fetch(`${API_BASE}/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ alunos: alunos })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (e) {
+        console.error("Erro ao calcular sugestão:", e);
+        return null;
+      }
+    }
+
+    async function salvarTurma(turmaData) {
+      try {
+        const response = await fetch(`${API_BASE}/add-turma`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(turmaData)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (e) {
+        console.error("Erro ao salvar turma:", e);
+        return null;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Calcular Sugestão
+      document.getElementById('btnCalcularSugestao').addEventListener('click', async function() {
+        const alunos = parseInt(document.getElementById('turmaAlunos').value) || 0;
+        const alertHistorico = document.getElementById('alertHistorico');
+
+        if (alunos <= 0) {
+          mostrarAlerta(alertHistorico, 'error', 'Informe uma quantidade válida de alunos.');
+          return;
+        }
+
+        const resultado = await calcularSugestao(alunos);
+        
+        if (resultado) {
+          if (resultado.erro) {
+            mostrarAlerta(alertHistorico, 'error', resultado.erro);
+          } else {
+            document.getElementById('resultadoSugestao').style.display = 'block';
+            document.getElementById('textoSugestaoHistorico').innerHTML = `
+              <p><strong>Alunos:</strong> ${resultado.alunos}</p>
+              <p><strong>Proporção média por aluno:</strong> ${resultado.proporcao_media}</p>
+              <p><strong>Quantidade sugerida:</strong> ${resultado.quantidade_sugerida} unidades</p>
+            `;
+            mostrarAlerta(alertHistorico, 'success', 'Sugestão calculada com sucesso!');
+          }
+        } else {
+          mostrarAlerta(alertHistorico, 'error', 'Erro ao calcular sugestão.');
+        }
+      });
+
+      // Salvar Turma
+      document.getElementById('btnSalvarTurma').addEventListener('click', async function() {
+        const turma = document.getElementById('turmaNome').value.trim() || "Nova Turma";
+        const alunos = parseInt(document.getElementById('turmaAlunos').value) || 0;
+        const enviados = parseInt(document.getElementById('turmaEnviados').value) || 0;
+        const usados = parseInt(document.getElementById('turmaUsados').value) || 0;
+        const faltou = parseInt(document.getElementById('turmaFaltou').value) || 0;
+        const alertHistorico = document.getElementById('alertHistorico');
+
+        if (alunos <= 0) {
+          mostrarAlerta(alertHistorico, 'error', 'Alunos deve ser maior que zero');
+          return;
+        }
+
+        const turmaData = {
+          turma: turma,
+          alunos: alunos,
+          enviados: enviados,
+          usados: usados,
+          faltou: faltou
+        };
+
+        const resultado = await salvarTurma(turmaData);
+        
+        if (resultado) {
+          if (resultado.erro) {
+            mostrarAlerta(alertHistorico, 'error', resultado.erro);
+          } else {
+            mostrarAlerta(alertHistorico, 'success', resultado.mensagem || 'Turma salva com sucesso!');
+            // Recarrega a página para mostrar o novo registro
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          }
+        } else {
+          mostrarAlerta(alertHistorico, 'error', 'Erro ao salvar turma.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
