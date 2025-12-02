@@ -999,7 +999,7 @@
           <div class="card">
             <div class="card-header">
               <h2 class="card-title">Parâmetros</h2>
-              <p class="card-subtitle">Configure as opções do sistema</p>
+              <p class="card-subtitle">Configure as opções do sistema para unidades específicas ou para todas as unidades</p>
             </div>
 
             <div class="form-grid">
@@ -1007,6 +1007,7 @@
                 <label class="form-label">Unidade</label>
                 <select class="form-control" id="unidadeParametros">
                   <option value="">Selecione...</option>
+                  <option value="TODAS">TODAS AS UNIDADES</option>
                 </select>
               </div>
 
@@ -1026,6 +1027,11 @@
                 <label class="form-label">Alunos (Geral)</label>
                 <input type="number" class="form-control" id="alunosParametrosGeral" min="1" value="10">
               </div>
+            </div>
+
+            <!-- Aviso para TODAS AS UNIDADES -->
+            <div id="infoUnidadesParametros" class="alert alert-info" style="display: none;">
+              <i class="fas fa-info-circle"></i> Este parâmetro será salvo em <span id="contadorUnidadesParametros">0</span> unidades.
             </div>
 
             <button class="btn btn-primary" id="btnCarregarProdutos">
@@ -1994,7 +2000,7 @@
       // Atualiza selects
       atualizarSelectUnidades('unidadeCadastro', false, true);
       atualizarSelectUnidades('unidadeDB', true);
-      atualizarSelectUnidades('unidadeParametros');
+      atualizarSelectUnidades('unidadeParametros', false, true);
       atualizarSelectDisciplinas('disciplinaSugestao');
       atualizarSelectDisciplinas('disciplinaDB', true);
       atualizarSelectDisciplinas('disciplinaParametros');
@@ -2519,18 +2525,36 @@
       document.getElementById('disciplinaDB').addEventListener('change', atualizarTabelaDB);
       document.getElementById('produtoDB').addEventListener('change', atualizarTabelaDB);
 
-      // ===== ABA PARÂMETROS =====
+      // ===== ABA PARÂMETROS - Event Listeners atualizados =====
+      // Mostrar/ocultar aviso para TODAS AS UNIDADES
+      document.getElementById('unidadeParametros').addEventListener('change', function() {
+        const infoDiv = document.getElementById('infoUnidadesParametros');
+        const contadorSpan = document.getElementById('contadorUnidadesParametros');
+        
+        if (this.value === "TODAS") {
+          infoDiv.style.display = 'block';
+          contadorSpan.textContent = unidadesCadastradas.length;
+        } else {
+          infoDiv.style.display = 'none';
+        }
+      });
+
       document.getElementById('btnCarregarProdutos').addEventListener('click', function() {
         const unidade = document.getElementById('unidadeParametros').value;
         const disciplina = document.getElementById('disciplinaParametros').value;
         const alertParametros = document.getElementById('alertParametros');
 
-        if (!unidade || !disciplina) {
-          mostrarAlerta(alertParametros, 'error', 'Selecione uma unidade e uma disciplina.');
+        if (!disciplina) {
+          mostrarAlerta(alertParametros, 'error', 'Selecione uma disciplina.');
+          return;
+        }
+        
+        if (!unidade) {
+          mostrarAlerta(alertParametros, 'error', 'Selecione uma unidade.');
           return;
         }
 
-        const produtos = getProdutosPorDisciplina(disciplina);
+        let produtos = getProdutosPorDisciplina(disciplina);
 
         if (produtos.length === 0) {
           mostrarAlerta(alertParametros, 'info', 'Não há produtos cadastrados para esta disciplina.');
@@ -2544,19 +2568,34 @@
           const tr = document.createElement('tr');
           
           // Encontra registros existentes
-          const registrosExistentes = db.filter(item => 
-            item.unidade === unidade && 
-            item.disciplina === disciplina && 
-            item.produto === produto
-          );
-
-          // Usa valores do último registro
           let enviado = 0, voltou = 0, faltou = 0;
-          if (registrosExistentes.length > 0) {
-            const ultimoRegistro = registrosExistentes[registrosExistentes.length - 1];
-            enviado = ultimoRegistro.enviado || 0;
-            voltou = ultimoRegistro.voltou || 0;
-            faltou = ultimoRegistro.faltou || 0;
+          
+          if (unidade === "TODAS") {
+            // Para TODAS AS UNIDADES, pega a média dos registros existentes
+            const registrosProduto = db.filter(item => 
+              item.disciplina === disciplina && 
+              item.produto === produto
+            );
+            
+            if (registrosProduto.length > 0) {
+              enviado = Math.round(registrosProduto.reduce((sum, item) => sum + (item.enviado || 0), 0) / registrosProduto.length);
+              voltou = Math.round(registrosProduto.reduce((sum, item) => sum + (item.voltou || 0), 0) / registrosProduto.length);
+              faltou = Math.round(registrosProduto.reduce((sum, item) => sum + (item.faltou || 0), 0) / registrosProduto.length);
+            }
+          } else {
+            // Para unidade específica, pega o último registro
+            const registrosExistentes = db.filter(item => 
+              item.unidade === unidade && 
+              item.disciplina === disciplina && 
+              item.produto === produto
+            );
+
+            if (registrosExistentes.length > 0) {
+              const ultimoRegistro = registrosExistentes[registrosExistentes.length - 1];
+              enviado = ultimoRegistro.enviado || 0;
+              voltou = ultimoRegistro.voltou || 0;
+              faltou = ultimoRegistro.faltou || 0;
+            }
           }
 
           const tdCheck = document.createElement('td');
@@ -2647,51 +2686,109 @@
         const linhas = document.querySelectorAll('#tabelaParametros tbody tr');
         let registrosSalvos = 0;
 
-        // Remove registros antigos
-        const novosDados = db.filter(item => 
-          !(item.unidade === unidade && item.disciplina === disciplina && item.data === data)
-        );
+        if (unidade === "TODAS") {
+          // Para TODAS AS UNIDADES, cria um modal de confirmação
+          mostrarModalConfirmacao(
+            `Deseja salvar estes parâmetros em TODAS as ${unidadesCadastradas.length} unidades?`,
+            async () => {
+              // Remove registros antigos para todas as unidades
+              const novosDados = db.filter(item => 
+                !(unidadesCadastradas.includes(item.unidade) && item.disciplina === disciplina && item.data === data)
+              );
 
-        linhas.forEach(linha => {
-          const check = linha.querySelector('input[type="checkbox"]');
-          const inputs = linha.querySelectorAll('input[type="number"]');
-          const produto = linha.cells[1].textContent;
+              unidadesCadastradas.forEach(unidadeNome => {
+                linhas.forEach(linha => {
+                  const check = linha.querySelector('input[type="checkbox"]');
+                  const inputs = linha.querySelectorAll('input[type="number"]');
+                  const produto = linha.cells[1].textContent;
 
-          if (check.checked) {
-            const enviado = parseInt(inputs[0].value) || 0;
-            const voltou = parseInt(inputs[1].value) || 0;
-            const faltou = parseInt(inputs[2].value) || 0;
+                  if (check.checked) {
+                    const enviado = parseInt(inputs[0].value) || 0;
+                    const voltou = parseInt(inputs[1].value) || 0;
+                    const faltou = parseInt(inputs[2].value) || 0;
 
-            if (enviado > 0 || voltou > 0 || faltou > 0) {
-              novosDados.push({
-                data,
-                unidade,
-                disciplina,
-                produto,
-                alunos: alunosGeral,
-                enviado: enviado,
-                voltou: voltou,
-                faltou: faltou
+                    if (enviado > 0 || voltou > 0 || faltou > 0) {
+                      novosDados.push({
+                        data,
+                        unidade: unidadeNome,
+                        disciplina,
+                        produto,
+                        alunos: alunosGeral,
+                        enviado: enviado,
+                        voltou: voltou,
+                        faltou: faltou
+                      });
+                      registrosSalvos++;
+                    }
+                  }
+                });
               });
-              registrosSalvos++;
+
+              if (registrosSalvos === 0) {
+                mostrarAlerta(alertParametros, 'error', 'Nenhum registro selecionado para salvar.');
+                return;
+              }
+
+              db = novosDados;
+              const salvo = await salvarDB(db);
+              if (salvo) {
+                await inicializarDados();
+                mostrarAlerta(alertParametros, 'success', `${registrosSalvos} registro(s) salvo(s) com sucesso em ${unidadesCadastradas.length} unidades!`);
+                document.getElementById('wrapTabelaParametros').style.display = 'none';
+                document.getElementById('acoesParametros').style.display = 'none';
+              } else {
+                mostrarAlerta(alertParametros, 'error', 'Erro ao salvar registros.');
+              }
             }
-          }
-        });
-
-        if (registrosSalvos === 0) {
-          mostrarAlerta(alertParametros, 'error', 'Nenhum registro selecionado para salvar.');
-          return;
-        }
-
-        db = novosDados;
-        const salvo = await salvarDB(db);
-        if (salvo) {
-          await inicializarDados();
-          mostrarAlerta(alertParametros, 'success', `${registrosSalvos} registro(s) salvo(s) com sucesso!`);
-          document.getElementById('wrapTabelaParametros').style.display = 'none';
-          document.getElementById('acoesParametros').style.display = 'none';
+          );
         } else {
-          mostrarAlerta(alertParametros, 'error', 'Erro ao salvar registros.');
+          // Para unidade específica
+          // Remove registros antigos
+          const novosDados = db.filter(item => 
+            !(item.unidade === unidade && item.disciplina === disciplina && item.data === data)
+          );
+
+          linhas.forEach(linha => {
+            const check = linha.querySelector('input[type="checkbox"]');
+            const inputs = linha.querySelectorAll('input[type="number"]');
+            const produto = linha.cells[1].textContent;
+
+            if (check.checked) {
+              const enviado = parseInt(inputs[0].value) || 0;
+              const voltou = parseInt(inputs[1].value) || 0;
+              const faltou = parseInt(inputs[2].value) || 0;
+
+              if (enviado > 0 || voltou > 0 || faltou > 0) {
+                novosDados.push({
+                  data,
+                  unidade,
+                  disciplina,
+                  produto,
+                  alunos: alunosGeral,
+                  enviado: enviado,
+                  voltou: voltou,
+                  faltou: faltou
+                });
+                registrosSalvos++;
+              }
+            }
+          });
+
+          if (registrosSalvos === 0) {
+            mostrarAlerta(alertParametros, 'error', 'Nenhum registro selecionado para salvar.');
+            return;
+          }
+
+          db = novosDados;
+          const salvo = await salvarDB(db);
+          if (salvo) {
+            await inicializarDados();
+            mostrarAlerta(alertParametros, 'success', `${registrosSalvos} registro(s) salvo(s) com sucesso!`);
+            document.getElementById('wrapTabelaParametros').style.display = 'none';
+            document.getElementById('acoesParametros').style.display = 'none';
+          } else {
+            mostrarAlerta(alertParametros, 'error', 'Erro ao salvar registros.');
+          }
         }
       });
 
