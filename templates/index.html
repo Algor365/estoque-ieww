@@ -672,7 +672,7 @@
         </button>
         <button class="nav-item" data-tab="cadastro">
           <i class="fas fa-edit"></i>
-          <span>Cadastro</span>
+          <span>Cadastro de Produtos</span>
         </button>
         <button class="nav-item" data-tab="database">
           <i class="fas fa-database"></i>
@@ -749,7 +749,7 @@
             
             <div class="stat-card">
               <div class="stat-value" id="statDisciplinas">0</div>
-              <div class="stat-label">Disciplinas Únicas</div>
+              <div class="stat-label">Produtos Cadastrados</div>
               <div class="progress-bar">
                 <div class="progress-fill" id="progressDisciplinas" style="width: 0%"></div>
               </div>
@@ -785,15 +785,15 @@
             <div style="display: flex; gap: 15px; flex-wrap: wrap;">
               <button class="btn btn-primary" data-tab="cadastro">
                 <i class="fas fa-plus"></i>
-                Novo Registro
+                Cadastrar Produto
               </button>
               <button class="btn btn-outline" data-tab="sugestao">
                 <i class="fas fa-calculator"></i>
                 Gerar Sugestão
               </button>
-              <button class="btn btn-outline" data-tab="historico">
-                <i class="fas fa-history"></i>
-                Histórico
+              <button class="btn btn-outline" data-tab="parametros">
+                <i class="fas fa-cogs"></i>
+                Definir Parâmetros
               </button>
               <button class="btn btn-outline" data-tab="unidades">
                 <i class="fas fa-building"></i>
@@ -856,28 +856,15 @@
           </div>
         </div>
 
-        <!-- Cadastro -->
+        <!-- Cadastro (agora apenas de produtos) -->
         <div class="tab-pane" id="cadastro">
           <div class="card">
             <div class="card-header">
-              <h2 class="card-title">Cadastro de Itens</h2>
-              <p class="card-subtitle">Alimentar o banco de dados com novos registros</p>
+              <h2 class="card-title">Cadastro de Produtos</h2>
+              <p class="card-subtitle">Cadastre produtos por disciplina no banco de dados</p>
             </div>
 
             <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Unidade</label>
-                <select class="form-control" id="unidadeCadastro">
-                  <option value="">Selecione...</option>
-                  <option value="TODAS">TODAS AS UNIDADES</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Data</label>
-                <input type="date" class="form-control" id="dataCadastro">
-              </div>
-
               <div class="form-group">
                 <label class="form-label">Disciplina</label>
                 <input type="text" class="form-control" id="disciplinaCadastro" placeholder="Ex: Bioestimulador Facial" list="disciplinasLista">
@@ -888,57 +875,39 @@
                 <label class="form-label">Produto</label>
                 <input type="text" class="form-control" id="produtoCadastro" placeholder="Ex: Produto X 15%">
               </div>
-
-              <div class="form-group">
-                <label class="form-label">Quantidade de Alunos</label>
-                <input type="number" class="form-control" id="alunosCadastro" min="1" value="10">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Quantidade Enviada</label>
-                <input type="number" class="form-control" id="enviadoCadastro" min="0" value="20">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Quantidade que Voltou</label>
-                <input type="number" class="form-control" id="voltouCadastro" min="0" value="5">
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Quantidade que Faltou</label>
-                <input type="number" class="form-control" id="faltouCadastro" min="0" value="0">
-              </div>
-            </div>
-
-            <div id="infoUnidadesCadastro" class="alert alert-info" style="display: none;">
-              <i class="fas fa-info-circle"></i> Este registro será salvo em <span id="contadorUnidadesCadastro">0</span> unidades.
             </div>
 
             <button class="btn btn-primary" id="btnSalvarCadastro">
               <i class="fas fa-save"></i>
-              Salvar Registro
+              Salvar Produto
             </button>
 
             <div id="alertCadastro" class="alert"></div>
+
+            <div class="table-container" style="margin-top: 20px;">
+              <table class="table" id="tabelaCadastro">
+                <thead>
+                  <tr>
+                    <th>Disciplina</th>
+                    <th>Produto</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
           </div>
         </div>
 
-        <!-- Banco de Dados -->
+        <!-- Banco de Dados (agora mostra banco de produtos) -->
         <div class="tab-pane" id="database">
           <div class="card">
             <div class="card-header">
-              <h2 class="card-title">Banco de Dados</h2>
-              <p class="card-subtitle">Consulte e gerencie os registros existentes</p>
+              <h2 class="card-title">Banco de Produtos</h2>
+              <p class="card-subtitle">Consulte e gerencie os produtos cadastrados por disciplina</p>
             </div>
 
             <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Unidade</label>
-                <select class="form-control" id="unidadeDB">
-                  <option value="">Todas</option>
-                </select>
-              </div>
-
               <div class="form-group">
                 <label class="form-label">Disciplina</label>
                 <select class="form-control" id="disciplinaDB">
@@ -948,9 +917,7 @@
 
               <div class="form-group">
                 <label class="form-label">Produto</label>
-                <select class="form-control" id="produtoDB">
-                  <option value="">Todos</option>
-                </select>
+                <input type="text" class="form-control" id="produtoDB" placeholder="Filtrar por nome...">
               </div>
             </div>
 
@@ -974,15 +941,8 @@
               <table class="table" id="tabelaDB">
                 <thead>
                   <tr>
-                    <th>Data</th>
-                    <th>Unidade</th>
                     <th>Disciplina</th>
                     <th>Produto</th>
-                    <th>Alunos</th>
-                    <th>Enviado</th>
-                    <th>Voltou</th>
-                    <th>Faltou</th>
-                    <th>Status</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -998,8 +958,8 @@
         <div class="tab-pane" id="parametros">
           <div class="card">
             <div class="card-header">
-              <h2 class="card-title">Parâmetros</h2>
-              <p class="card-subtitle">Configure as opções do sistema para unidades específicas ou para todas as unidades</p>
+              <h2 class="card-title">Parâmetros de Uso</h2>
+              <p class="card-subtitle">Configure quantidades de produtos para disciplinas específicas</p>
             </div>
 
             <div class="form-grid">
@@ -1024,7 +984,7 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">Alunos (Geral)</label>
+                <label class="form-label">Quantidade de Alunos</label>
                 <input type="number" class="form-control" id="alunosParametrosGeral" min="1" value="10">
               </div>
             </div>
@@ -1036,7 +996,7 @@
 
             <button class="btn btn-primary" id="btnCarregarProdutos">
               <i class="fas fa-sync"></i>
-              Carregar Produtos
+              Carregar Produtos da Disciplina
             </button>
 
             <div id="alertParametros" class="alert alert-info"></div>
@@ -1233,7 +1193,8 @@
     const ADMIN_AVATAR_URL = "https://i.pinimg.com/236x/c5/ef/e9/c5efe9990be2f5b219b309f5505eaf43.jpg";
     
     // Variáveis globais
-    let db = [];
+    let db = []; // Parâmetros completos (planejamento_db.json)
+    let bancoProdutos = {}; // Banco de produtos (banco_de_dados_produtos.json)
     let unidadesCadastradas = [];
     let historicoTurmas = [];
     let acaoPendente = null;
@@ -1299,6 +1260,47 @@
       } catch (e) {
         console.error("Erro ao salvar DB:", e);
         localStorage.setItem("planejamentoProdutosDB", JSON.stringify(dados));
+        return false;
+      }
+    }
+
+    async function carregarBancoProdutos() {
+      try {
+        const response = await fetch(`${API_BASE}/api/planejamento/banco-produtos`);
+        if (!response.ok) {
+          if (response.status === 401) window.location.href = "/login";
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        return await response.json();
+      } catch (e) {
+        console.error("Erro ao ler banco de produtos:", e);
+        try {
+          const raw = localStorage.getItem("bancoProdutos");
+          return raw ? JSON.parse(raw) : {};
+        } catch (err) {
+          return {};
+        }
+      }
+    }
+
+    async function salvarBancoProdutos(dados) {
+      try {
+        const response = await fetch(`${API_BASE}/api/planejamento/banco-produtos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401) window.location.href = "/login";
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+        
+        localStorage.setItem("bancoProdutos", JSON.stringify(dados));
+        return true;
+      } catch (e) {
+        console.error("Erro ao salvar banco de produtos:", e);
+        localStorage.setItem("bancoProdutos", JSON.stringify(dados));
         return false;
       }
     }
@@ -1474,13 +1476,11 @@
     }
 
     function getProdutosPorDisciplina(disciplina) {
-      const produtos = new Set();
-      db.forEach(item => {
-        if (item.disciplina === disciplina && item.produto) {
-          produtos.add(item.produto);
-        }
-      });
-      return Array.from(produtos).sort();
+      // Pega do banco de produtos
+      if (bancoProdutos[disciplina]) {
+        return bancoProdutos[disciplina].sort();
+      }
+      return [];
     }
 
     function getRegistrosPorUnidade(unidade) {
@@ -1521,6 +1521,14 @@
       if (usados === enviados) return '<span class="badge badge-success">Perfeito</span>';
       if (usados < enviados) return '<span class="badge badge-info">Sobrou</span>';
       return '<span class="badge">Normal</span>';
+    }
+
+    function getTotalProdutosCadastrados() {
+      let total = 0;
+      Object.values(bancoProdutos).forEach(produtos => {
+        total += produtos.length;
+      });
+      return total;
     }
 
     // ===== FUNÇÕES DE ATUALIZAÇÃO =====
@@ -1573,40 +1581,16 @@
         select.appendChild(option);
       }
 
-      getDisciplinasUnicas().forEach(disciplina => {
+      // Pega disciplinas do banco de produtos
+      const disciplinas = Object.keys(bancoProdutos).sort();
+      disciplinas.forEach(disciplina => {
         const option = document.createElement('option');
         option.value = disciplina;
         option.textContent = disciplina;
         select.appendChild(option);
       });
 
-      if (getDisciplinasUnicas().includes(valorAtual)) {
-        select.value = valorAtual;
-      }
-    }
-
-    function atualizarSelectProdutos(selectId, incluirTodos = false) {
-      const select = document.getElementById(selectId);
-      if (!select) return;
-      
-      const valorAtual = select.value;
-      select.innerHTML = '';
-
-      if (incluirTodos) {
-        const option = document.createElement('option');
-        option.value = '';
-        option.textContent = 'Todos';
-        select.appendChild(option);
-      }
-
-      getProdutosUnicos().forEach(produto => {
-        const option = document.createElement('option');
-        option.value = produto;
-        option.textContent = produto;
-        select.appendChild(option);
-      });
-
-      if (getProdutosUnicos().includes(valorAtual)) {
+      if (disciplinas.includes(valorAtual)) {
         select.value = valorAtual;
       }
     }
@@ -1616,7 +1600,7 @@
       if (!datalist) return;
       
       datalist.innerHTML = '';
-      getDisciplinasUnicas().forEach(disciplina => {
+      Object.keys(bancoProdutos).sort().forEach(disciplina => {
         const option = document.createElement('option');
         option.value = disciplina;
         datalist.appendChild(option);
@@ -1827,74 +1811,150 @@
       
       tbody.innerHTML = '';
 
-      const unidadeFiltro = document.getElementById('unidadeDB').value;
       const disciplinaFiltro = document.getElementById('disciplinaDB').value;
-      const produtoFiltro = document.getElementById('produtoDB').value;
+      const produtoFiltro = document.getElementById('produtoDB').value.toLowerCase();
 
-      const registrosFiltrados = db.filter(registro => {
-        if (unidadeFiltro && registro.unidade !== unidadeFiltro) return false;
-        if (disciplinaFiltro && registro.disciplina !== disciplinaFiltro) return false;
-        if (produtoFiltro && registro.produto !== produtoFiltro) return false;
+      let todosProdutos = [];
+      Object.entries(bancoProdutos).forEach(([disciplina, produtos]) => {
+        produtos.forEach(produto => {
+          todosProdutos.push({ disciplina, produto });
+        });
+      });
+
+      const produtosFiltrados = todosProdutos.filter(item => {
+        if (disciplinaFiltro && item.disciplina !== disciplinaFiltro) return false;
+        if (produtoFiltro && !item.produto.toLowerCase().includes(produtoFiltro)) return false;
         return true;
       });
 
-      if (registrosFiltrados.length === 0) {
+      if (produtosFiltrados.length === 0) {
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 10;
-        td.textContent = 'Nenhum registro encontrado';
+        td.colSpan = 3;
+        td.textContent = 'Nenhum produto cadastrado';
         td.style.textAlign = 'center';
         tr.appendChild(td);
         tbody.appendChild(tr);
         return;
       }
 
-      registrosFiltrados.forEach((registro, index) => {
+      produtosFiltrados.forEach((item, index) => {
         const tr = document.createElement('tr');
 
-        const campos = [
-          formatarData(registro.data),
-          registro.unidade,
-          registro.disciplina,
-          registro.produto,
-          registro.alunos,
-          registro.enviado,
-          registro.voltou,
-          registro.faltou,
-          getStatusRegistro(registro)
-        ];
+        const tdDisciplina = document.createElement('td');
+        tdDisciplina.textContent = item.disciplina;
 
-        campos.forEach(valor => {
-          const td = document.createElement('td');
-          if (typeof valor === 'string' && valor.includes('badge')) {
-            td.innerHTML = valor;
-          } else {
-            td.textContent = valor;
-          }
-          tr.appendChild(td);
-        });
+        const tdProduto = document.createElement('td');
+        tdProduto.textContent = item.produto;
 
         const tdAcoes = document.createElement('td');
         const btnExcluir = document.createElement('button');
         btnExcluir.className = 'btn btn-danger btn-small';
         btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
-        btnExcluir.title = 'Excluir registro';
+        btnExcluir.title = 'Excluir produto';
         btnExcluir.addEventListener('click', () => {
-          mostrarModalConfirmacao('Tem certeza que deseja excluir este registro?', async () => {
-            db.splice(index, 1);
-            const salvo = await salvarDB(db);
-            if (salvo) {
-              await inicializarDados();
-              mostrarAlerta(document.getElementById('alertDB'), 'success', 'Registro excluído com sucesso!');
-            } else {
-              mostrarAlerta(document.getElementById('alertDB'), 'error', 'Erro ao excluir registro.');
-              db.splice(index, 0, registro);
-              atualizarTabelaDB();
+          mostrarModalConfirmacao(`Tem certeza que deseja excluir o produto "${item.produto}" da disciplina "${item.disciplina}"?`, async () => {
+            // Remove do banco de produtos
+            const disciplina = item.disciplina;
+            const produto = item.produto;
+            
+            if (bancoProdutos[disciplina]) {
+              const indexProd = bancoProdutos[disciplina].indexOf(produto);
+              if (indexProd > -1) {
+                bancoProdutos[disciplina].splice(indexProd, 1);
+                // Se a disciplina ficar vazia, remove ela
+                if (bancoProdutos[disciplina].length === 0) {
+                  delete bancoProdutos[disciplina];
+                }
+                
+                const salvo = await salvarBancoProdutos(bancoProdutos);
+                if (salvo) {
+                  await inicializarDados();
+                  mostrarAlerta(document.getElementById('alertDB'), 'success', 'Produto excluído com sucesso!');
+                } else {
+                  mostrarAlerta(document.getElementById('alertDB'), 'error', 'Erro ao excluir produto.');
+                }
+              }
             }
           });
         });
 
         tdAcoes.appendChild(btnExcluir);
+        tr.appendChild(tdDisciplina);
+        tr.appendChild(tdProduto);
+        tr.appendChild(tdAcoes);
+        tbody.appendChild(tr);
+      });
+    }
+
+    function atualizarTabelaCadastro() {
+      const tbody = document.querySelector('#tabelaCadastro tbody');
+      if (!tbody) return;
+      
+      tbody.innerHTML = '';
+
+      let todosProdutos = [];
+      Object.entries(bancoProdutos).forEach(([disciplina, produtos]) => {
+        produtos.forEach(produto => {
+          todosProdutos.push({ disciplina, produto });
+        });
+      });
+
+      if (todosProdutos.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 3;
+        td.textContent = 'Nenhum produto cadastrado';
+        td.style.textAlign = 'center';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      todosProdutos.forEach((item, index) => {
+        const tr = document.createElement('tr');
+
+        const tdDisciplina = document.createElement('td');
+        tdDisciplina.textContent = item.disciplina;
+
+        const tdProduto = document.createElement('td');
+        tdProduto.textContent = item.produto;
+
+        const tdAcoes = document.createElement('td');
+        const btnExcluir = document.createElement('button');
+        btnExcluir.className = 'btn btn-danger btn-small';
+        btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
+        btnExcluir.title = 'Excluir produto';
+        btnExcluir.addEventListener('click', () => {
+          mostrarModalConfirmacao(`Tem certeza que deseja excluir o produto "${item.produto}" da disciplina "${item.disciplina}"?`, async () => {
+            // Remove do banco de produtos
+            const disciplina = item.disciplina;
+            const produto = item.produto;
+            
+            if (bancoProdutos[disciplina]) {
+              const indexProd = bancoProdutos[disciplina].indexOf(produto);
+              if (indexProd > -1) {
+                bancoProdutos[disciplina].splice(indexProd, 1);
+                // Se a disciplina ficar vazia, remove ela
+                if (bancoProdutos[disciplina].length === 0) {
+                  delete bancoProdutos[disciplina];
+                }
+                
+                const salvo = await salvarBancoProdutos(bancoProdutos);
+                if (salvo) {
+                  await inicializarDados();
+                  mostrarAlerta(document.getElementById('alertCadastro'), 'success', 'Produto excluído com sucesso!');
+                } else {
+                  mostrarAlerta(document.getElementById('alertCadastro'), 'error', 'Erro ao excluir produto.');
+                }
+              }
+            }
+          });
+        });
+
+        tdAcoes.appendChild(btnExcluir);
+        tr.appendChild(tdDisciplina);
+        tr.appendChild(tdProduto);
         tr.appendChild(tdAcoes);
         tbody.appendChild(tr);
       });
@@ -1918,7 +1978,7 @@
         atividades.push({
           data: registro.data,
           usuario: 'Sistema',
-          acao: 'Registro salvo',
+          acao: 'Parâmetro salvo',
           detalhes: `${registro.disciplina} - ${registro.produto} (${registro.unidade})`
         });
       });
@@ -1982,34 +2042,32 @@
       document.getElementById('statRegistros').textContent = db.length;
       document.getElementById('statUnidades').textContent = unidadesCadastradas.length;
       document.getElementById('statTurmas').textContent = historicoTurmas.length;
-      document.getElementById('statDisciplinas').textContent = getDisciplinasUnicas().length;
+      document.getElementById('statDisciplinas').textContent = getTotalProdutosCadastrados();
       
       // Atualiza barras de progresso (usando valores relativos)
       const maxRegistros = Math.max(db.length, 100);
       const maxUnidades = Math.max(unidadesCadastradas.length, 10);
       const maxTurmas = Math.max(historicoTurmas.length, 50);
-      const maxDisciplinas = Math.max(getDisciplinasUnicas().length, 20);
+      const maxProdutos = Math.max(getTotalProdutosCadastrados(), 50);
       
       document.getElementById('progressRegistros').style.width = `${(db.length / maxRegistros) * 100}%`;
       document.getElementById('progressUnidades').style.width = `${(unidadesCadastradas.length / maxUnidades) * 100}%`;
       document.getElementById('progressTurmas').style.width = `${(historicoTurmas.length / maxTurmas) * 100}%`;
-      document.getElementById('progressDisciplinas').style.width = `${(getDisciplinasUnicas().length / maxDisciplinas) * 100}%`;
+      document.getElementById('progressDisciplinas').style.width = `${(getTotalProdutosCadastrados() / maxProdutos) * 100}%`;
     }
 
     async function atualizarTudo() {
       // Atualiza selects
-      atualizarSelectUnidades('unidadeCadastro', false, true);
-      atualizarSelectUnidades('unidadeDB', true);
       atualizarSelectUnidades('unidadeParametros', false, true);
       atualizarSelectDisciplinas('disciplinaSugestao');
       atualizarSelectDisciplinas('disciplinaDB', true);
       atualizarSelectDisciplinas('disciplinaParametros');
-      atualizarSelectProdutos('produtoDB', true);
       atualizarDatalistDisciplinas();
       
       // Atualiza tabelas
       atualizarTabelaUnidades();
       atualizarTabelaDB();
+      atualizarTabelaCadastro();
       atualizarTabelaHistoricoComSelecao();
       atualizarTabelaAtividades();
       atualizarStats();
@@ -2074,14 +2132,15 @@
     async function inicializarDados() {
       try {
         db = await carregarDB();
+        bancoProdutos = await carregarBancoProdutos();
         unidadesCadastradas = await carregarUnidadesCadastradas();
         historicoTurmas = await carregarHistorico();
         
         console.log("Dados carregados:", {
           registros: db.length,
+          produtos: getTotalProdutosCadastrados(),
           unidades: unidadesCadastradas.length,
-          turmas: historicoTurmas.length,
-          disciplinas: getDisciplinasUnicas().length
+          turmas: historicoTurmas.length
         });
         
         await atualizarTudo();
@@ -2094,12 +2153,7 @@
     document.addEventListener('DOMContentLoaded', async function() {
       // Configura data atual
       const hoje = new Date().toISOString().split('T')[0];
-      
-      // Define datas padrão
-      ['dataCadastro', 'dataParametros'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.value = hoje;
-      });
+      document.getElementById('dataParametros').value = hoje;
       
       // Inicializa sistema
       await aplicarConfUsuario();
@@ -2129,9 +2183,9 @@
             const titulos = {
               'dashboard': ['Dashboard', 'Visão geral do sistema de planejamento'],
               'sugestao': ['Sugestão por Disciplina', 'Gere sugestões baseadas no histórico de consumo'],
-              'cadastro': ['Cadastro de Itens', 'Alimente o banco de dados com novos registros'],
-              'database': ['Banco de Dados', 'Consulte e gerencie os registros existentes'],
-              'parametros': ['Parâmetros do Sistema', 'Configure as opções do sistema'],
+              'cadastro': ['Cadastro de Produtos', 'Cadastre produtos por disciplina no banco de dados'],
+              'database': ['Banco de Produtos', 'Consulte e gerencie os produtos cadastrados por disciplina'],
+              'parametros': ['Parâmetros de Uso', 'Configure quantidades de produtos para disciplinas específicas'],
               'unidades': ['Gerenciar Unidades', 'Adicione e remova unidades do sistema'],
               'historico': ['Histórico de Turmas', 'Registros do sistema antigo']
             };
@@ -2352,39 +2406,13 @@
         mostrarAlerta(alertSugestao, 'success', 'Sugestão gerada com sucesso!');
       });
 
-      // ===== ABA CADASTRO =====
-      document.getElementById('unidadeCadastro').addEventListener('change', function() {
-        const infoDiv = document.getElementById('infoUnidadesCadastro');
-        const contadorSpan = document.getElementById('contadorUnidadesCadastro');
-        
-        if (this.value === "TODAS") {
-          infoDiv.style.display = 'block';
-          contadorSpan.textContent = unidadesCadastradas.length;
-        } else {
-          infoDiv.style.display = 'none';
-        }
-      });
-
+      // ===== ABA CADASTRO (agora apenas de produtos) =====
       document.getElementById('btnSalvarCadastro').addEventListener('click', async function() {
-        const data = document.getElementById('dataCadastro').value;
         const disciplina = document.getElementById('disciplinaCadastro').value.trim();
         const produto = document.getElementById('produtoCadastro').value.trim();
-        const alunos = parseInt(document.getElementById('alunosCadastro').value) || 0;
-        const enviado = parseInt(document.getElementById('enviadoCadastro').value) || 0;
-        const voltou = parseInt(document.getElementById('voltouCadastro').value) || 0;
-        const faltou = parseInt(document.getElementById('faltouCadastro').value) || 0;
-        const unidade = document.getElementById('unidadeCadastro').value;
         const alertCadastro = document.getElementById('alertCadastro');
 
         // Validações
-        if (!data) {
-          mostrarAlerta(alertCadastro, 'error', 'Informe a data.');
-          return;
-        }
-        if (!unidade) {
-          mostrarAlerta(alertCadastro, 'error', 'Selecione a unidade.');
-          return;
-        }
         if (!disciplina) {
           mostrarAlerta(alertCadastro, 'error', 'Informe a disciplina.');
           return;
@@ -2393,137 +2421,103 @@
           mostrarAlerta(alertCadastro, 'error', 'Informe o produto.');
           return;
         }
-        if (alunos <= 0) {
-          mostrarAlerta(alertCadastro, 'error', 'Informe uma quantidade válida de alunos.');
+
+        // Inicializa array da disciplina se não existir
+        if (!bancoProdutos[disciplina]) {
+          bancoProdutos[disciplina] = [];
+        }
+
+        // Verifica se produto já existe
+        if (bancoProdutos[disciplina].includes(produto)) {
+          mostrarAlerta(alertCadastro, 'error', 'Este produto já está cadastrado para esta disciplina.');
           return;
         }
 
-        // Salvar em todas as unidades
-        if (unidade === "TODAS") {
-          mostrarModalConfirmacao(
-            `Deseja salvar este registro em TODAS as ${unidadesCadastradas.length} unidades?`,
-            async () => {
-              let registrosSalvos = 0;
-              const registrosParaSalvar = [];
-
-              unidadesCadastradas.forEach(unidadeNome => {
-                registrosParaSalvar.push({
-                  data,
-                  unidade: unidadeNome,
-                  disciplina,
-                  produto,
-                  alunos,
-                  enviado,
-                  voltou,
-                  faltou
-                });
-                registrosSalvos++;
-              });
-
-              db.push(...registrosParaSalvar);
-              const salvo = await salvarDB(db);
-              
-              if (salvo) {
-                mostrarAlerta(alertCadastro, 'success', `${registrosSalvos} registros salvos com sucesso em todas as unidades!`);
-                // Limpa campos
-                document.getElementById('produtoCadastro').value = '';
-                document.getElementById('alunosCadastro').value = '10';
-                document.getElementById('enviadoCadastro').value = '20';
-                document.getElementById('voltouCadastro').value = '5';
-                document.getElementById('faltouCadastro').value = '0';
-                await inicializarDados();
-              } else {
-                mostrarAlerta(alertCadastro, 'error', 'Erro ao salvar registros.');
-                db.splice(db.length - registrosParaSalvar.length, registrosParaSalvar.length);
-              }
-            }
-          );
+        // Adiciona produto
+        bancoProdutos[disciplina].push(produto);
+        
+        // Ordena alfabeticamente
+        bancoProdutos[disciplina].sort();
+        
+        const salvo = await salvarBancoProdutos(bancoProdutos);
+        
+        if (salvo) {
+          mostrarAlerta(alertCadastro, 'success', 'Produto cadastrado com sucesso!');
+          // Limpa campos
+          document.getElementById('produtoCadastro').value = '';
+          await inicializarDados();
         } else {
-          // Salvar em unidade específica
-          const novoRegistro = {
-            data,
-            unidade,
-            disciplina,
-            produto,
-            alunos,
-            enviado,
-            voltou,
-            faltou
-          };
-
-          db.push(novoRegistro);
-          const salvo = await salvarDB(db);
-          
-          if (salvo) {
-            mostrarAlerta(alertCadastro, 'success', 'Registro salvo com sucesso!');
-            // Limpa campos
-            document.getElementById('produtoCadastro').value = '';
-            document.getElementById('alunosCadastro').value = '10';
-            document.getElementById('enviadoCadastro').value = '20';
-            document.getElementById('voltouCadastro').value = '5';
-            document.getElementById('faltouCadastro').value = '0';
-            await inicializarDados();
-          } else {
-            mostrarAlerta(alertCadastro, 'error', 'Erro ao salvar registro.');
-          }
+          mostrarAlerta(alertCadastro, 'error', 'Erro ao salvar produto.');
+          // Remove do array se falhou
+          const index = bancoProdutos[disciplina].indexOf(produto);
+          if (index > -1) bancoProdutos[disciplina].splice(index, 1);
         }
       });
 
-      // ===== ABA BANCO DE DADOS =====
+      // ===== ABA BANCO DE DADOS (agora banco de produtos) =====
       document.getElementById('btnLimparFiltros').addEventListener('click', function() {
-        document.getElementById('unidadeDB').value = '';
         document.getElementById('disciplinaDB').value = '';
         document.getElementById('produtoDB').value = '';
         atualizarTabelaDB();
       });
 
       document.getElementById('btnApagarFiltrados').addEventListener('click', function() {
-        const unidadeFiltro = document.getElementById('unidadeDB').value;
         const disciplinaFiltro = document.getElementById('disciplinaDB').value;
-        const produtoFiltro = document.getElementById('produtoDB').value;
+        const produtoFiltro = document.getElementById('produtoDB').value.toLowerCase();
 
-        if (!unidadeFiltro && !disciplinaFiltro && !produtoFiltro) {
-          mostrarAlerta(document.getElementById('alertDB'), 'error', 'Selecione pelo menos um filtro para apagar registros.');
+        if (!disciplinaFiltro && !produtoFiltro) {
+          mostrarAlerta(document.getElementById('alertDB'), 'error', 'Selecione pelo menos um filtro para apagar produtos.');
           return;
         }
 
-        const registrosParaApagar = db.filter(registro => {
-          if (unidadeFiltro && registro.unidade !== unidadeFiltro) return false;
-          if (disciplinaFiltro && registro.disciplina !== disciplinaFiltro) return false;
-          if (produtoFiltro && registro.produto !== produtoFiltro) return false;
-          return true;
+        let produtosParaApagar = [];
+        Object.entries(bancoProdutos).forEach(([disciplina, produtos]) => {
+          produtos.forEach(produto => {
+            if (disciplinaFiltro && disciplina !== disciplinaFiltro) return;
+            if (produtoFiltro && !produto.toLowerCase().includes(produtoFiltro)) return;
+            produtosParaApagar.push({ disciplina, produto });
+          });
         });
 
-        if (registrosParaApagar.length === 0) {
-          mostrarAlerta(document.getElementById('alertDB'), 'info', 'Nenhum registro encontrado com os filtros selecionados.');
+        if (produtosParaApagar.length === 0) {
+          mostrarAlerta(document.getElementById('alertDB'), 'info', 'Nenhum produto encontrado com os filtros selecionados.');
           return;
         }
 
         mostrarModalConfirmacao(
-          `Tem certeza que deseja apagar ${registrosParaApagar.length} registro(s) que correspondem aos filtros atuais?`,
+          `Tem certeza que deseja apagar ${produtosParaApagar.length} produto(s) que correspondem aos filtros atuais?`,
           async () => {
-            const novosDados = db.filter(registro => {
-              if (unidadeFiltro && registro.unidade !== unidadeFiltro) return true;
-              if (disciplinaFiltro && registro.disciplina !== disciplinaFiltro) return true;
-              if (produtoFiltro && registro.produto !== produtoFiltro) return true;
-              return false;
+            // Cria uma cópia do banco de produtos
+            const novoBanco = JSON.parse(JSON.stringify(bancoProdutos));
+            
+            // Remove os produtos filtrados
+            produtosParaApagar.forEach(({ disciplina, produto }) => {
+              if (novoBanco[disciplina]) {
+                const index = novoBanco[disciplina].indexOf(produto);
+                if (index > -1) {
+                  novoBanco[disciplina].splice(index, 1);
+                }
+                // Se a disciplina ficou vazia, remove ela
+                if (novoBanco[disciplina].length === 0) {
+                  delete novoBanco[disciplina];
+                }
+              }
             });
 
-            const salvo = await salvarDB(novosDados);
+            const salvo = await salvarBancoProdutos(novoBanco);
             if (salvo) {
               await inicializarDados();
-              mostrarAlerta(document.getElementById('alertDB'), 'success', `${registrosParaApagar.length} registro(s) apagado(s) com sucesso!`);
+              mostrarAlerta(document.getElementById('alertDB'), 'success', `${produtosParaApagar.length} produto(s) apagado(s) com sucesso!`);
             } else {
-              mostrarAlerta(document.getElementById('alertDB'), 'error', 'Erro ao apagar registros.');
+              mostrarAlerta(document.getElementById('alertDB'), 'error', 'Erro ao apagar produtos.');
             }
           }
         );
       });
 
       // Filtros em tempo real
-      document.getElementById('unidadeDB').addEventListener('change', atualizarTabelaDB);
       document.getElementById('disciplinaDB').addEventListener('change', atualizarTabelaDB);
-      document.getElementById('produtoDB').addEventListener('change', atualizarTabelaDB);
+      document.getElementById('produtoDB').addEventListener('input', atualizarTabelaDB);
 
       // ===== ABA PARÂMETROS - Event Listeners atualizados =====
       // Mostrar/ocultar aviso para TODAS AS UNIDADES
