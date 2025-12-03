@@ -1292,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', async function() {
       totalSugerido += sugestao;
 
       const tr = document.createElement('tr');
-      const test= sugestao+1;
+      const test= sugestao;
       const cells = [
         produto,
         media.toFixed(2),
