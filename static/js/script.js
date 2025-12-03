@@ -1292,13 +1292,12 @@ document.addEventListener('DOMContentLoaded', async function() {
       totalSugerido += sugestao;
 
       const tr = document.createElement('tr');
-      const values=nunber(sugestao);
       const cells = [
         produto,
         media.toFixed(2),
         dados.quantidade,
         sugestao.toFixed(2),
-        Math.ceil(nunber)
+        Math.ceil(sugestao)+1
       ];
 
       cells.forEach(texto => {
@@ -1313,7 +1312,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('wrapTabelaSugestao').style.display = 'block';
     document.getElementById('cardSugestaoResumo').style.display = 'block';
     document.getElementById('textoSugestaoResumo').innerHTML = `
-      <p><strong>Total sugerido:</strong> ${totalSugerido.toFixed(2)} unidades</p>
+      <p><strong>Total sugerides:</strong> ${totalSugerido.toFixed(2)} unidades</p>
       <p><strong>Total arredondado:</strong> ${Math.ceil(totalSugerido)} unidades</p>
       <p><strong>Alunos:</strong> ${alunos}</p>
       <p><strong>Disciplina:</strong> ${disciplina}</p>
