@@ -1292,12 +1292,13 @@ document.addEventListener('DOMContentLoaded', async function() {
       totalSugerido += sugestao;
 
       const tr = document.createElement('tr');
+      const values=nunber(sugestao);
       const cells = [
         produto,
         media.toFixed(2),
         dados.quantidade,
         sugestao.toFixed(2),
-        Math.ceil(sugestao)
+        Math.ceil(nunber)
       ];
 
       cells.forEach(texto => {
