@@ -1314,7 +1314,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('wrapTabelaSugestao').style.display = 'block';
     document.getElementById('cardSugestaoResumo').style.display = 'block';
     document.getElementById('textoSugestaoResumo').innerHTML = `
-      <p><strong>Total sugerides:</strong> ${totalSugerido.toFixed(2)} unidades</p>
+      <p><strong>Total sugerido</strong> ${totalSugerido.toFixed(2)} unidades</p>
       <p><strong>Total arredondado:</strong> ${Math.ceil(totalSugerido)} unidades</p>
       <p><strong>Alunos:</strong> ${alunos}</p>
       <p><strong>Disciplina:</strong> ${disciplina}</p>
