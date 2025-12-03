@@ -1286,7 +1286,9 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     produtosMap.forEach((dados, produto) => {
       const media = dados.quantidade > 0 ? dados.soma / dados.quantidade : 0;
-      const sugestao = media * alunos;
+      const valor =Math.ceil(media)
+      const sugestao =media * alunos;
+      
       totalSugerido += sugestao;
 
       const tr = document.createElement('tr');
@@ -1295,7 +1297,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         media.toFixed(2),
         dados.quantidade,
         sugestao.toFixed(2),
-        Math.round(sugestao)
+        Math.ceil(sugestao)
       ];
 
       cells.forEach(texto => {
@@ -1311,7 +1313,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('cardSugestaoResumo').style.display = 'block';
     document.getElementById('textoSugestaoResumo').innerHTML = `
       <p><strong>Total sugerido:</strong> ${totalSugerido.toFixed(2)} unidades</p>
-      <p><strong>Total arredondado:</strong> ${Math.round(totalSugerido)} unidades</p>
+      <p><strong>Total arredondado:</strong> ${Math.ceil(totalSugerido)} unidades</p>
       <p><strong>Alunos:</strong> ${alunos}</p>
       <p><strong>Disciplina:</strong> ${disciplina}</p>
       <p><strong>Registros analisados:</strong> ${registrosDisciplina.length}</p>
