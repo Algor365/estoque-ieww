@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Planejamento de Produtos - Instagram Download</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="static/css/styles.css">
+
+  <!-- Estilos mínimos só para o layout interno da tela do Instagram,
+       reaproveitando o máximo possível do styles.css -->
+  <style>
+    .instagram-container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .url-input-container {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .url-input {
+      flex: 1;
+      min-width: 220px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    .url-input:focus {
+      outline: none;
+      border-color: #3f51b5;
+    }
+
+    .progress-container {
+      margin-top: 15px;
+      background: #f0f0f0;
+      border-radius: 999px;
+      overflow: hidden;
+      display: none;
+      height: 8px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3f51b5, #9c27b0);
+      transition: width 0.3s;
+    }
+
+    .downloads-list-container {
+      width: 100%;
+    }
+
+    .download-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 15px;
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+
+    .download-item:hover {
+      background: #fafafa;
+    }
+
+    .download-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(45deg, #405de6, #833ab4);
+      color: #fff;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .download-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .download-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #333;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .download-meta {
+      font-size: 12px;
+      color: #777;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .download-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .download-actions .action-btn {
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+
+    .info-box {
+      background: #e3f2fd;
+      border-left: 4px solid #2196F3;
+      padding: 12px 15px;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-top: 15px;
+    }
+
+    .info-box ul {
+      margin: 8px 0;
+      padding-left: 18px;
+    }
+
+    .info-box li {
+      margin-bottom: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 35px 20px;
+      color: #777;
+    }
+
+    .empty-state i {
+      font-size: 40px;
+      color: #ddd;
+      margin-bottom: 10px;
+    }
+
+    /* Responsivo */
+    @media (max-width: 600px) {
+      .download-item {
+        align-items: flex-start;
+      }
+      .download-actions {
+        flex-direction: row;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+    }
+    /* Remover fundo dos cards */
+.card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Remover fundo dos containers internos */
+.instagram-container,
+.downloads-list-container {
+  background: transparent !important;
+}
+
+/* Remover fundo da área de inputs */
+.url-input-container,
+.info-box,
+.empty-state {
+  background: transparent !important;
+}
+
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar (igual ao index, com Instagram marcado como ativo) -->
+    <aside class="sidebar">
+      <div class="logo-container">
+        <div class="logo">ECORP</div>
+        <div class="logo-subtitle">Planejamento</div>
+      </div>
+
+      <nav class="nav">
+        
+        <button class="nav-item active" onclick="location.href='/instagram-download'">
+          <i class="fab fa-instagram"></i>
+          <span>Instagram Download</span>
+        </button>
+       
+      </nav>
+
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar"></div>
+        <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
+        <div class="user-role" id="userRole">{{ role or "Usuário" }}</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <header class="header">
+        >
+
+        <div class="header-actions">
+          
+          <button class="btn btn-danger" id="btnLogout">
+            <i class="fas fa-sign-out-alt"></i>
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <!-- Conteúdo principal no estilo de cards do index -->
+      <div class="tab-content">
+        <div class="tab-pane active" id="instagram-download">
+          <div class="instagram-container">
+            <!-- Card: formulário de download -->
+            <div class="card">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i class="fab fa-instagram"></i> Instagram Downloader
+                </h2>
+                <p class="card-subtitle">Cole a URL do Reel abaixo para fazer o download</p>
+              </div>
+
+              <div style="padding: 15px 20px 20px 20px;">
+                <div class="url-input-container">
+                  <input
+                    type="text"
+                    class="url-input"
+                    id="urlInput"
+                    placeholder="Cole a URL do Instagram Reel aqui..."
+                  >
+                  <button class="btn btn-primary" id="downloadBtn">
+                    <i class="fas fa-download"></i>
+                    Download
+                  </button>
+                </div>
+
+                <div class="progress-container" id="progressContainer">
+                  <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <div id="downloadMessage" class="alert" style="display: none; margin-top: 15px;"></div>
+
+                <div class="info-box">
+                  <strong><i class="fas fa-info-circle"></i> Como usar:</strong>
+                  <ul>
+                    <li>Copie a URL do Reel do Instagram (app ou site)</li>
+                    <li>Cole no campo acima e clique em <strong>Download</strong></li>
+                    <li>O vídeo será salvo na lista abaixo</li>
+                    <li>Clique em <strong>“Baixar”</strong> para salvar no seu computador</li>
+                  </ul>
+                  <p><strong>Nota:</strong> Funciona com Reels públicos. Vídeos privados exigem login.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: lista de downloads -->
+            <div class="card downloads-list-container">
+              <div class="card-header">
+                <h2 class="card-title">
+                  <i class="fas fa-folder-open"></i> Downloads Realizados
+                </h2>
+                <p class="card-subtitle">Seus vídeos baixados</p>
+              </div>
+
+              <div id="downloadsList">
+                <div class="empty-state">
+                  <i class="fas fa-film"></i>
+                  <h3>Nenhum download ainda</h3>
+                  <p>Faça seu primeiro download acima!</p>
+                </div>
+              </div>
+            </div>
+          </div> <!-- /instagram-container -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+ <script>
+  // =========================
+  // CONFIRMAÇÃO (MODAL) + LOGOUT
+  // =========================
+  let acaoPendente = null;
+
+  function mostrarModalConfirmacao(mensagem, callbackConfirmar) {
+    const modal = document.getElementById('modalConfirmacao');
+    const body = document.getElementById('modalConfirmacaoBody');
+
+    // Se não tiver modal na página, usa o confirm padrão do navegador
+    if (!modal || !body) {
+      if (confirm(mensagem)) callbackConfirmar();
+      return;
+    }
+
+    body.textContent = mensagem;
+    acaoPendente = callbackConfirmar;
+    modal.style.display = 'flex';
+  }
+
+  // Elementos do DOM (Instagram)
+  const urlInput = document.getElementById('urlInput');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const progressContainer = document.getElementById('progressContainer');
+  const progressBar = document.getElementById('progressBar');
+  const downloadMessage = document.getElementById('downloadMessage');
+  const downloadsList = document.getElementById('downloadsList');
+
+  // =========================
+  // FUNÇÕES DO INSTAGRAM
+  // =========================
+
+  // Carregar lista de downloads
+  async function carregarDownloads() {
+    try {
+      const response = await fetch('/api/instagram-download/list');
+      const downloads = await response.json();
+
+      if (downloads.erro) {
+        throw new Error(downloads.erro);
+      }
+
+      if (!downloads || downloads.length === 0) {
+        downloadsList.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-film"></i>
+            <h3>Nenhum download ainda</h3>
+            <p>Faça seu primeiro download acima!</p>
+          </div>
+        `;
+        return;
+      }
+
+      downloadsList.innerHTML = downloads.map(download => `
+        <div class="download-item" data-filename="${download.nome}">
+          <div class="download-icon">
+            <i class="fas fa-video"></i>
+          </div>
+          <div class="download-info">
+            <div class="download-name" title="${download.nome}">${download.nome}</div>
+            <div class="download-meta">
+              <span><i class="fas fa-calendar"></i> ${new Date(download.data).toLocaleDateString()}</span>
+              <span><i class="fas fa-hdd"></i> ${formatBytes(download.tamanho)}</span>
+            </div>
+          </div>
+          <div class="download-actions">
+            <button class="btn btn-primary btn-small action-btn" onclick="downloadFile('${download.nome}')">
+              <i class="fas fa-download"></i>
+              Baixar
+            </button>
+            <button class="btn btn-danger btn-small action-btn" onclick="deleteFile('${download.nome}')">
+              <i class="fas fa-trash"></i>
+              Excluir
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+    } catch (error) {
+      console.error('Erro ao carregar downloads:', error);
+      showMessage('Erro ao carregar lista de downloads', 'error');
+    }
+  }
+
+  // Formatar bytes para algo legível
+  function formatBytes(bytes, decimals = 2) {
+    if (!bytes && bytes !== 0) return '-';
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
+
+  // Baixar arquivo
+  function downloadFile(filename) {
+    window.open(`/static/downloads/${filename}`, '_blank');
+  }
+
+  // Excluir arquivo
+  async function deleteFile(filename) {
+    if (!confirm(`Tem certeza que deseja excluir "${filename}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/instagram-download/${encodeURIComponent(filename)}`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (result.sucesso) {
+        showMessage('Arquivo excluído com sucesso!', 'success');
+        carregarDownloads();
+      } else {
+        throw new Error(result.erro || 'Erro ao excluir arquivo');
+      }
+    } catch (error) {
+      console.error('Erro ao excluir arquivo:', error);
+      showMessage('Erro ao excluir arquivo', 'error');
+    }
+  }
+
+  // Mostrar mensagem
+  function showMessage(text, type = 'info') {
+    downloadMessage.textContent = text;
+    downloadMessage.className = 'alert';
+    downloadMessage.classList.add(`alert-${type}`);
+    downloadMessage.style.display = 'block';
+
+    setTimeout(() => {
+      downloadMessage.style.display = 'none';
+    }, 5000);
+  }
+
+  // Simular progresso visual
+  function simulateProgress() {
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    let width = 0;
+    const interval = setInterval(() => {
+      if (width >= 90) {
+        clearInterval(interval);
+        return;
+      }
+      width += 10;
+      progressBar.style.width = width + '%';
+    }, 500);
+
+    return interval;
+  }
+
+  // Clique no botão de download
+  downloadBtn.addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+
+    if (!url) {
+      showMessage('Por favor, cole uma URL do Instagram', 'error');
+      return;
+    }
+
+    if (!url.includes('instagram.com')) {
+      showMessage('URL do Instagram inválida', 'error');
+      return;
+    }
+
+    downloadBtn.disabled = true;
+    downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+    const progressInterval = simulateProgress();
+
+    try {
+      const response = await fetch('/api/instagram-download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url })
+      });
+
+      const result = await response.json();
+
+      clearInterval(progressInterval);
+      progressBar.style.width = '100%';
+
+      if (response.ok && result.sucesso) {
+        showMessage(result.mensagem || 'Download realizado com sucesso!', 'success');
+        urlInput.value = '';
+
+        setTimeout(() => {
+          carregarDownloads();
+          progressContainer.style.display = 'none';
+          progressBar.style.width = '0%';
+        }, 1500);
+      } else {
+        throw new Error(result.erro || 'Erro no download');
+      }
+    } catch (error) {
+      console.error('Erro no download:', error);
+      showMessage(`Erro: ${error.message}`, 'error');
+      progressContainer.style.display = 'none';
+      progressBar.style.width = '0%';
+    } finally {
+      downloadBtn.disabled = false;
+      downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+    }
+  });
+
+  // Enter no input dispara o download
+  urlInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      downloadBtn.click();
+    }
+  });
+
+  // =========================
+  // LOGOUT + MODAL (DO script.js)
+  // =========================
+  const btnLogout = document.getElementById('btnLogout');
+if (btnLogout) {
+  btnLogout.addEventListener('click', function () {
+    // Sai direto, sem confirmação
+    window.location.href = "/logout";
+  });
+}
+
+  // Botões do modal
+  const btnModalCancelar = document.getElementById('btnModalCancelar');
+  if (btnModalCancelar) {
+    btnModalCancelar.addEventListener('click', function () {
+      const modal = document.getElementById('modalConfirmacao');
+      if (modal) modal.style.display = 'none';
+      acaoPendente = null;
+    });
+  }
+
+  const btnModalConfirmar = document.getElementById('btnModalConfirmar');
+  if (btnModalConfirmar) {
+    btnModalConfirmar.addEventListener('click', function () {
+      if (acaoPendente) {
+        acaoPendente();
+      }
+      const modal = document.getElementById('modalConfirmacao');
+      if (modal) modal.style.display = 'none';
+      acaoPendente = null;
+    });
+  }
+
+  // Fechar modal clicando fora
+  window.addEventListener('click', function (event) {
+    if (event.target.classList && event.target.classList.contains('modal')) {
+      event.target.style.display = 'none';
+      if (event.target.id === 'modalConfirmacao') {
+        acaoPendente = null;
+      }
+    }
+  });
+
+  // Carregar downloads ao iniciar
+  document.addEventListener('DOMContentLoaded', carregarDownloads);
+</script>
+
+  
+</body>
+</html>
