@@ -1,10 +1,401 @@
 [
   {
-    "disciplina": "disci_end_01",
-    "nome": "prod_end_01",
-    "dataCadastro": "2025-12-02",
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Soro Fisiologico 0,9% 100ml",
     "unidades": [
-      "unidade_ed_01"
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Soro Fisiologico 0,9% 10ml",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Skinbooster",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Anti Aging e Flacidez Tissular Sug. 01",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Anti Aging e Flacidez Tissular Sug. 03 (30+)",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Cicatriz de Acne",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Hipercromias",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Hipercromias Fototipo Alto",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Melasma Persistente",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Papada Submentoniana e Jowl",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Rugas Finas",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-03",
+    "disciplina": "Intradermo 02",
+    "nome": "Rugas Profundas",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Acelerador de Metabolismo 01",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Acelerador de Metabolismo 02",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "BCAA - Aumento de Massa Magra",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Compulsão por Doces",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Definição Abdominal",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Detox Hepático",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Emagrecimento Sug. 02",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Glicose 75%",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Modulador de Ansiedade",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Retenção Hídrica",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "dataCadastro": "2025-12-07",
+    "disciplina": "Intradermo 03",
+    "nome": "Revitalize Glúteo",
+    "unidades": [
+      "São Paulo",
+      "Belo Horizonte",
+      "Rio de Janeiro",
+      "Campinas",
+      "Fortaleza",
+      "Santo André",
+      "Ribeirão Preto",
+      "São José dos Campos",
+      "Salvador",
+      "Curitiba"
+    ]
+  },
+  {
+    "disciplina": "Intradermo 02",
+    "nome": "teste",
+    "dataCadastro": "2026-01-16",
+    "unidades": [
+      "Santo André"
     ]
   }
 ]

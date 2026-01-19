@@ -1,7 +1,20 @@
 [
-  {
-    "username": "admin",
-    "password":"tes",
-    "foto":"https://www.google.com/imgres?q=gojo&imgurl=https%3A%2F%2Fstatic.wikia.nocookie.net%2Frpg-the-king-of-cartoons-2%2Fimages%2F3%2F3d%2FSix_Eyes_Gojou.png%2Frevision%2Flatest%3Fcb%3D20211116191600%26path-prefix%3Dpt-br&imgrefurl=https%3A%2F%2Frpg-the-omniverse.fandom.com%2Fpt-br%2Fwiki%2FInherited_Techniques%3A_Six_Eyes&docid=0fn5inb6WdQGXM&tbnid=O6zktsgP_Pnq7M&vet=12ahUKEwiEgZLr3ZyRAxW9FLkGHfYhIxoQM3oECCoQAA..i&w=1920&h=1080&hcb=2&ved=2ahUKEwiEgZLr3ZyRAxW9FLkGHfYhIxoQM3oECCoQAA"
-  }
+{"username": "albatroz",
+ "password":"THhi159753",
+"role":"admin"},
+
+{"username": "Ana",
+ "password":"Ana159753" },
+
+{"username": "Guilherme",
+ "password":"159753" },
+
+{"username":"Gustavo",
+"password":"CAvf0000"},
+
+{"username":"dev01",
+"password":"dev1514"},
+
+{"username":"Camila",
+"password":"159753"}
 ]
