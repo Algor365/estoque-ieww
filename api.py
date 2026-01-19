@@ -7,10 +7,6 @@ import os
 import time
 from functools import wraps
 from datetime import datetime
-import yt_dlp
-import os
-from flask import send_from_directory
-
 
 app = Flask(__name__)
 
@@ -156,19 +152,8 @@ def login():
             session["user"] = user["username"]
             session["role"] = user.get("role", "Usuário")
 
-            role = session["role"]
-
-            if role == "Administrador":
-                return redirect(url_for("index"))  # Dashboard principal
-
-            elif role == "Coordenador":
-                return redirect(url_for("planejamento"))  # ajuste a rota desejada
-
-            elif role == "admin":
-                return redirect(url_for("instagram_download_page"))  # exemplo
-
-            # fallback (caso o tipo não exista)
-            return redirect(url_for("index"))
+            next_url = request.args.get("next") or url_for("index")
+            return redirect(next_url)
 
         return render_template("login.html", erro="Usuário ou senha inválidos.")
 
@@ -468,186 +453,6 @@ def historico_dados():
     historico = carregar_historico()
     return jsonify(historico)
 
-# ==========================================================
-#                 DOWNLOAD INSTAGRAM REELS
-# ==========================================================
-
-
-
-def download_instagram_reel(url):
-    """
-    Baixa Reels do Instagram usando yt-dlp
-    """
-    try:
-        # Configurações atualizadas
-        ydl_opts = {
-            'outtmpl': 'downloads/%(title)s.%(ext)s',
-            'quiet': False,
-            'no_warnings': False,
-            'format': 'best',
-            'merge_output_format': 'mp4',
-            
-            # Headers para parecer um navegador real
-            'http_headers': {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-us,en;q=0.5',
-                'Accept-Encoding': 'gzip,deflate',
-                'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1',
-            },
-            
-            # Para contornar restrições
-            'extractor_args': {
-                'instagram': {
-                    'cookiefile': 'cookies.txt',
-                }
-            },
-            
-            # Tentar baixar mesmo com erros
-            'ignoreerrors': False,
-            'retries': 3,
-            'fragment_retries': 3,
-            'skip_unavailable_fragments': True,
-        }
-        
-        # Cria diretório de downloads
-        os.makedirs('downloads', exist_ok=True)
-        
-        print("Iniciando download...")
-        
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(url, download=True)
-            
-            if info:
-                filename = ydl.prepare_filename(info)
-                print(f"\n✅ Download concluído com sucesso!")
-                print(f"📁 Arquivo salvo em: {filename}")
-                return filename
-            else:
-                print("❌ Não foi possível obter informações do vídeo")
-                return None
-                
-    except Exception as e:
-        print(f"❌ Erro: {e}")
-        return None
-
-@app.route("/instagram-download")
-@login_required
-def instagram_download_page():
-    """
-    Página de download de Reels do Instagram
-    """
-    return render_template("instagram_download.html")
-
-@app.route("/api/instagram-download", methods=["POST"])
-@login_required
-def api_instagram_download():
-    """
-    Endpoint para processar o download de Reels
-    """
-    try:
-        data = request.get_json()
-        url = data.get("url", "").strip()
-        
-        if not url:
-            return jsonify({"erro": "URL não fornecida"}), 400
-        
-        # Verifica se é uma URL do Instagram
-        if "instagram.com" not in url:
-            return jsonify({"erro": "URL do Instagram inválida"}), 400
-        
-        # Executa o download
-        result = download_instagram_reel(url)
-        
-        if result:
-            # Extrai apenas o nome do arquivo
-            filename = os.path.basename(result)
-            
-            # Registra no histórico
-            registrar_historico("download_instagram", {
-                "url": url,
-                "arquivo": filename,
-                "usuario": session.get("user")
-            })
-            
-            return jsonify({
-                "sucesso": True,
-                "mensagem": f"Download concluído: {filename}",
-                "arquivo": filename
-            })
-        else:
-            return jsonify({"erro": "Falha no download"}), 500
-            
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-@app.route("/api/instagram-download/list", methods=["GET"])
-@login_required
-def api_instagram_download_list():
-    """
-    Lista todos os arquivos baixados
-    """
-    try:
-        downloads_dir = "downloads"
-        if not os.path.exists(downloads_dir):
-            return jsonify([])
-        
-        files = []
-        for filename in os.listdir(downloads_dir):
-            filepath = os.path.join(downloads_dir, filename)
-            if os.path.isfile(filepath):
-                stat = os.stat(filepath)
-                files.append({
-                    "nome": filename,
-                    "tamanho": stat.st_size,
-                    "data": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                    "caminho": f"/static/downloads/{filename}"
-                })
-        
-        return jsonify(files)
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-@app.route("/api/instagram-download/<filename>", methods=["DELETE"])
-@login_required
-def api_instagram_download_delete(filename):
-    """
-    Deleta um arquivo baixado
-    """
-    try:
-        # Prevenir path traversal
-        filename = os.path.basename(filename)
-        filepath = os.path.join("downloads", filename)
-        
-        if os.path.exists(filepath):
-            os.remove(filepath)
-            
-            # Registra no histórico
-            registrar_historico("delete_instagram_file", {
-                "arquivo": filename,
-                "usuario": session.get("user")
-            })
-            
-            return jsonify({"sucesso": True, "mensagem": "Arquivo excluído"})
-        else:
-            return jsonify({"erro": "Arquivo não encontrado"}), 404
-            
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
-# Adicione também ao servidor estático para servir os downloads
-@app.route('/static/downloads/<path:filename>')
-@login_required
-def serve_download(filename):
-    """
-    Serve os arquivos baixados
-    """
-    return send_from_directory('downloads', filename)
-
-# Adicione esta linha no início das importações se necessário:
-# from flask import send_from_directory
 
 # ==========================================================
 #                        MAIN
