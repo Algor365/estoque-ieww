@@ -2,18 +2,394 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Planejamento de Produtos</title>
+  <title>Dashboard | ECORP Planejamento</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="static/css/styles.css">
+  
+  <style>
+    /* --- VARIÁVEIS E BASE (Copiado e adaptado do Login) --- */
+    :root {
+      --gold: #D4AF37;
+      --gold-light: #F4D03F;
+      --gold-dark: #B8860B;
+      --black: #050505;
+      --black-panel: #0a0a0a;
+      --black-light: #141414;
+      --muted: #9CA3AF;
+      --text: #F9FAFB;
+      --danger: #EF4444;
+      --success: #10B981;
+      --radius-card: 22px;
+      --radius-input: 999px;
+      --transition: all 0.25s ease;
+      --sidebar-width: 260px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dark) var(--black);
+    }
+
+    /* Scrollbar estilizada */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(212,175,55,0.15), transparent 40%),
+        radial-gradient(circle at bottom right, rgba(212,175,55,0.05), transparent 40%),
+        linear-gradient(135deg, #050505, #0f0f0f);
+      color: var(--text);
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* --- LAYOUT PRINCIPAL --- */
+    .app-container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(5, 5, 5, 0.95);
+      border-right: 1px solid rgba(212,175,55,0.15);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-container {
+      padding: 30px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    /* Logo Style do Login */
+    .logo-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: conic-gradient(from 200deg, var(--gold-light), var(--gold-dark), #7c2d12, var(--gold-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(212,175,55,0.3);
+      color: #020617;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .logo-text .brand { font-size: 16px; font-weight: 800; color: var(--gold); letter-spacing: 0.1em; }
+    .logo-text .subtitle { font-size: 10px; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
+
+    .nav {
+      flex: 1;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: left;
+      width: 100%;
+    }
+
+    .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+
+    .nav-item:hover {
+      color: var(--text);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(212,175,55,0.15), transparent);
+      color: var(--gold);
+      border: 1px solid rgba(212,175,55,0.2);
+      box-shadow: 0 0 15px rgba(212,175,55,0.05);
+    }
+
+    .user-info {
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+      background: rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gold-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #000;
+      border: 2px solid var(--black);
+      box-shadow: 0 0 0 2px var(--gold);
+    }
+
+    .user-details div { font-size: 12px; }
+    .user-name { color: var(--text); font-weight: 600; }
+    .user-role { color: var(--muted); font-size: 11px; }
+
+    /* --- MAIN CONTENT --- */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 30px 40px;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+    }
+
+    .page-title h1 {
+  font-size: 28px;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+  background: linear-gradient(to right, var(--gold), #fff);
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+}
+
+
+
+    .page-title p { color: var(--muted); font-size: 13px; }
+
+    .header-actions { display: flex; gap: 12px; }
+
+    /* --- CARDS & CONTAINERS --- */
+    .card {
+      background: radial-gradient(circle at top, rgba(20,20,20,0.8), var(--black-panel));
+      border: 1px solid rgba(212,175,55,0.15);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 100% 0, rgba(212,175,55,0.05), transparent 60%);
+      pointer-events: none;
+    }
+
+    .card-header { margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+    .card-title { font-size: 18px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .card-subtitle { font-size: 12px; color: var(--muted); }
+
+    /* --- STATS GRID --- */
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: rgba(20,20,20,0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .stat-card:hover {
+      border-color: rgba(212,175,55,0.3);
+      transform: translateY(-2px);
+    }
+
+    .stat-value { font-size: 32px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 12px; }
+
+    .progress-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); width: 0%; transition: width 1s ease; }
+
+    /* --- FORMS --- */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group { margin-bottom: 0; }
+    .form-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 8px; margin-left: 10px; }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 20px;
+      border-radius: var(--radius-input);
+      border: 1px solid rgba(55,65,81,0.6);
+      background: rgba(10,10,10,0.8);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: var(--transition);
+    }
+    
+    .form-control:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px rgba(212,175,55,0.5), 0 0 15px rgba(212,175,55,0.2);
+    }
+
+    /* --- BUTTONS --- */
+    .btn {
+      border: none;
+      border-radius: var(--radius-input);
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+      color: #020617;
+      box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,175,55,0.5); }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid rgba(212,175,55,0.5);
+      color: var(--gold);
+    }
+    .btn-outline:hover { background: rgba(212,175,55,0.1); border-color: var(--gold); }
+
+    .btn-danger {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); box-shadow: 0 0 15px rgba(239,68,68,0.2); }
+
+    /* --- TABLES --- */
+    .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+    .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    
+    .table th {
+      background: rgba(255,255,255,0.03);
+      color: var(--gold);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      padding: 14px 16px;
+      text-align: left;
+    }
+
+    .table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      color: #d1d5db;
+    }
+
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background: rgba(212,175,55,0.02); }
+
+    /* --- UTILS & ALERTS --- */
+    .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+    .tab-pane.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    .alert { padding: 12px 16px; border-radius: 12px; margin-top: 15px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+    .alert:empty { display: none; }
+    .alert-info { background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); color: #38bdf8; }
+    .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; }
+    
+    /* Modal */
+    .modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
+    }
+    .modal-content {
+      background: var(--black-panel); border: 1px solid var(--gold-dark);
+      border-radius: var(--radius-card); padding: 30px; width: 400px;
+      text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    }
+    .modal-title { color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+    .modal-footer { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+      .app-container { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+      .nav { flex-direction: row; overflow-x: auto; padding: 10px; }
+      .nav-item { padding: 10px; font-size: 0; } /* ícones apenas */
+      .nav-item i { font-size: 18px; width: auto; }
+      .main-content { width: 100%; margin-left: 0; padding: 20px; }
+      .header { flex-direction: column; align-items: flex-start; gap: 15px; }
+    }
+  </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="logo-container">
-        <div class="logo">ECORP</div>
-        <div class="logo-subtitle">Planejamento</div>
+        <div class="logo-circle">E</div>
+        <div class="logo-text">
+          <div class="brand">ECORP</div>
+          <div class="subtitle">Planejamento</div>
+        </div>
       </div>
 
       <nav class="nav">
@@ -21,7 +397,6 @@
           <i class="fas fa-tachometer-alt"></i>
           <span>Dashboard</span>
         </button>
-      
         <button class="nav-item" data-tab="sugestao">
           <i class="fas fa-lightbulb"></i>
           <span>Sugestão</span>
@@ -49,13 +424,14 @@
       </nav>
 
       <div class="user-info">
-        <div class="user-avatar" id="userAvatar"></div>
-        <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
-        <div class="user-role" id="userRole">{{ role or "Usuário" }}</div>
+        <div class="user-avatar" id="userAvatar"><i class="fa-solid fa-user"></i></div>
+        <div class="user-details">
+            <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
+            <div class="user-role" id="userRole">{{ role or "Admin" }}</div>
+        </div>
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="main-content">
       <header class="header">
         <div class="page-title">
@@ -76,7 +452,6 @@
       </header>
 
       <div class="tab-content">
-        <!-- Dashboard -->
         <div class="tab-pane active" id="dashboard">
           <div class="stats-container">
             <div class="stat-card">
@@ -159,7 +534,6 @@
           </div>
         </div>
 
-        <!-- Sugestão -->
         <div class="tab-pane" id="sugestao">
           <div class="card">
             <div class="card-header">
@@ -181,14 +555,16 @@
               </div>
             </div>
 
-            <button class="btn btn-primary" id="btnGerarSugestao">
-              <i class="fas fa-calculator"></i>
-              Gerar Sugestão
-            </button>
+            <div style="margin-top:20px;">
+              <button class="btn btn-primary" id="btnGerarSugestao">
+                <i class="fas fa-calculator"></i>
+                Gerar Sugestão
+              </button>
+            </div>
 
             <div id="alertSugestao" class="alert alert-info"></div>
 
-            <div class="table-container" id="wrapTabelaSugestao" style="display:none;">
+            <div class="table-container" id="wrapTabelaSugestao" style="display:none; margin-top:20px;">
               <table class="table" id="tabelaSugestao">
                 <thead>
                   <tr>
@@ -197,23 +573,21 @@
                     <th>Registros Usados</th>
                     <th>Valor Real</th>
                     <th>Sugestão Total</th>
-                    
                   </tr>
                 </thead>
                 <tbody></tbody>
               </table>
             </div>
 
-            <div id="cardSugestaoResumo" class="card" style="display:none; margin-top: 20px;">
+            <div id="cardSugestaoResumo" class="card" style="display:none; margin-top: 20px; border-color: var(--gold-light);">
               <div class="card-header">
                 <h3 class="card-title">Resumo da Sugestão</h3>
               </div>
-              <div id="textoSugestaoResumo"></div>
+              <div id="textoSugestaoResumo" style="color: var(--text);"></div>
             </div>
           </div>
         </div>
 
-        <!-- Cadastro -->
         <div class="tab-pane" id="cadastro">
           <div class="card">
             <div class="card-header">
@@ -245,14 +619,16 @@
 
             <div id="infoUnidadesSelecionadas" class="alert alert-info" style="display: none;">
               <i class="fas fa-info-circle"></i> 
-              Produto será cadastrado em <span id="contadorUnidadesSelecionadas">0</span> unidade(s): 
+              Produto será cadastrado em <span id="contadorUnidadesSelecionadas" style="color:#fff; font-weight:bold;">0</span> unidade(s): 
               <span id="listaUnidadesSelecionadas"></span>
             </div>
 
-            <button class="btn btn-primary" id="btnSalvarCadastro">
-              <i class="fas fa-save"></i>
-              Salvar Produto
-            </button>
+            <div style="margin-top:20px;">
+                <button class="btn btn-primary" id="btnSalvarCadastro">
+                <i class="fas fa-save"></i>
+                Salvar Produto
+                </button>
+            </div>
 
             <div id="alertCadastro" class="alert"></div>
 
@@ -273,7 +649,6 @@
           </div>
         </div>
 
-        <!-- Banco de Dados -->
         <div class="tab-pane" id="database">
           <div class="card">
             <div class="card-header">
@@ -306,21 +681,21 @@
 
             <div class="form-grid">
               <div class="form-group">
-                <button class="btn btn-outline btn-small" id="btnLimparFiltros">
+                <button class="btn btn-outline" id="btnLimparFiltros">
                   <i class="fas fa-times"></i>
                   Limpar Filtros
                 </button>
               </div>
 
               <div class="form-group">
-                <button class="btn btn-danger btn-small" id="btnApagarFiltrados">
+                <button class="btn btn-danger" id="btnApagarFiltrados">
                   <i class="fas fa-trash"></i>
                   Apagar Filtrados
                 </button>
               </div>
             </div>
 
-            <div class="table-container" id="wrapTabelaDB">
+            <div class="table-container" id="wrapTabelaDB" style="margin-top:20px;">
               <table class="table" id="tabelaDB">
                 <thead>
                   <tr>
@@ -344,12 +719,11 @@
           </div>
         </div>
 
-        <!-- Parâmetros -->
         <div class="tab-pane" id="parametros">
           <div class="card">
             <div class="card-header">
               <h2 class="card-title">Parâmetros</h2>
-              <p class="card-subtitle">Configure as opções do sistema para unidades específicas ou para todas as unidades</p>
+              <p class="card-subtitle">Configure as opções do sistema para unidades específicas</p>
             </div>
 
             <div class="form-grid">
@@ -379,19 +753,20 @@
               </div>
             </div>
 
-            <!-- Aviso para TODAS AS UNIDADES -->
             <div id="infoUnidadesParametros" class="alert alert-info" style="display: none;">
-              <i class="fas fa-info-circle"></i> Este parâmetro será salvo em <span id="contadorUnidadesParametros">0</span> unidades.
+              <i class="fas fa-info-circle"></i> Este parâmetro será salvo em <span id="contadorUnidadesParametros" style="color:#fff; font-weight:bold;">0</span> unidades.
             </div>
 
-            <button class="btn btn-primary" id="btnCarregarProdutos">
-              <i class="fas fa-sync"></i>
-              Carregar Produtos
-            </button>
+            <div style="margin-top:20px;">
+                <button class="btn btn-primary" id="btnCarregarProdutos">
+                <i class="fas fa-sync"></i>
+                Carregar Produtos
+                </button>
+            </div>
 
             <div id="alertParametros" class="alert alert-info"></div>
 
-            <div class="table-container" id="wrapTabelaParametros" style="display:none;">
+            <div class="table-container" id="wrapTabelaParametros" style="display:none; margin-top:20px;">
               <table class="table" id="tabelaParametros">
                 <thead>
                   <tr>
@@ -416,7 +791,6 @@
           </div>
         </div>
 
-        <!-- Unidades -->
         <div class="tab-pane" id="unidades">
           <div class="card">
             <div class="card-header">
@@ -440,7 +814,7 @@
 
             <div id="alertUnidades" class="alert alert-info"></div>
 
-            <div class="table-container" id="wrapTabelaUnidades">
+            <div class="table-container" id="wrapTabelaUnidades" style="margin-top:20px;">
               <table class="table" id="tabelaUnidades">
                 <thead>
                   <tr>
@@ -455,7 +829,6 @@
           </div>
         </div>
 
-        <!-- Histórico -->
         <div class="tab-pane" id="historico">
           <div class="card">
             <div class="card-header">
@@ -490,7 +863,7 @@
               </div>
             </div>
 
-            <div class="form-grid">
+            <div class="form-grid" style="margin-top:20px;">
               <div class="form-group">
                 <button class="btn btn-primary" id="btnCalcularSugestao">
                   <i class="fas fa-calculator"></i>
@@ -508,11 +881,11 @@
 
             <div id="alertHistorico" class="alert alert-info"></div>
 
-            <div id="resultadoSugestao" class="card" style="display:none; margin-top: 20px;">
+            <div id="resultadoSugestao" class="card" style="display:none; margin-top: 20px; border-color: var(--gold);">
               <div class="card-header">
                 <h3 class="card-title">Resultado da Sugestão</h3>
               </div>
-              <div id="textoSugestaoHistorico"></div>
+              <div id="textoSugestaoHistorico" style="color:var(--text)"></div>
             </div>
 
             <div class="table-container" style="margin-top: 30px;">
@@ -520,7 +893,7 @@
                 <thead>
                   <tr>
                     <th style="width: 30px;">
-                      <input type="checkbox" id="checkAllHistorico">
+                      <input type="checkbox" id="checkAllHistorico" style="accent-color: var(--gold);">
                     </th>
                     <th>Turma</th>
                     <th>Alunos</th>
@@ -537,7 +910,7 @@
               </table>
             </div>
 
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
               <button class="btn btn-outline" id="btnSelecionarTodos">
                 <i class="fas fa-check-square"></i>
                 Selecionar Todos
@@ -561,13 +934,12 @@
     </main>
   </div>
 
-  <!-- Modal de Confirmação -->
   <div class="modal" id="modalConfirmacao">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">Confirmação</h3>
       </div>
-      <div id="modalConfirmacaoBody">
+      <div id="modalConfirmacaoBody" style="color: #ccc; margin-bottom: 20px;">
         Tem certeza que deseja realizar esta ação?
       </div>
       <div class="modal-footer">
