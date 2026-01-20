@@ -382,10 +382,7 @@
       </div>
 
       <nav class="nav">
-        <a href="/" class="nav-item">
-            <i class="fas fa-tachometer-alt"></i>
-            <span>Dashboard</span>
-        </a>
+        
         <a href="/instagram-download" class="nav-item active">
           <i class="fab fa-instagram"></i>
           <span>Instagram Download</span>
@@ -396,7 +393,7 @@
         <div class="user-avatar" id="userAvatar"><i class="fa-solid fa-user"></i></div>
         <div class="user-details">
             <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
-            <div class="user-role" id="userRole">{{ role or "Admin" }}</div>
+            <div class="user-role" id="userRole">{{ "role" or "Admin" }}</div>
         </div>
       </div>
     </aside>
