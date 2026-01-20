@@ -2,216 +2,408 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Planejamento de Produtos - Instagram Download</title>
+  <title>Instagram Download | ECORP Planejamento</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="static/css/styles.css">
-
-  <!-- Estilos mínimos só para o layout interno da tela do Instagram,
-       reaproveitando o máximo possível do styles.css -->
+  
   <style>
-    .instagram-container {
-      max-width: 900px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+    /* --- VARIÁVEIS E BASE (Idêntico ao Index) --- */
+    :root {
+      --gold: #D4AF37;
+      --gold-light: #F4D03F;
+      --gold-dark: #B8860B;
+      --black: #050505;
+      --black-panel: #0a0a0a;
+      --black-light: #141414;
+      --muted: #9CA3AF;
+      --text: #F9FAFB;
+      --danger: #EF4444;
+      --success: #10B981;
+      --radius-card: 22px;
+      --radius-input: 999px;
+      --transition: all 0.25s ease;
+      --sidebar-width: 260px;
     }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dark) var(--black);
+    }
+
+    /* Scrollbar estilizada */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--black); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 4px; }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(212,175,55,0.15), transparent 40%),
+        radial-gradient(circle at bottom right, rgba(212,175,55,0.05), transparent 40%),
+        linear-gradient(135deg, #050505, #0f0f0f);
+      color: var(--text);
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* --- LAYOUT PRINCIPAL --- */
+    .app-container {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(5, 5, 5, 0.95);
+      border-right: 1px solid rgba(212,175,55,0.15);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-container {
+      padding: 30px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .logo-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: conic-gradient(from 200deg, var(--gold-light), var(--gold-dark), #7c2d12, var(--gold-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(212,175,55,0.3);
+      color: #020617;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .logo-text { display: flex; flex-direction: column; }
+    .logo-text .brand { font-size: 16px; font-weight: 800; color: var(--gold); letter-spacing: 0.1em; }
+    .logo-text .subtitle { font-size: 10px; color: var(--muted); letter-spacing: 0.2em; text-transform: uppercase; }
+
+    .nav {
+      flex: 1;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      text-align: left;
+      width: 100%;
+      text-decoration: none; /* Para links <a> */
+    }
+
+    .nav-item i { width: 20px; text-align: center; font-size: 16px; }
+
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(212,175,55,0.15), transparent);
+      color: var(--gold);
+      border: 1px solid rgba(212,175,55,0.2);
+      box-shadow: 0 0 15px rgba(212,175,55,0.05);
+    }
+
+    .user-info {
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+      background: rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--gold-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #000;
+      border: 2px solid var(--black);
+      box-shadow: 0 0 0 2px var(--gold);
+    }
+
+    .user-name { color: var(--text); font-weight: 600; font-size: 13px; }
+    .user-role { color: var(--muted); font-size: 11px; }
+
+    /* --- MAIN CONTENT --- */
+    .main-content {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: 30px 40px;
+      width: calc(100% - var(--sidebar-width));
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 30px;
+      height: 40px; /* Altura fixa para alinhar caso não tenha titulo na header */
+    }
+    
+    .header-actions { margin-left: auto; display: flex; gap: 12px; }
+
+    /* --- CARDS & ESTILOS ESPECÍFICOS --- */
+    .card {
+      background: radial-gradient(circle at top, rgba(20,20,20,0.8), var(--black-panel));
+      border: 1px solid rgba(212,175,55,0.15);
+      border-radius: var(--radius-card);
+      padding: 0; /* Padding controlado internamente */
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 100% 0, rgba(212,175,55,0.05), transparent 60%);
+      pointer-events: none;
+    }
+
+    .card-header {
+      padding: 24px 24px 15px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .card-title { font-size: 18px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+    .card-subtitle { font-size: 12px; color: var(--muted); }
+
+    /* --- INPUTS & BUTTONS --- */
     .url-input-container {
       display: flex;
-      gap: 10px;
+      gap: 15px;
       flex-wrap: wrap;
     }
 
     .url-input {
       flex: 1;
       min-width: 220px;
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-      font-size: 14px;
-    }
-
-    .url-input:focus {
+      padding: 12px 20px;
+      border-radius: var(--radius-input);
+      border: 1px solid rgba(55,65,81,0.6);
+      background: rgba(10,10,10,0.8);
+      color: var(--text);
+      font-size: 13px;
       outline: none;
-      border-color: #3f51b5;
+      transition: var(--transition);
+    }
+    
+    .url-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px rgba(212,175,55,0.5), 0 0 15px rgba(212,175,55,0.2);
     }
 
+    .btn {
+      border: none;
+      border-radius: var(--radius-input);
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+      color: #020617;
+      box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(212,175,55,0.5); }
+    .btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .btn-danger {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: var(--danger);
+    }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); box-shadow: 0 0 15px rgba(239,68,68,0.2); }
+
+    /* --- PROGRESS BAR --- */
     .progress-container {
-      margin-top: 15px;
-      background: #f0f0f0;
+      margin-top: 20px;
+      background: rgba(255,255,255,0.05);
       border-radius: 999px;
       overflow: hidden;
       display: none;
-      height: 8px;
+      height: 6px;
     }
 
     .progress-bar {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #3f51b5, #9c27b0);
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
       transition: width 0.3s;
+      box-shadow: 0 0 10px rgba(212,175,55,0.5);
     }
 
-    .downloads-list-container {
-      width: 100%;
-    }
-
+    /* --- DOWNLOAD LIST --- */
+    .downloads-list-container { width: 100%; }
+    
     .download-item {
       display: flex;
       align-items: center;
       gap: 15px;
-      padding: 12px 15px;
-      border-bottom: 1px solid #eee;
+      padding: 16px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
       transition: background 0.2s;
     }
 
-    .download-item:hover {
-      background: #fafafa;
-    }
+    .download-item:last-child { border-bottom: none; }
+    .download-item:hover { background: rgba(212,175,55,0.03); }
 
     .download-icon {
       width: 44px;
       height: 44px;
-      border-radius: 10px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(45deg, #405de6, #833ab4);
-      color: #fff;
+      background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--gold);
       font-size: 20px;
       flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
-    .download-info {
-      flex: 1;
-      min-width: 0;
-    }
+    .download-info { flex: 1; min-width: 0; }
+    .download-name { font-weight: 600; margin-bottom: 4px; color: var(--text); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .download-meta { font-size: 11px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    .download-name {
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #333;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
+    .download-actions { display: flex; gap: 10px; }
+    .action-btn { padding: 6px 12px; font-size: 10px; }
 
-    .download-meta {
-      font-size: 12px;
-      color: #777;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .download-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .download-actions .action-btn {
-      padding: 6px 10px;
-      font-size: 12px;
-    }
-
+    /* --- INFO BOX --- */
     .info-box {
-      background: #e3f2fd;
-      border-left: 4px solid #2196F3;
-      padding: 12px 15px;
-      border-radius: 4px;
+      background: rgba(10,10,10,0.6);
+      border: 1px solid rgba(212,175,55,0.2);
+      padding: 15px 20px;
+      border-radius: 12px;
       font-size: 13px;
-      margin-top: 15px;
+      margin-top: 25px;
+      color: var(--muted);
     }
 
-    .info-box ul {
-      margin: 8px 0;
-      padding-left: 18px;
+    .info-box strong { color: var(--gold); display: block; margin-bottom: 8px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; }
+    .info-box ul { margin: 8px 0; padding-left: 18px; color: #d1d5db; }
+    .info-box li { margin-bottom: 4px; }
+
+    /* --- ALERTS & EMPTY STATE --- */
+    .alert { padding: 12px 16px; border-radius: 12px; margin-top: 15px; font-size: 13px; }
+    .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .alert-success { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; }
+    .alert-info { background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); color: #38bdf8; }
+
+    .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
+    .empty-state i { font-size: 40px; color: rgba(255,255,255,0.1); margin-bottom: 15px; }
+    .empty-state h3 { color: var(--text); font-size: 16px; margin-bottom: 5px; font-weight: 500; }
+
+    /* Modal */
+    .modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center;
     }
-
-    .info-box li {
-      margin-bottom: 4px;
+    .modal-content {
+      background: var(--black-panel); border: 1px solid var(--gold-dark);
+      border-radius: var(--radius-card); padding: 30px; width: 400px;
+      text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.8);
     }
+    .modal-title { color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+    .modal-footer { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
 
-    .empty-state {
-      text-align: center;
-      padding: 35px 20px;
-      color: #777;
+    @media (max-width: 768px) {
+      .app-container { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+      .nav { flex-direction: row; overflow-x: auto; padding: 10px; }
+      .nav-item { padding: 10px; font-size: 0; }
+      .nav-item i { font-size: 18px; width: auto; }
+      .main-content { width: 100%; margin-left: 0; padding: 20px; }
+      .download-item { flex-direction: column; align-items: flex-start; }
+      .download-actions { width: 100%; margin-top: 10px; justify-content: flex-end; }
     }
-
-    .empty-state i {
-      font-size: 40px;
-      color: #ddd;
-      margin-bottom: 10px;
-    }
-
-    /* Responsivo */
-    @media (max-width: 600px) {
-      .download-item {
-        align-items: flex-start;
-      }
-      .download-actions {
-        flex-direction: row;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-      }
-    }
-    /* Remover fundo dos cards */
-.card {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: none !important;
-}
-
-/* Remover fundo dos containers internos */
-.instagram-container,
-.downloads-list-container {
-  background: transparent !important;
-}
-
-/* Remover fundo da área de inputs */
-.url-input-container,
-.info-box,
-.empty-state {
-  background: transparent !important;
-}
-
   </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- Sidebar (igual ao index, com Instagram marcado como ativo) -->
     <aside class="sidebar">
       <div class="logo-container">
-        <div class="logo">ECORP</div>
-        <div class="logo-subtitle">Planejamento</div>
+        <div class="logo-circle">E</div>
+        <div class="logo-text">
+          <div class="brand">ECORP</div>
+          <div class="subtitle">Planejamento</div>
+        </div>
       </div>
 
       <nav class="nav">
-        
-        <button class="nav-item active" onclick="location.href='/instagram-download'">
+        <a href="/" class="nav-item">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="/instagram-download" class="nav-item active">
           <i class="fab fa-instagram"></i>
           <span>Instagram Download</span>
-        </button>
-       
+        </a>
       </nav>
 
       <div class="user-info">
-        <div class="user-avatar" id="userAvatar"></div>
-        <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
-        <div class="user-role" id="userRole">{{ role or "Usuário" }}</div>
+        <div class="user-avatar" id="userAvatar"><i class="fa-solid fa-user"></i></div>
+        <div class="user-details">
+            <div class="user-name" id="userName">{{ usuario or "Usuário" }}</div>
+            <div class="user-role" id="userRole">{{ role or "Usuário" }}</div>
+        </div>
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="main-content">
       <header class="header">
-    
-
         <div class="header-actions">
-          
           <button class="btn btn-danger" id="btnLogout">
             <i class="fas fa-sign-out-alt"></i>
             Sair
@@ -219,73 +411,81 @@
         </div>
       </header>
 
-      <!-- Conteúdo principal no estilo de cards do index -->
-      <div class="tab-content">
-        <div class="tab-pane active" id="instagram-download">
-          <div class="instagram-container">
-            <!-- Card: formulário de download -->
-            <div class="card">
-              <div class="card-header">
-                <h2 class="card-title">
-                  <i class="fab fa-instagram"></i> Instagram Downloader
-                </h2>
-                <p class="card-subtitle">Cole a URL do Reel abaixo para fazer o download</p>
-              </div>
-
-              <div style="padding: 15px 20px 20px 20px;">
-                <div class="url-input-container">
-                  <input
-                    type="text"
-                    class="url-input"
-                    id="urlInput"
-                    placeholder="Cole a URL do Instagram Reel aqui..."
-                  >
-                  <button class="btn btn-primary" id="downloadBtn">
-                    <i class="fas fa-download"></i>
-                    Download
-                  </button>
-                </div>
-
-                <div class="progress-container" id="progressContainer">
-                  <div class="progress-bar" id="progressBar"></div>
-                </div>
-
-                <div id="downloadMessage" class="alert" style="display: none; margin-top: 15px;"></div>
-
-                <div class="info-box">
-                  <strong><i class="fas fa-info-circle"></i> Como usar:</strong>
-                  <ul>
-                    <li>Copie a URL do Reel do Instagram (app ou site)</li>
-                    <li>Cole no campo acima e clique em <strong>Download</strong></li>
-                    <li>O vídeo será salvo na lista abaixo</li>
-                    <li>Clique em <strong>“Baixar”</strong> para salvar no seu computador</li>
-                  </ul>
-                  <p><strong>Nota:</strong> Funciona com Reels públicos. Vídeos privados exigem login.</p>
-                </div>
-              </div>
+      <div class="instagram-container">
+        <div class="card">
+            <div class="card-header">
+            <h2 class="card-title">
+                <i class="fab fa-instagram" style="margin-right: 8px;"></i> Instagram Downloader
+            </h2>
+            <p class="card-subtitle">Cole a URL do Reel abaixo para fazer o download</p>
             </div>
 
-            <!-- Card: lista de downloads -->
-            <div class="card downloads-list-container">
-              <div class="card-header">
-                <h2 class="card-title">
-                  <i class="fas fa-folder-open"></i> Downloads Realizados
-                </h2>
-                <p class="card-subtitle">Seus vídeos baixados</p>
-              </div>
-
-              <div id="downloadsList">
-                <div class="empty-state">
-                  <i class="fas fa-film"></i>
-                  <h3>Nenhum download ainda</h3>
-                  <p>Faça seu primeiro download acima!</p>
-                </div>
-              </div>
+            <div style="padding: 24px;">
+            <div class="url-input-container">
+                <input
+                type="text"
+                class="url-input"
+                id="urlInput"
+                placeholder="Cole a URL do Instagram Reel aqui..."
+                >
+                <button class="btn btn-primary" id="downloadBtn">
+                <i class="fas fa-download"></i>
+                Download
+                </button>
             </div>
-          </div> <!-- /instagram-container -->
+
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div id="downloadMessage" class="alert" style="display: none;"></div>
+
+            <div class="info-box">
+                <strong><i class="fas fa-info-circle"></i> Como usar:</strong>
+                <ul>
+                <li>Copie a URL do Reel do Instagram (app ou site)</li>
+                <li>Cole no campo acima e clique em <strong>Download</strong></li>
+                <li>O vídeo será salvo na lista abaixo</li>
+                <li>Clique em <strong>“Baixar”</strong> para salvar no seu computador</li>
+                </ul>
+                <p style="margin-top: 8px; font-size: 11px; color: var(--muted);"><strong>Nota:</strong> Funciona com Reels públicos. Vídeos privados exigem login.</p>
+            </div>
+            </div>
         </div>
-      </div>
+
+        <div class="card">
+            <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-folder-open" style="margin-right: 8px;"></i> Downloads Realizados
+            </h2>
+            <p class="card-subtitle">Seus vídeos baixados recentemente</p>
+            </div>
+
+            <div id="downloadsList" class="downloads-list-container">
+            <div class="empty-state">
+                <i class="fas fa-film"></i>
+                <h3>Nenhum download ainda</h3>
+                <p>Faça seu primeiro download acima!</p>
+            </div>
+            </div>
+        </div>
+      </div> 
     </main>
+  </div>
+
+  <div class="modal" id="modalConfirmacao">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirmação</h3>
+      </div>
+      <div id="modalConfirmacaoBody" style="color: #ccc; margin-bottom: 20px;">
+        Tem certeza?
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="btnModalCancelar" style="border: 1px solid var(--muted); color: var(--muted); background: transparent;">Cancelar</button>
+        <button class="btn btn-danger" id="btnModalConfirmar">Confirmar</button>
+      </div>
+    </div>
   </div>
 
  <script>
@@ -293,21 +493,6 @@
   // CONFIRMAÇÃO (MODAL) + LOGOUT
   // =========================
   let acaoPendente = null;
-
-  function mostrarModalConfirmacao(mensagem, callbackConfirmar) {
-    const modal = document.getElementById('modalConfirmacao');
-    const body = document.getElementById('modalConfirmacaoBody');
-
-    // Se não tiver modal na página, usa o confirm padrão do navegador
-    if (!modal || !body) {
-      if (confirm(mensagem)) callbackConfirmar();
-      return;
-    }
-
-    body.textContent = mensagem;
-    acaoPendente = callbackConfirmar;
-    modal.style.display = 'flex';
-  }
 
   // Elementos do DOM (Instagram)
   const urlInput = document.getElementById('urlInput');
@@ -355,11 +540,11 @@
             </div>
           </div>
           <div class="download-actions">
-            <button class="btn btn-primary btn-small action-btn" onclick="downloadFile('${download.nome}')">
+            <button class="btn btn-primary action-btn" onclick="downloadFile('${download.nome}')">
               <i class="fas fa-download"></i>
               Baixar
             </button>
-            <button class="btn btn-danger btn-small action-btn" onclick="deleteFile('${download.nome}')">
+            <button class="btn btn-danger action-btn" onclick="deleteFile('${download.nome}')">
               <i class="fas fa-trash"></i>
               Excluir
             </button>
@@ -508,15 +693,14 @@
   });
 
   // =========================
-  // LOGOUT + MODAL (DO script.js)
+  // LOGOUT
   // =========================
   const btnLogout = document.getElementById('btnLogout');
-if (btnLogout) {
-  btnLogout.addEventListener('click', function () {
-    // Sai direto, sem confirmação
-    window.location.href = "/logout";
-  });
-}
+  if (btnLogout) {
+    btnLogout.addEventListener('click', function () {
+      window.location.href = "/logout";
+    });
+  }
 
   // Botões do modal
   const btnModalCancelar = document.getElementById('btnModalCancelar');
@@ -528,32 +712,8 @@ if (btnLogout) {
     });
   }
 
-  const btnModalConfirmar = document.getElementById('btnModalConfirmar');
-  if (btnModalConfirmar) {
-    btnModalConfirmar.addEventListener('click', function () {
-      if (acaoPendente) {
-        acaoPendente();
-      }
-      const modal = document.getElementById('modalConfirmacao');
-      if (modal) modal.style.display = 'none';
-      acaoPendente = null;
-    });
-  }
-
-  // Fechar modal clicando fora
-  window.addEventListener('click', function (event) {
-    if (event.target.classList && event.target.classList.contains('modal')) {
-      event.target.style.display = 'none';
-      if (event.target.id === 'modalConfirmacao') {
-        acaoPendente = null;
-      }
-    }
-  });
-
   // Carregar downloads ao iniciar
   document.addEventListener('DOMContentLoaded', carregarDownloads);
 </script>
-
-  
 </body>
 </html>
