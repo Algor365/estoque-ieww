@@ -3,16 +3,6 @@
     "alunos": 24,
     "data": "2025-12-01",
     "disciplina": "Intradermo 02",
-    "enviado": 20,
-    "faltou": 0,
-    "produto": "Anti Aging e Flacidez Tissular Sug. 01",
-    "unidade": "São Paulo",
-    "voltou": 19
-  },
-  {
-    "alunos": 24,
-    "data": "2025-12-01",
-    "disciplina": "Intradermo 02",
     "enviado": 10,
     "faltou": 0,
     "produto": "Anti Aging e Flacidez Tissular Sug. 03 (30+)",
@@ -440,113 +430,113 @@
     "voltou": 2
   },
   {
-    "data": "2025-11-22",
-    "unidade": "Fortaleza",
-    "disciplina": "Intradermo 03",
-    "produto": "Acelerador de Metabolismo 01",
     "alunos": 17,
+    "data": "2025-11-22",
+    "disciplina": "Intradermo 03",
     "enviado": 21,
-    "voltou": 11,
-    "faltou": 0
+    "faltou": 0,
+    "produto": "Acelerador de Metabolismo 01",
+    "unidade": "Fortaleza",
+    "voltou": 11
   },
   {
+    "alunos": 17,
     "data": "2025-11-22",
-    "unidade": "Fortaleza",
     "disciplina": "Intradermo 03",
+    "enviado": 20,
+    "faltou": 0,
     "produto": "Acelerador de Metabolismo 02",
-    "alunos": 17,
-    "enviado": 20,
-    "voltou": 17,
-    "faltou": 0
+    "unidade": "Fortaleza",
+    "voltou": 17
   },
   {
+    "alunos": 17,
     "data": "2025-11-22",
-    "unidade": "Fortaleza",
     "disciplina": "Intradermo 03",
+    "enviado": 20,
+    "faltou": 0,
     "produto": "BCAA - Aumento de Massa Magra",
-    "alunos": 17,
-    "enviado": 20,
-    "voltou": 18,
-    "faltou": 0
+    "unidade": "Fortaleza",
+    "voltou": 18
   },
   {
+    "alunos": 17,
     "data": "2025-11-22",
-    "unidade": "Fortaleza",
     "disciplina": "Intradermo 03",
+    "enviado": 15,
+    "faltou": 0,
     "produto": "Compulsão por Doces",
-    "alunos": 17,
-    "enviado": 15,
-    "voltou": 14,
-    "faltou": 0
+    "unidade": "Fortaleza",
+    "voltou": 14
   },
   {
+    "alunos": 17,
     "data": "2025-11-22",
-    "unidade": "Fortaleza",
     "disciplina": "Intradermo 03",
+    "enviado": 15,
+    "faltou": 0,
     "produto": "Definição Abdominal",
-    "alunos": 17,
-    "enviado": 15,
-    "voltou": 15,
-    "faltou": 0
+    "unidade": "Fortaleza",
+    "voltou": 15
   },
   {
+    "alunos": 17,
     "data": "2025-11-22",
-    "unidade": "Fortaleza",
     "disciplina": "Intradermo 03",
+    "enviado": 16,
+    "faltou": 0,
     "produto": "Detox Hepático",
-    "alunos": 17,
-    "enviado": 16,
-    "voltou": 8,
-    "faltou": 0
+    "unidade": "Fortaleza",
+    "voltou": 8
   },
   {
+    "alunos": 17,
     "data": "2025-11-22",
-    "unidade": "Fortaleza",
     "disciplina": "Intradermo 03",
+    "enviado": 16,
+    "faltou": 0,
     "produto": "Emagrecimento Sug. 02",
-    "alunos": 17,
-    "enviado": 16,
-    "voltou": 15,
-    "faltou": 0
+    "unidade": "Fortaleza",
+    "voltou": 15
   },
   {
-    "data": "2025-11-22",
-    "unidade": "Fortaleza",
-    "disciplina": "Intradermo 03",
-    "produto": "Glicose 75%",
     "alunos": 17,
+    "data": "2025-11-22",
+    "disciplina": "Intradermo 03",
     "enviado": 29,
-    "voltou": 24,
-    "faltou": 0
+    "faltou": 0,
+    "produto": "Glicose 75%",
+    "unidade": "Fortaleza",
+    "voltou": 24
   },
   {
+    "alunos": 17,
     "data": "2025-11-22",
-    "unidade": "Fortaleza",
     "disciplina": "Intradermo 03",
+    "enviado": 20,
+    "faltou": 0,
     "produto": "Modulador de Ansiedade",
-    "alunos": 17,
-    "enviado": 20,
-    "voltou": 19,
-    "faltou": 0
+    "unidade": "Fortaleza",
+    "voltou": 19
   },
   {
-    "data": "2025-11-22",
-    "unidade": "Fortaleza",
-    "disciplina": "Intradermo 03",
-    "produto": "Retenção Hídrica",
     "alunos": 17,
+    "data": "2025-11-22",
+    "disciplina": "Intradermo 03",
     "enviado": 16,
-    "voltou": 15,
-    "faltou": 0
+    "faltou": 0,
+    "produto": "Retenção Hídrica",
+    "unidade": "Fortaleza",
+    "voltou": 15
   },
   {
-    "data": "2025-11-22",
-    "unidade": "Fortaleza",
-    "disciplina": "Intradermo 03",
-    "produto": "Revitalize Glúteo",
     "alunos": 17,
+    "data": "2025-11-22",
+    "disciplina": "Intradermo 03",
     "enviado": 20,
-    "voltou": 10,
-    "faltou": 0
+    "faltou": 0,
+    "produto": "Revitalize Glúteo",
+    "unidade": "Fortaleza",
+    "voltou": 10
   }
 ]
