@@ -164,7 +164,7 @@ def login():
             elif role == "Coordenador":
                 return redirect(url_for("planejamento"))  # ajuste a rota desejada
 
-            elif role == "admin":
+            elif role == "MKT":
                 return redirect(url_for("instagram_download_page"))  # exemplo
 
             # fallback (caso o tipo não exista)

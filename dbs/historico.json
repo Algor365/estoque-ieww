@@ -64,5 +64,14 @@
       "arquivo": "Video by toguro.mp4",
       "usuario": "albatroz"
     }
+  },
+  {
+    "timestamp": "2026-01-20T17:34:17.460334",
+    "acao": "download_instagram",
+    "detalhes": {
+      "url": "https://www.instagram.com/reel/DTk95lCjtkB/?igsh=MWdibDJrMDJ4OHNwcA==",
+      "arquivo": "Video by toguro.mp4",
+      "usuario": "Rafaeladiias"
+    }
   }
 ]
