@@ -843,18 +843,29 @@ function atualizarTabelaDB() {
     btnExcluir.innerHTML = '<i class="fas fa-trash"></i>';
     btnExcluir.title = 'Excluir registro';
     btnExcluir.addEventListener('click', () => {
-      mostrarModalConfirmacao('Tem certeza que deseja excluir este registro?', async () => {
-        db.splice(index, 1);
-        const salvo = await salvarDB(db);
-        if (salvo) {
-          await inicializarDados();
-          mostrarAlerta(document.getElementById('alertDB'), 'success', 'Registro excluído com sucesso!');
-        } else {
-          mostrarAlerta(document.getElementById('alertDB'), 'error', 'Erro ao excluir registro.');
-          db.splice(index, 0, registro);
-          atualizarTabelaDB();
-        }
-      });
+  mostrarModalConfirmacao('Tem certeza que deseja excluir este registro?', async () => {
+    // acha o índice real desse registro dentro de db
+    const realIndex = db.indexOf(registro);
+
+    if (realIndex !== -1) {
+      db.splice(realIndex, 1);
+    }
+
+    const salvo = await salvarDB(db);
+    if (salvo) {
+      await inicializarDados();
+      mostrarAlerta(document.getElementById('alertDB'), 'success', 'Registro excluído com sucesso!');
+    } else {
+      mostrarAlerta(document.getElementById('alertDB'), 'error', 'Erro ao excluir registro.');
+      // se quiser recolocar de volta em caso de erro:
+      if (realIndex !== -1) {
+        db.splice(realIndex, 0, registro);
+      }
+      atualizarTabelaDB();
+    }
+  });
+
+
     });
 
     tdAcoes.appendChild(btnExcluir);
