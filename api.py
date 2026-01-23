@@ -645,6 +645,100 @@ def serve_download(filename):
     Serve os arquivos baixados
     """
     return send_from_directory('downloads', filename)
+def download_youtube_video(url, quality="720"):
+    """
+    Baixa vídeos do YouTube com escolha de qualidade.
+    Quanto menor a qualidade, mais rápido o download.
+    """
+    try:
+        # converter para número
+        try:
+            quality = int(quality)
+        except:
+            quality = 720
+
+        # formato dinâmico baseado na qualidade
+        format_str = f"bv*[height<={quality}][fps<=30]+ba/b[height<={quality}]/b"
+
+        ydl_opts = {
+            'outtmpl': 'downloads/%(title)s.%(ext)s',
+
+            'format': format_str,
+            'merge_output_format': 'mp4',
+
+            # acelera downloads fragmentados
+            'concurrent_fragment_downloads': 5,
+            'http_chunk_size': 10 * 1024 * 1024,
+
+            # não baixar playlists acidentalmente
+            'noplaylist': True,
+
+            # ffmpeg explícito
+            'ffmpeg_location': '/usr/bin/ffmpeg',
+
+            'http_headers': {
+                'User-Agent': 'Mozilla/5.0',
+                'Accept-Language': 'pt-BR,pt;q=0.5',
+            },
+
+            'retries': 3,
+            'fragment_retries': 3,
+            'ignoreerrors': False
+        }
+
+        print(f"Iniciando download YouTube na qualidade {quality}p...")
+
+        os.makedirs("downloads", exist_ok=True)
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+
+            if info:
+                filename = ydl.prepare_filename(info)
+                print(f"Download finalizado: {filename}")
+                return filename
+
+            return None
+
+    except Exception as e:
+        print(f"Erro YouTube: {e}")
+        return None
+
+
+@app.route("/api/youtube-download", methods=["POST"])
+@login_required
+def api_youtube_download():
+    try:
+        data = request.get_json() or {}
+        url = data.get("url", "").strip()
+        quality = data.get("quality", "720")
+
+        if not url:
+            return jsonify({"erro": "URL não fornecida"}), 400
+
+        filename_path = download_youtube_video(url, quality)
+
+        if not filename_path:
+            return jsonify({"erro": "Falha no download"}), 500
+
+        filename = os.path.basename(filename_path)
+
+        registrar_historico("download_youtube", {
+            "url": url,
+            "qualidade": f"{quality}p",
+            "arquivo": filename,
+            "usuario": session.get("user")
+        })
+
+        return jsonify({
+            "sucesso": True,
+            "mensagem": f"Download concluído: {filename}",
+            "arquivo": filename
+        })
+
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
 
 # Adicione esta linha no início das importações se necessário:
 # from flask import send_from_directory
