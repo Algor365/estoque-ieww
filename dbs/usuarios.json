@@ -13,7 +13,8 @@
 "password":"CAvf0000"},
 
 {"username":"dev01",
-"password":"dev1514"},
+"password":"dev1514",
+"role":"ADM"},
 
 {"username":"Rafaeladiias",
 "password":"091123",

@@ -413,10 +413,17 @@
     <main class="main-content">
       <header class="header">
         <div class="header-actions">
+                    {% if session.get('role') == 'ADM' %}
+  <button class="btn btn-primary" onclick="window.location.href='{{ url_for('index') }}';">
+    <i class="fas fa-tachometer-alt"></i>
+    Dashboard
+  </button>
+  {% endif %}
           <button class="btn btn-danger" id="btnLogout">
             <i class="fas fa-sign-out-alt"></i>
             Sair
           </button>
+
         </div>
       </header>
 
